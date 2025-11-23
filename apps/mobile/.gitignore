@@ -1,0 +1,91 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Firebase & credentials
+google-services.json
+GoogleService-Info.plist
+.env
+.env.*
+*.keystore
+*.pem
+*.p12
+*.jks
+*.crt
+*.key
+
+# Signing keys 
+**/*.jks
+**/*.keystore
+key.properties
+keystore.properties
+
+# === Flutter Generated Files ===
+build/
+.dart_tool/
+flutter_export_environment.sh
+
+# ===========================
+# MQTT CONFIG (HiveMQ Cloud)
+# ===========================
+MQTT_HOST=localhost
+MQTT_PORT=1883
+MQTT_USERNAME=your_hivemq_user
+MQTT_PASSWORD=your_hivemq_pass
+MQTT_CLIENT_PREFIX=fountaine-app-
+
+# ===========================
+# APP CONFIG
+# ===========================
+DEFAULT_KIT_ID=devkit-01
+ROLLUP_MINUTES=30
+SIMULATED_MODE=false
+
+# ===========================
+# Documentation
+# ===========================
+
+docs/
+docs/icd.md
