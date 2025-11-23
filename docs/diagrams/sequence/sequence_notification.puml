@@ -1,0 +1,51 @@
+@startuml
+title Sequence Diagram - Notifikasi Sensor (via DB Service)
+
+actor "User" as User
+participant "Halaman Notifikasi" as Form
+participant "Kit Provider" as Kit
+participant "DB Service" as DB
+participant "MQTT Provider" as MQTT
+participant "Constants (Threshold)" as Const
+
+' === Proses data sensor ===
+MQTT -> Kit : Mengirim data sensor terbaru
+activate Kit
+
+Kit -> Const : Membaca nilai ambang batas parameter
+activate Const
+Const --> Kit : Mengembalikan nilai threshold
+deactivate Const
+
+Kit -> Kit : Membandingkan nilai sensor dengan threshold
+Kit -> DB : Menyimpan data sensor ke SQLite
+activate DB
+DB -> DB : Eksekusi insert data sensor
+DB --> Kit : Data tersimpan
+deactivate DB
+
+Kit -> DB : Menyimpan notifikasi (alert / safe)
+activate DB
+DB -> DB : Eksekusi insert notifikasi
+DB --> Kit : Notifikasi tersimpan
+deactivate DB
+deactivate Kit
+
+' === User membuka halaman notifikasi ===
+User -> Form : Membuka halaman notifikasi
+activate Form
+
+Form -> Kit : Meminta data notifikasi
+activate Kit
+Kit -> DB : Mengambil notifikasi dari SQLite
+activate DB
+DB -> DB : Query SELECT notifikasi
+DB --> Kit : Data notifikasi terkirim
+deactivate DB
+Kit -> Form : Mengirim daftar notifikasi
+activate Form
+Form -> User : Menampilkan daftar notifikasi di UI
+deactivate Form
+deactivate Kit
+
+@enduml

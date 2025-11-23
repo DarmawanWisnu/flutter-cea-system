@@ -1,0 +1,194 @@
+@startuml
+title Class Diagram - Arsitektur Sistem Fountaine Hydroponic Monitoring
+
+' =================== UI LAYER ===================
+package "UI Layer" {
+  class AuthGate
+  class MonitorScreen
+  class HistoryScreen
+  class NotificationScreen
+  class AddKitScreen
+  class HomeScreen
+}
+
+' =================== PROVIDER LAYER ===================
+package "Providers" {
+  class AuthNotifier {
+    - _authService : AuthService
+    + signIn()
+    + register()
+    + signOut()
+  }
+
+  class MqttVM {
+    - _mqttService : MqttService
+    + connect()
+    + reconnect()
+    + disconnect()
+  }
+
+  class KitListNotifier {
+    - _mqttService : MqttService
+    - _dbService : DatabaseService
+    + fetchTelemetry()
+    + saveTelemetry()
+    + checkThresholds()
+  }
+
+  class NotificationListNotifier {
+    - _kitNotifier : KitListNotifier
+    - _dbService : DatabaseService
+    + fetchNotifications()
+    + addNotification()
+  }
+}
+
+' =================== SERVICE LAYER ===================
+package "Services" {
+  class AuthService {
+    - _auth : FirebaseAuth
+    + signInWithEmailPassword()
+    + registerWithEmailPassword()
+    + signOut()
+    + sendEmailVerification()
+    + sendPasswordReset()
+  }
+
+  class MqttService {
+    - _client : MqttServerClient
+    - _kitId : String
+    + connect()
+    + publish()
+    + disconnect()
+    + telemetry$() : Stream
+    + status$() : Stream
+  }
+
+  class DatabaseService {
+    - _db : Database
+    + init()
+    + insertTelemetry()
+    + getTelemetry()
+    + insertNotification()
+    + getNotifications()
+  }
+}
+
+' =================== MODEL LAYER ===================
+package "Models" {
+  class Telemetry {
+    + ppm : double
+    + ph : double
+    + tempC : double
+    + humidity : double
+    + waterTemp : double
+    + waterLevel : double
+    + pHReducer : bool
+    + addWater : bool
+    + nutrientsAdder : bool
+    + humidifier : bool
+    + exFan : bool
+  }
+
+  class DeviceStatus {
+    + online : bool
+    + lastSeen : DateTime
+  }
+
+  class AppNotification {
+    + id : int
+    + title : String
+    + message : String
+    + timestamp : DateTime
+    + isRead : bool
+  }
+
+  class HistoryRouteArgs {
+    + targetTime : DateTime
+    + kitName : String
+    + reason : String
+  }
+
+  class NotificationRouteArgs {
+    + initialFilter : String
+  }
+
+  class MonitorArgs {
+    + kitId : String
+    + simulated : bool
+  }
+
+  class HistoryArgs {
+    + kitId : String
+  }
+}
+
+' =================== CORE LAYER ===================
+package "Core" {
+  class AppConst {
+    + rollupMinutes : int
+    + defaultKitId : String
+    + simulatedMode : bool
+    + formatDateTime() : String
+  }
+
+  class MqttConst {
+    + host : String
+    + port : int
+    + username : String
+    + password : String
+  }
+
+  class MembershipFunction {
+    + mu(x: double) : double
+  }
+
+  class TriangularMF {
+    + a, b, c : double
+    + mu(x: double) : double
+  }
+
+  class TrapezoidalMF {
+    + a, b, c, d : double
+    + mu(x: double) : double
+  }
+
+  class FuzzyVariable {
+    + name : String
+    + minX : double
+    + maxX : double
+    + terms : Map<String, MembershipFunction>
+  }
+}
+
+' =================== RELATIONSHIPS ===================
+' --- UI Relations ---
+AuthGate --> AuthNotifier
+MonitorScreen --> KitListNotifier
+HistoryScreen --> KitListNotifier
+NotificationScreen --> NotificationListNotifier
+AddKitScreen --> KitListNotifier
+HomeScreen --> MqttVM
+
+' --- Provider Relations ---
+AuthNotifier --> AuthService
+MqttVM --> MqttService
+KitListNotifier --> MqttService
+KitListNotifier --> DatabaseService
+KitListNotifier --> AppConst
+NotificationListNotifier --> KitListNotifier
+NotificationListNotifier --> DatabaseService
+NotificationListNotifier --> AppNotification
+
+' --- Service Relations ---
+MqttService --> MqttConst
+DatabaseService --> Telemetry
+DatabaseService --> AppNotification
+AuthService --> FirebaseAuth
+
+' --- Core Relations ---
+FuzzyVariable --> MembershipFunction
+TriangularMF -|> MembershipFunction
+TrapezoidalMF -|> MembershipFunction
+
+@enduml

@@ -1,0 +1,49 @@
+@startuml
+title Sequence Diagram - Login
+
+actor "User" as User
+participant "Form Login" as Form
+participant "Sistem" as System
+participant "Database" as DB
+participant "Halaman Home Aplikasi" as Home
+
+' === Awal ===
+User -> Form : Membuka aplikasi
+activate Form
+Form -> User : Menampilkan form login
+deactivate Form
+
+' === Proses input ===
+User -> Form : Input username dan password
+activate Form
+Form -> User : Menampilkan inputan di form
+deactivate Form
+
+User -> Form : Klik Submit
+activate Form
+
+' === Kirim ke sistem ===
+Form -> System : Mengirimkan data username dan password
+activate System
+
+' === Validasi ke database ===
+System -> DB : Validasi data
+activate DB
+DB -> DB : Proses validasi data
+DB --> System : Hasil validasi (valid / tidak)
+deactivate DB
+
+' === Hasil validasi ===
+System -> Form : Menampilkan pesan username/password salah
+activate Form
+deactivate Form
+
+System -> Home : Menampilkan menu home
+activate Home
+Home -> User : Tampilkan halaman utama aplikasi
+deactivate Home
+
+deactivate System
+deactivate Form
+
+@enduml

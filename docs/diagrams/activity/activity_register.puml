@@ -1,0 +1,27 @@
+@startuml
+title Activity Diagram - Register
+
+|User|
+start
+:Akses halaman register;
+
+|Sistem|
+:Menampilkan form register;
+
+|User|
+:Input email, password, dan konfirmasi password;
+:Klik tombol Register;
+
+|Sistem|
+:Validasi data input;
+if ("Data valid?") then (Ya)
+  :Membuat akun pengguna di Firebase Auth;
+  :Mengirim email verifikasi ke pengguna;
+  :Menampilkan notifikasi "registrasi berhasil, silakan verifikasi email";
+  :Menampilkan halaman verifikasi;
+  stop
+else (Tidak)
+  :Menampilkan pesan kesalahan (contoh: email tidak valid atau password tidak cocok);
+  :Kembali ke halaman register;
+endif
+@enduml

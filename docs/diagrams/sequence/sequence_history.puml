@@ -1,0 +1,52 @@
+@startuml
+title Sequence Diagram - Lihat History Data Sensor
+
+actor "User" as User
+participant "Halaman History" as Form
+participant "Sistem" as System
+participant "Database (SQLite)" as DB
+
+' === Awal ===
+User -> Form : Membuka halaman history
+activate Form
+Form -> User : Menampilkan tampilan awal (kosong)
+deactivate Form
+
+' === Permintaan data ===
+Form -> System : Meminta data history sensor
+activate System
+
+System -> DB : Mengambil data dari SQLite
+activate DB
+DB -> DB : Eksekusi query SELECT
+DB --> System : Mengirim data hasil query
+deactivate DB
+
+' === Tampilkan data ke user ===
+System -> Form : Mengirim data history
+activate Form
+Form -> User : Menampilkan tabel / grafik data sensor
+deactivate Form
+
+' === User aksi tambahan (opsional) ===
+User -> Form : Memilih filter atau rentang tanggal
+activate Form
+Form -> System : Meminta data baru berdasarkan filter
+activate System
+System -> DB : Query data sesuai filter
+activate DB
+DB --> System : Hasil filter dikirim
+deactivate DB
+System -> Form : Menampilkan hasil filter
+activate Form
+Form -> User : Menampilkan data terbaru
+deactivate Form
+deactivate System
+
+' === Akhiran ===
+User -> Form : Keluar dari halaman history
+Form -> System : Menutup koneksi ke database
+deactivate Form
+deactivate System
+
+@enduml

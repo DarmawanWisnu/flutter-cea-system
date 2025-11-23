@@ -1,0 +1,59 @@
+@startuml
+title Sequence Diagram - Tambah Kit Baru
+
+actor "User" as User
+participant "Form Add Kit" as Form
+participant "Sistem" as System
+participant "MQTT Broker (Mosquitto)" as MQTT
+participant "Database (SQLite)" as DB
+participant "Halaman Home Aplikasi" as Home
+
+' === Awal ===
+User -> Form : Membuka halaman tambah kit
+activate Form
+Form -> User : Menampilkan form input data kit
+deactivate Form
+
+' === Input data ===
+User -> Form : Input nama kit dan ID perangkat
+activate Form
+Form -> User : Menampilkan data inputan
+deactivate Form
+
+User -> Form : Klik tombol Simpan
+activate Form
+
+' === Kirim ke sistem ===
+Form -> System : Mengirimkan data kit baru
+activate System
+
+' === Kirim ke MQTT Broker ===
+System -> MQTT : Mengirim data kit untuk registrasi
+activate MQTT
+MQTT -> MQTT : Proses pairing / konfirmasi koneksi perangkat
+MQTT --> System : Status koneksi (berhasil / gagal)
+deactivate MQTT
+
+' === Simpan ke database lokal ===
+System -> DB : Simpan data kit baru ke SQLite
+activate DB
+DB -> DB : Eksekusi perintah insert
+DB --> System : Data berhasil disimpan
+deactivate DB
+
+' === Hasil ke user ===
+System -> Form : Menampilkan notifikasi "Kit berhasil ditambahkan"
+activate Form
+Form -> User : Menampilkan pesan sukses
+deactivate Form
+
+' === Redirect ke Home ===
+System -> Home : Menampilkan halaman utama aplikasi
+activate Home
+Home -> User : Menampilkan daftar kit
+deactivate Home
+
+deactivate System
+deactivate Form
+
+@enduml

@@ -1,0 +1,57 @@
+@startuml
+title Sequence Diagram - Monitor Real-Time
+
+actor "User" as User
+participant "Halaman Monitor" as Form
+participant "Sistem" as System
+participant "MQTT Broker (Mosquitto)" as MQTT
+participant "Database (SQLite)" as DB
+
+' === Awal ===
+User -> Form : Membuka halaman monitor
+activate Form
+Form -> User : Menampilkan tampilan awal monitor (grafik kosong)
+deactivate Form
+
+' === Inisialisasi koneksi ===
+Form -> System : Meminta koneksi ke MQTT broker
+activate System
+
+System -> MQTT : Subscribe topic sensor
+activate MQTT
+MQTT -> System : Mengirim data sensor
+deactivate MQTT
+
+' === Proses penerimaan data ===
+System -> DB : Menyimpan data sensor ke SQLite
+activate DB
+DB -> DB : Proses insert data sensor
+DB --> System : Data tersimpan
+deactivate DB
+
+System -> Form : Update tampilan data sensor (grafik & status)
+activate Form
+Form -> User : Menampilkan nilai terbaru pada grafik
+deactivate Form
+
+' === Iterasi otomatis (tanpa loop block) ===
+MQTT -> System : Mengirim data sensor terbaru
+activate System
+System -> DB : Menyimpan data ke SQLite
+activate DB
+DB --> System : Data tersimpan
+deactivate DB
+System -> Form : Update grafik
+activate Form
+Form -> User : Menampilkan data terbaru
+deactivate Form
+deactivate System
+
+' === Akhiran ===
+User -> Form : Keluar dari halaman monitor
+Form -> System : Memutus koneksi MQTT
+System -> MQTT : Disconnect
+deactivate Form
+deactivate System
+
+@enduml

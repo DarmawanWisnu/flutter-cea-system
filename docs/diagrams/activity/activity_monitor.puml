@@ -1,0 +1,42 @@
+@startuml
+title Activity Diagram - Monitor Screen
+
+|User|
+start
+:Akses halaman Dashboard / Monitor Screen;
+
+|Sistem|
+:Mengambil data sensor terbaru dari MQTT Broker;
+:Menampilkan nilai sensor (pH, PPM, Humidity, Temperature);
+:Menampilkan status Kit dan mode kontrol (Auto / Manual);
+
+|User|
+:Melihat data sensor pada dashboard;
+:Memilih mode kontrol (Auto / Manual);
+
+|Sistem|
+if ("Mode Manual dipilih?") then (Ya)
+  |Sistem|
+  :Menampilkan tombol kontrol manual (pH Up, pH Down, Pump A, Pump B);
+
+  |User|
+  if ("User menekan tombol manual?") then (Ya)
+    :Mengirim perintah pompa / pH melalui MQTT;
+  endif
+
+  if ("User menekan tombol Refill?") then (Ya)
+    :Mengirim perintah Refill melalui MQTT;
+  endif
+
+  |Sistem|
+  :Menjalankan perintah dari user melalui MQTT;
+else (Tidak)
+  |Sistem|
+  :Menjalankan kontrol otomatis berdasarkan logika fuzzy;
+endif
+
+|Sistem|
+:Memperbarui status pompa dan data sensor secara real-time di UI;
+
+stop
+@enduml

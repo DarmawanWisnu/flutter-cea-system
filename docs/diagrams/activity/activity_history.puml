@@ -1,0 +1,30 @@
+@startuml
+title Activity Diagram - History
+
+|User|
+start
+:Akses halaman History;
+
+|Sistem|
+:Menampilkan daftar kit atau pilihan periode data;
+:Mengambil data riwayat sensor dari database lokal (SQLite);
+
+|User|
+:Memilih kit atau periode waktu tertentu;
+
+|Sistem|
+:Menampilkan data history sensor (pH, PPM, Humidity, Temperature);
+:Menampilkan grafik tren perubahan nilai sensor;
+
+|User|
+:Melihat detail data sensor pada grafik;
+
+|Sistem|
+if ("Data terbaru tersedia?") then (Ya)
+  :Memperbarui data history di tampilan UI;
+else (Tidak)
+  :Menampilkan pesan "Tidak ada data baru";
+endif
+
+stop
+@enduml

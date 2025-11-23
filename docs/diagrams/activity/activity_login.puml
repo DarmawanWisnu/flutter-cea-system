@@ -1,0 +1,22 @@
+@startuml
+|User|
+start
+:Akses halaman login;
+
+|Sistem|
+:Menampilkan form login;
+
+|User|
+:Input email dan password;
+:Klik tombol Login;
+
+|Sistem|
+:Validasi data login;
+if ("Data valid?") then (Ya)
+  :Menampilkan halaman utama aplikasi;
+  stop
+else (Tidak)
+  :Menampilkan pemberitahuan "data login salah";
+  :Kembali ke halaman login;
+endif
+@enduml

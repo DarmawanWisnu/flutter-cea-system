@@ -1,0 +1,29 @@
+@startuml
+title Activity Diagram - Notification
+
+|User|
+start
+:Akses halaman Notification;
+
+|Sistem|
+:Mengambil daftar notifikasi dari database lokal (SQLite);
+:Menampilkan daftar notifikasi di UI;
+
+|User|
+:Melihat daftar notifikasi;
+
+if ("User memilih salah satu notifikasi?") then (Ya)
+  :Membuka detail notifikasi;
+endif
+
+|Sistem|
+:Menampilkan detail notifikasi (waktu, pesan, status baca);
+
+|User|
+:Menandai notifikasi sebagai telah dibaca;
+
+|Sistem|
+:Memperbarui status notifikasi di database SQLite;
+
+stop
+@enduml

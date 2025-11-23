@@ -1,0 +1,51 @@
+@startuml
+title Sequence Diagram - Register
+
+actor "User" as User
+participant "Form Register" as Form
+participant "Sistem" as System
+participant "Database (Firebase Auth)" as DB
+participant "Halaman Home Aplikasi" as Home
+
+' === Awal ===
+User -> Form : Membuka halaman register
+activate Form
+Form -> User : Menampilkan form register
+deactivate Form
+
+' === Input data ===
+User -> Form : Input data akun (email, password, nama)
+activate Form
+Form -> User : Menampilkan data inputan
+deactivate Form
+
+User -> Form : Klik tombol Daftar
+activate Form
+
+' === Kirim ke sistem ===
+Form -> System : Mengirimkan data registrasi
+activate System
+
+' === Validasi & simpan ke database ===
+System -> DB : Kirim data ke Firebase Auth
+activate DB
+DB -> DB : Proses pembuatan akun
+DB --> System : Akun berhasil dibuat
+deactivate DB
+
+' === Konfirmasi hasil ===
+System -> Form : Menampilkan pesan "Registrasi berhasil"
+activate Form
+Form -> User : Menampilkan notifikasi sukses
+deactivate Form
+
+' === Arahkan ke Home ===
+System -> Home : Menampilkan halaman utama aplikasi
+activate Home
+Home -> User : Menampilkan menu home
+deactivate Home
+
+deactivate System
+deactivate Form
+
+@enduml
