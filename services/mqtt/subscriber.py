@@ -16,27 +16,23 @@ TOPIC = f"kit/{KIT_ID}/telemetry"
 BACKEND_URL = "http://127.0.0.1:8000/telemetry"
 QOS = 1
 CLIENT_ID = f"csv-subscriber-{KIT_ID}"
+STATE = {
+    "ppm": None,
+    "ph": None,
+    "tempC": None,
+    "humidity": None,
+    "waterTemp": None,
+    "waterLevel": None
+}
 
-def rc_value(rc):
-    try:
-        return int(rc)
-    except Exception:
-        return getattr(rc, "value", rc)
+def send_to_backend():
+    if any(v is None for v in STATE.values()):
+        return
 
-def connect_with_retry(client, host, port, keepalive=60):
-    while RUNNING:
-        try:
-            client.connect(host, port, keepalive)
-            return
-        except OSError as e:
-            print(f"[WARN] MQTT connect gagal: {e}. Retry...")
-            time.sleep(2)
-
-def send_to_backend(data):
     try:
         r = requests.post(
             f"{BACKEND_URL}?device_id={KIT_ID}",
-            json=data,
+            json=STATE,
             timeout=5
         )
         print(f"[BACKEND] {r.status_code} → {r.text}")
@@ -44,17 +40,25 @@ def send_to_backend(data):
         print(f"[ERR] Backend gagal: {e}")
 
 def on_connect(client, userdata, flags, reason_code, properties):
-    if rc_value(reason_code) == 0:
-        print(f"[OK] Subscriber konek. TOPIC={TOPIC}")
-        client.subscribe(TOPIC, qos=QOS)
-    else:
-        print(f"[ERR] Connect gagal: {reason_code}")
+    print(f"[OK] Subscriber konek: {TOPIC}")
+    client.subscribe(TOPIC, qos=QOS)
 
 def on_message(client, userdata, msg):
     try:
         data = json.loads(msg.payload.decode())
-        print(f"[MQTT] {data}")
-        send_to_backend(data)
+
+        sensor = data.get("sensor")
+        value = data.get("value")
+
+        if sensor not in STATE:
+            print(f"[WARN] Sensor tidak dikenal: {sensor}")
+            return
+
+        STATE[sensor] = value
+        print(f"[MQTT] UPDATE {sensor} = {value}")
+
+        send_to_backend()
+
     except Exception as e:
         print(f"[ERR] parse MQTT: {e}")
 
@@ -69,9 +73,9 @@ def main():
     client.on_message = on_message
 
     client.loop_start()
-    connect_with_retry(client, BROKER, PORT)
+    client.connect(BROKER, PORT)
 
-    print("[INFO] Subscriber jalan. Ctrl+C untuk stop.")
+    print("[INFO] Subscriber jalan.")
 
     try:
         while RUNNING:

@@ -7,7 +7,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:fountaine/firebase_options.dart';
 import 'package:fountaine/app/routes.dart';
-import 'package:fountaine/services/db_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,9 +26,6 @@ Future<void> main() async {
         ? AndroidProvider.debug
         : AndroidProvider.playIntegrity,
   );
-
-  // SQLite
-  await DatabaseService.instance.init();
 
   runApp(const ProviderScope(child: FountaineApp()));
 }

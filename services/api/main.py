@@ -7,26 +7,21 @@ import uuid
 import hashlib
 import time
 import json
+import actuator
 
 load_dotenv()
 
 app = FastAPI()
+app.include_router(actuator.router, prefix="/actuator")
 
-# Telemetry
+# TELEMETRY PAYLOAD
 class TelemetryPayload(BaseModel):
-    id: Optional[int] = None
     ppm: float
     ph: float
     tempC: float
     humidity: float
     waterTemp: float
     waterLevel: float
-    pH_reducer: bool = False
-    add_water: bool = False
-    nutrients_adder: bool = False
-    humidifier: bool = False
-    ex_fan: bool = False
-    isDefault: bool = False
 
 # INSERT TELEMETRY
 @app.post("/telemetry")
@@ -45,21 +40,18 @@ def insert_telemetry(device_id: str, data: TelemetryPayload):
         cur.execute("""
             INSERT INTO telemetry (
                 row_id, device_id, ingest_time, payload_json,
-                id, ppm, ph, tempC, humidity, waterTemp, waterLevel,
-                pH_reducer, add_water, nutrients_adder, humidifier, ex_fan, isDefault,
+                ppm, ph, tempC, humidity, waterTemp, waterLevel,
                 payload_hash
             )
             VALUES (
                 %s, %s, %s, %s,
-                %s, %s, %s, %s, %s, %s, %s,
                 %s, %s, %s, %s, %s, %s,
                 %s
             )
             ON CONFLICT (payload_hash) DO NOTHING;
         """, (
             row_id, device_id, ingest_time, json_str,
-            data.id, data.ppm, data.ph, data.tempC, data.humidity, data.waterTemp, data.waterLevel,
-            data.pH_reducer, data.add_water, data.nutrients_adder, data.humidifier, data.ex_fan, data.isDefault,
+            data.ppm, data.ph, data.tempC, data.humidity, data.waterTemp, data.waterLevel,
             payload_hash
         ))
 
@@ -74,7 +66,18 @@ def insert_telemetry(device_id: str, data: TelemetryPayload):
         cur.close()
         release_connection(conn)
 
-# GET LATEST DATA
+# CLEAN MAPPER — camelCase only
+def map_payload(p):
+    return {
+        "ppm": p.get("ppm"),
+        "ph": p.get("ph"),
+        "tempC": p.get("tempC"),
+        "humidity": p.get("humidity"),
+        "waterTemp": p.get("waterTemp"),
+        "waterLevel": p.get("waterLevel"),
+    }
+
+# LATEST
 @app.get("/telemetry/latest")
 def get_latest(device_id: str):
     conn = get_connection()
@@ -88,17 +91,17 @@ def get_latest(device_id: str):
             ORDER BY ingest_time DESC
             LIMIT 1;
         """, (device_id,))
-        
+
         row = cur.fetchone()
         if not row:
             return {"message": "no data"}
 
-        payload = row[0]      # SUDAH DICT, JANGAN json.loads()
+        mapped = map_payload(row[0])
 
         return {
             "device_id": device_id,
             "ingest_time": row[1],
-            "data": payload
+            "data": mapped
         }
 
     except Exception as e:
@@ -108,8 +111,7 @@ def get_latest(device_id: str):
         cur.close()
         conn.close()
 
-
-# GET HISTORY
+# HISTORY
 @app.get("/telemetry/history")
 def get_history(device_id: str, limit: int = 50):
     conn = get_connection()
@@ -123,21 +125,21 @@ def get_history(device_id: str, limit: int = 50):
             ORDER BY ingest_time DESC
             LIMIT %s;
         """, (device_id, limit))
-        
+
         rows = cur.fetchall()
 
-        data = [
+        items = [
             {
                 "ingest_time": r[1],
-                "data": r[0]     # JSONB → otomatis dict, JANGAN json.loads()
+                "data": map_payload(r[0])
             }
             for r in rows
         ]
 
         return {
             "device_id": device_id,
-            "count": len(data),
-            "items": data
+            "count": len(items),
+            "items": items
         }
 
     except Exception as e:
@@ -147,6 +149,7 @@ def get_history(device_id: str, limit: int = 50):
         cur.close()
         conn.close()
 
+# RUN UVICORN
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(

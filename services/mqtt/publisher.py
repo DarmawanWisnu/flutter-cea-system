@@ -14,16 +14,26 @@ PORT = 1883
 KIT_ID = os.getenv("KIT_ID", "devkit-01")
 TOPIC = f"kit/{KIT_ID}/telemetry"
 CSV_PATH = os.path.join(os.path.dirname(__file__), "data.csv")
-INTERVAL = 5.0
 QOS = 1
 RETAIN = False
 CLIENT_ID = f"csv-publisher-{KIT_ID}"
+INTERVALS = {
+    "tempC": 5,
+    "humidity": 5,
+    "waterLevel": 10,
+    "waterTemp": 15,
+    "ppm": 20,
+    "ph": 30
+}
 
-def rc_value(rc):
-    try:
-        return int(rc)
-    except Exception:
-        return getattr(rc, "value", rc)
+def pick(row, *keys, default=0.0):
+    for k in keys:
+        if k in row and row[k] not in ("", None):
+            try:
+                return float(row[k])
+            except:
+                return default
+    return default
 
 def read_csv_rows(path):
     with open(path, newline='', encoding='utf-8') as f:
@@ -31,15 +41,6 @@ def read_csv_rows(path):
         if not rows:
             raise ValueError("CSV kosong atau header salah.")
         return rows
-
-def connect_with_retry(client, host, port, keepalive=60):
-    while RUNNING:
-        try:
-            client.connect(host, port, keepalive)
-            return
-        except OSError as e:
-            print(f"[WARN] Gagal connect ke {host}:{port}: {e}. Coba lagi 2 detik...")
-            time.sleep(2)
 
 def main():
     try:
@@ -55,35 +56,38 @@ def main():
     )
 
     client.loop_start()
-    connect_with_retry(client, BROKER, PORT)
+    client.connect(BROKER, PORT)
+    print(f"[OK] Publisher jalan — TOPIC = {TOPIC}")
 
-    print(f"[OK] Publisher jalan. Target TOPIC = {TOPIC}")
+    last_sent = {k: 0 for k in INTERVALS.keys()}
+    row_idx = 0
 
     try:
         while RUNNING:
-            for i, row in enumerate(rows):
-                if not RUNNING:
-                    break
+            row = rows[row_idx]
+            now = time.time()
 
-                payload = {
-                    "id": i + 1,
-                    "ppm": float(row.get("TDS", 0)),
-                    "ph": float(row.get("pH", 0)),
-                    "tempC": float(row.get("DHT_temp", 0)),       # BENAR
-                    "humidity": float(row.get("DHT_humidity", 0)),
-                    "waterTemp": float(row.get("water_temp", 0)),
-                    "waterLevel": float(row.get("water_level", 0)),
-                    "pH_reducer": False,
-                    "add_water": False,
-                    "nutrients_adder": False,
-                    "humidifier": False,
-                    "ex_fan": False,
-                    "isDefault": False
-                }
+            sensor_values = {
+                "ppm": pick(row, "TDS", "tds"),
+                "ph": pick(row, "pH", "ph"),
+                "tempC": pick(row, "DHT_temp", "dht_temp", "tempC", "temperature"),
+                "humidity": pick(row, "DHT_humidity", "dht_humidity", "humidity"),
+                "waterTemp": pick(row, "water_temp", "waterTemp"),
+                "waterLevel": pick(row, "water_level", "waterLevel"),
+            }
 
-                client.publish(TOPIC, json.dumps(payload), qos=QOS, retain=RETAIN)
-                print(f"[PUB] {json.dumps(payload)}")
-                time.sleep(INTERVAL)
+            for sensor, interval in INTERVALS.items():
+                if now - last_sent[sensor] >= interval:
+                    payload = {
+                        "sensor": sensor,
+                        "value": sensor_values[sensor]
+                    }
+                    client.publish(TOPIC, json.dumps(payload), qos=QOS, retain=RETAIN)
+                    print(f"[PUB] {payload}")
+                    last_sent[sensor] = now
+
+            row_idx = (row_idx + 1) % len(rows)
+            time.sleep(0.1)
 
     finally:
         print("[STOP] Publisher berhenti.")
