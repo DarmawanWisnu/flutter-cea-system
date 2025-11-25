@@ -1,7 +1,6 @@
 class MonitorArgs {
   final String kitId;
-  final bool simulated;
-  const MonitorArgs({required this.kitId, this.simulated = false});
+  const MonitorArgs({required this.kitId});
 }
 
 class HistoryArgs {

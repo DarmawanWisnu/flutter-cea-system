@@ -1,20 +1,21 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:fountaine/providers/provider/api_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fountaine/domain/telemetry.dart';
 import 'package:fountaine/domain/device_status.dart';
 import 'package:fountaine/services/mqtt_service.dart';
-import 'package:fountaine/services/db_service.dart';
 
-// ===== Provider publik =====
+/// Provider global untuk list Kit
 final kitListProvider = StateNotifierProvider<KitListNotifier, List<Kit>>((
   ref,
 ) {
-  return KitListNotifier();
+  return KitListNotifier(ref);
 });
 
-// ===== Model Kit =====
+/// Model Kit
 class Kit {
   final String id;
   final String name;
@@ -63,22 +64,21 @@ class Kit {
   );
 }
 
-// ===== Notifier =====
+/// NOTIFIER
 class KitListNotifier extends StateNotifier<List<Kit>> {
-  KitListNotifier() : super([]) {
+  final Ref ref;
+  KitListNotifier(this.ref) : super([]) {
     _load();
-    _scheduleDailyPrune();
   }
 
   static const _storageKey = 'kits';
   final MqttService _mqtt = MqttService();
-  StreamSubscription<Telemetry>? _telemetrySub;
+
+  StreamSubscription<Map<String, dynamic>>? _sensorSub;
   StreamSubscription<DeviceStatus>? _statusSub;
   String? _currentKitId;
 
-  Timer? _pruneTimer;
-
-  // ---------------- LOAD / SAVE ----------------
+  // LOAD / SAVE
   Future<void> _load() async {
     try {
       final sp = await SharedPreferences.getInstance();
@@ -86,8 +86,6 @@ class KitListNotifier extends StateNotifier<List<Kit>> {
       final arr = jsonDecode(raw) as List;
       state = arr
           .map((e) => Kit.fromJson(Map<String, dynamic>.from(e)))
-          .toList()
-          .reversed
           .toList();
     } catch (_) {
       state = [];
@@ -102,9 +100,11 @@ class KitListNotifier extends StateNotifier<List<Kit>> {
     );
   }
 
-  // ---------------- CRUD ----------------
+  // CRUD
   Future<void> addKit(Kit kit) async {
-    if (state.any((k) => k.id == kit.id)) throw Exception('Kit ID sudah ada');
+    if (state.any((k) => k.id == kit.id)) {
+      throw Exception("Kit sudah ada");
+    }
     state = [kit, ...state];
     await _save();
   }
@@ -117,47 +117,63 @@ class KitListNotifier extends StateNotifier<List<Kit>> {
   Future<void> updateKit(Kit kit) async {
     final i = state.indexWhere((k) => k.id == kit.id);
     if (i == -1) return;
-    final newList = [...state];
-    newList[i] = kit;
-    state = newList;
+
+    final s = [...state];
+    s[i] = kit;
+    state = s;
     await _save();
   }
 
-  // ---------------- LIVE (MQTT + SQLite) ----------------
-  Future<void> listenFromMqtt(String kitId, {String? kitName}) async {
-    // Upsert kit
+  // CONNECT & LISTEN
+  Future<void> listenToKit(String kitId, {String? kitName}) async {
+    // upsert kit
     if (!state.any((k) => k.id == kitId)) {
-      state = [Kit(id: kitId, name: kitName ?? kitId, online: false), ...state];
+      state = [Kit(id: kitId, name: kitName ?? kitId), ...state];
       await _save();
     }
 
-    // Ganti kit -> stop listener lama
     if (_currentKitId != null && _currentKitId != kitId) {
       await stopListening();
     }
     _currentKitId = kitId;
 
-    await _mqtt.connect(kitId: kitId);
-    print('[KIT] AFTER CONNECT for $kitId');
+    // Fetch initial telemetry from API
+    final latest = await ref.read(apiTelemetryProvider).getLatest(kitId);
 
-    print('[KIT] LISTENER ATTACHED for $kitId');
-    _telemetrySub = _mqtt.telemetry$(kitId).listen((t) async {
-      print('[KIT] GOT MQTT PAYLOAD: ${t.toJson()}');
+    state = [
+      for (final k in state)
+        k.id == kitId
+            ? k.copyWith(
+                telemetry: latest,
+                online: true,
+                lastUpdated: DateTime.now(),
+              )
+            : k,
+    ];
+
+    await _save();
+
+    // Connect MQTT
+    await _mqtt.connect(kitId: kitId);
+
+    // SENSOR REALTIME
+    _sensorSub = _mqtt.sensorUpdate$().listen((msg) {
+      final sensor = msg['sensor'];
+      final value = msg['value'] * 1.0;
 
       state = [
         for (final k in state)
           k.id == kitId
               ? k.copyWith(
-                  telemetry: t,
-                  online: true,
+                  telemetry: k.telemetry?.updateSensor(sensor, value),
                   lastUpdated: DateTime.now(),
+                  online: true,
                 )
               : k,
       ];
-      await _save();
-      await DatabaseService.instance.insertTelemetry(kitId, t);
     });
 
+    // STATUS (online/offline)
     _statusSub = _mqtt.status$(kitId).listen((s) {
       state = [
         for (final k in state)
@@ -168,46 +184,20 @@ class KitListNotifier extends StateNotifier<List<Kit>> {
                 )
               : k,
       ];
-      _save();
     });
   }
 
-  // ❗❗ STOP LISTENER TANPA MEMATIKAN MQTT
+  // STOP LISTENERS
   Future<void> stopListening() async {
-    await _telemetrySub?.cancel();
+    await _sensorSub?.cancel();
     await _statusSub?.cancel();
-    _telemetrySub = null;
+    _sensorSub = null;
     _statusSub = null;
-    // → MQTT tetap hidup.
-  }
-
-  // ---------------- PRUNING 7 HARI @ 05:00 ----------------
-  void _scheduleDailyPrune() {
-    _pruneTimer?.cancel();
-
-    DateTime next5() {
-      final now = DateTime.now();
-      final today5 = DateTime(now.year, now.month, now.day, 5);
-      return now.isBefore(today5)
-          ? today5
-          : today5.add(const Duration(days: 1));
-    }
-
-    void scheduleOnce() {
-      final delay = next5().difference(DateTime.now());
-      _pruneTimer = Timer(delay, () async {
-        await DatabaseService.instance.pruneOlderThan(const Duration(days: 7));
-        scheduleOnce(); // jadwalkan lagi besok
-      });
-    }
-
-    scheduleOnce();
   }
 
   @override
   void dispose() {
-    // ❗ Jangan stop MQTT, biarkan global
-    _pruneTimer?.cancel();
+    stopListening();
     super.dispose();
   }
 }

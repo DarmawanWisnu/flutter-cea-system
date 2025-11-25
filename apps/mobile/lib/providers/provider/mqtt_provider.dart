@@ -13,7 +13,6 @@ class MqttVM extends ChangeNotifier {
   bool _initialized = false;
   String? _currentKitId;
 
-  /// Inisialisasi & connect ke broker (pakai 10.0.2.2).
   Future<void> init({String? kitId}) async {
     if (_initialized) return;
     _initialized = true;
@@ -25,7 +24,6 @@ class MqttVM extends ChangeNotifier {
 
     _currentKitId = kitId ?? AppConst.defaultKitId;
 
-    debugPrint("[MQTT] Connecting to ${MqttConst.host}:${MqttConst.port}");
     await _svc.connect(kitId: _currentKitId!);
   }
 

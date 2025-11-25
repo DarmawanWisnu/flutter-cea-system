@@ -1,24 +1,11 @@
 class Telemetry {
-  // Identitas/penanda rekam (opsional, dari CSV)
   final int? id;
-
-  // Nilai sensor utama
-  final double ppm; // dari TDS
-  final double ph; // dari pH
-  final double tempC; // dari DHT_temp (udara)
-  final double humidity; // dari DHT_humidity
-  final double waterTemp; // dari water_temp
-  final double waterLevel; // dari water_level
-
-  // Aktuator (jika ada di payload)
-  final bool pHReducer;
-  final bool addWater;
-  final bool nutrientsAdder;
-  final bool humidifier;
-  final bool exFan;
-
-  // Flag dataset
-  final bool isDefault;
+  final double ppm;
+  final double ph;
+  final double tempC;
+  final double humidity;
+  final double waterTemp;
+  final double waterLevel;
 
   const Telemetry({
     this.id,
@@ -28,15 +15,9 @@ class Telemetry {
     required this.humidity,
     required this.waterTemp,
     required this.waterLevel,
-    this.pHReducer = false,
-    this.addWater = false,
-    this.nutrientsAdder = false,
-    this.humidifier = false,
-    this.exFan = false,
-    this.isDefault = false,
   });
 
-  // --- Helpers ---
+  // Convert dynamic ke double aman
   static double _toDouble(dynamic v, [double def = 0]) {
     if (v == null) return def;
     if (v is num) return v.toDouble();
@@ -52,29 +33,17 @@ class Telemetry {
     return null;
   }
 
-  static bool _toBool(dynamic v) {
-    if (v == null) return false;
-    if (v is bool) return v;
-    if (v is num) return v != 0;
-    final s = v.toString().toLowerCase();
-    return s == 'on' || s == 'true' || s == '1';
+  factory Telemetry.fromJson(Map<String, dynamic> j) {
+    return Telemetry(
+      id: _toInt(j['id']),
+      ppm: _toDouble(j['ppm']),
+      ph: _toDouble(j['ph']),
+      tempC: _toDouble(j['tempC']),
+      humidity: _toDouble(j['humidity']),
+      waterTemp: _toDouble(j['waterTemp'] ?? j['water_temp']),
+      waterLevel: _toDouble(j['waterLevel'] ?? j['water_level']),
+    );
   }
-
-  factory Telemetry.fromJson(Map<String, dynamic> j) => Telemetry(
-    id: _toInt(j['id']),
-    ppm: _toDouble(j['ppm'] ?? j['TDS'] ?? j['tds']),
-    ph: _toDouble(j['pH'] ?? j['ph']),
-    tempC: _toDouble(j['DHT_temp'] ?? j['tempC']),
-    humidity: _toDouble(j['DHT_humidity'] ?? j['humidity']),
-    waterTemp: _toDouble(j['water_temp'] ?? j['waterTemp']),
-    waterLevel: _toDouble(j['water_level'] ?? j['waterLevel']),
-    pHReducer: _toBool(j['pH_reducer']),
-    addWater: _toBool(j['add_water']),
-    nutrientsAdder: _toBool(j['nutrients_adder']),
-    humidifier: _toBool(j['humidifier']),
-    exFan: _toBool(j['ex_fan']),
-    isDefault: _toBool(j['isDefault']),
-  );
 
   Map<String, dynamic> toJson() => {
     if (id != null) "id": id,
@@ -84,11 +53,45 @@ class Telemetry {
     "humidity": humidity,
     "waterTemp": waterTemp,
     "waterLevel": waterLevel,
-    "pH_reducer": pHReducer,
-    "add_water": addWater,
-    "nutrients_adder": nutrientsAdder,
-    "humidifier": humidifier,
-    "ex_fan": exFan,
-    "isDefault": isDefault,
   };
+
+  Telemetry copyWith({
+    int? id,
+    double? ppm,
+    double? ph,
+    double? tempC,
+    double? humidity,
+    double? waterTemp,
+    double? waterLevel,
+  }) {
+    return Telemetry(
+      id: id ?? this.id,
+      ppm: ppm ?? this.ppm,
+      ph: ph ?? this.ph,
+      tempC: tempC ?? this.tempC,
+      humidity: humidity ?? this.humidity,
+      waterTemp: waterTemp ?? this.waterTemp,
+      waterLevel: waterLevel ?? this.waterLevel,
+    );
+  }
+
+  /// Untuk update 1 sensor dari MQTT realtime:
+  Telemetry updateSensor(String sensor, double value) {
+    switch (sensor) {
+      case 'ppm':
+        return copyWith(ppm: value);
+      case 'ph':
+        return copyWith(ph: value);
+      case 'tempC':
+        return copyWith(tempC: value);
+      case 'humidity':
+        return copyWith(humidity: value);
+      case 'waterTemp':
+        return copyWith(waterTemp: value);
+      case 'waterLevel':
+        return copyWith(waterLevel: value);
+      default:
+        return this;
+    }
+  }
 }

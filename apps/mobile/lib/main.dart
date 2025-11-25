@@ -4,22 +4,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-
 import 'package:fountaine/firebase_options.dart';
 import 'package:fountaine/app/routes.dart';
+import 'package:fountaine/providers/provider/api_provider.dart';
+import 'package:fountaine/services/api_service.dart';
+import 'package:fountaine/services/api_telemetry_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // env
-  try {
-    await dotenv.load(fileName: ".env");
-    debugPrint('[dotenv] Loaded successfully');
-  } catch (e) {
-    debugPrint('[dotenv] Warning: failed to load .env → $e');
-  }
+  await dotenv.load(fileName: ".env");
 
-  // Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await FirebaseAppCheck.instance.activate(
     androidProvider: kDebugMode
@@ -27,7 +22,32 @@ Future<void> main() async {
         : AndroidProvider.playIntegrity,
   );
 
-  runApp(const ProviderScope(child: FountaineApp()));
+  runApp(
+    ProviderScope(
+      overrides: [
+        // Override base ApiService
+        apiServiceProvider.overrideWithValue(
+          ApiService(
+            baseUrl:
+                dotenv.env['API_BASE_URL'] ??
+                'http://10.0.2.2:8000', // default emulator
+          ),
+        ),
+
+        // Override ApiTelemetryService
+        apiTelemetryProvider.overrideWithValue(
+          ApiTelemetryService(
+            api: ApiService(
+              baseUrl:
+                  dotenv.env['API_BASE_URL'] ??
+                  'http://10.0.2.2:8000', // harus sama
+            ),
+          ),
+        ),
+      ],
+      child: const FountaineApp(),
+    ),
+  );
 }
 
 class FountaineApp extends StatelessWidget {
@@ -45,9 +65,8 @@ class FountaineApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      // untuk testing langsung ke home/monitor; nanti bisa ganti ke AuthGate
       initialRoute: Routes.monitor,
-      // home : const HomePage(),
+      // home: const AuthGate(),
       routes: Routes.routes,
       onGenerateRoute: onGenerateRoute,
     );
