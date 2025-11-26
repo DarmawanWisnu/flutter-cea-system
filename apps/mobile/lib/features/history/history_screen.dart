@@ -1,11 +1,8 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart';
-
 import '../../providers/provider/notification_provider.dart';
+import '../../providers/provider/api_provider.dart';
 import '../../domain/telemetry.dart';
 import '../../models/nav_args.dart';
 
@@ -20,21 +17,26 @@ class HistoryScreen extends ConsumerStatefulWidget {
 
 class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   DateTime? selectedDate;
+
   final ScrollController _scroll = ScrollController();
   final Map<int, GlobalKey> _itemKeys = {};
   DateTime? _pendingTargetTime;
 
+  // UI colors
   static const Color _bg = Color(0xFFF6FBF6);
   static const Color _primary = Color(0xFF154B2E);
   static const Color _muted = Color(0xFF7A7A7A);
 
+  // Data storage
   List<Map<String, dynamic>> _entries = [];
 
   @override
   void initState() {
     super.initState();
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _loadData();
+
       if (widget.targetTime != null) {
         _pendingTargetTime = widget.targetTime;
         selectedDate = DateTime(
@@ -43,53 +45,47 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           widget.targetTime!.day,
         );
       }
+
       if (mounted) setState(() {});
     });
   }
 
+  // LOAD FROM BACKEND
   Future<void> _loadData() async {
-    _entries = await _readEntriesWithTs(widget.kitId);
-  }
+    final api = ref.read(apiServiceProvider);
 
-  /// Baca langsung dari SQLite: ambil ingest_time (ts) + payload_json (Telemetry)
-  Future<List<Map<String, dynamic>>> _readEntriesWithTs(String deviceId) async {
-    final dbPath = await getDatabasesPath();
-    final path = join(dbPath, 'data.db');
-    final db = await openDatabase(path);
-
-    final rows = await db.query(
-      'telemetry',
-      columns: ['ingest_time', 'payload_json'],
-      where: 'device_id = ?',
-      whereArgs: [deviceId],
-      orderBy: 'ingest_time DESC',
+    final res = await api.getJson(
+      "/telemetry/history?deviceId=${widget.kitId}&limit=500",
     );
-    await db.close();
 
-    return rows.map((r) {
-      final ts = (r['ingest_time'] as int?) ?? 0;
-      final jsonStr = (r['payload_json'] as String?) ?? '{}';
-      final map = jsonDecode(jsonStr) as Map<String, dynamic>;
-      final t = Telemetry.fromJson(map);
-      return {'t': t, 'ts': ts};
+    final List items = res["items"] ?? [];
+
+    _entries = items.map((e) {
+      final t = Telemetry.fromJson(e["data"]);
+      final ts = e["ingestTime"] as int;
+
+      return {"t": t, "ts": ts};
     }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
     final s = MediaQuery.of(context).size.width / 375.0;
+
     final unread = ref.watch(unreadNotificationCountProvider);
 
+    // FILTER BY DATE
     final filtered = selectedDate == null
         ? _entries
         : _entries.where((e) {
             final d1 = DateFormat(
               'yyyy-MM-dd',
-            ).format(DateTime.fromMillisecondsSinceEpoch(e['ts'] as int));
+            ).format(DateTime.fromMillisecondsSinceEpoch(e['ts']));
             final d2 = DateFormat('yyyy-MM-dd').format(selectedDate!);
             return d1 == d2;
           }).toList();
 
+    // Auto-scroll if needed
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_pendingTargetTime != null && filtered.isNotEmpty) {
         _jumpToTarget(_pendingTargetTime!, filtered);
@@ -119,6 +115,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // DATE PICKER
               GestureDetector(
                 onTap: () async {
                   final picked = await showDatePicker(
@@ -129,6 +126,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   );
                   if (picked != null) {
                     setState(() => selectedDate = picked);
+                    await _loadData();
                     _pendingTargetTime = null;
                   }
                 },
@@ -182,7 +180,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   ),
                 ),
               ),
+
               SizedBox(height: 18 * s),
+
+              // EMPTY / LIST
               if (filtered.isEmpty)
                 Expanded(
                   child: Center(
@@ -214,10 +215,11 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                     itemCount: filtered.length,
                     itemBuilder: (context, index) {
                       final item = filtered[index];
-                      final Telemetry t = item['t'] as Telemetry;
+                      final Telemetry t = item['t'];
                       final date = DateTime.fromMillisecondsSinceEpoch(
-                        item['ts'] as int,
+                        item['ts'],
                       );
+
                       final key = _itemKeys.putIfAbsent(
                         date.millisecondsSinceEpoch,
                         () => GlobalKey(),
@@ -277,7 +279,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                     ),
                                   ],
                                 ),
+
                                 const Divider(),
+
                                 _dataRow('Water Acidity', '${t.ph} pH', s),
                                 _dataRow('TDS', '${t.ppm} ppm', s),
                                 _dataRow('Humidity', '${t.humidity} %', s),
@@ -298,6 +302,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           ),
         ),
       ),
+
+      // NOTIFICATION FAB
       floatingActionButton: FloatingActionButton(
         backgroundColor: _primary,
         onPressed: () {
@@ -371,20 +377,25 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     );
   }
 
+  // scroll to the target item
   void _jumpToTarget(DateTime target, List<Map<String, dynamic>> filtered) {
     int? keyTs;
     Duration best = const Duration(days: 9999);
+
     for (final it in filtered) {
-      final ts = (it['ts'] as int?) ?? 0;
+      final ts = it['ts'] as int;
       final diff = DateTime.fromMillisecondsSinceEpoch(
         ts,
       ).difference(target).abs();
+
       if (diff < best) {
         best = diff;
         keyTs = ts;
       }
     }
+
     if (keyTs == null) return;
+
     final ctx = _itemKeys[keyTs]?.currentContext;
     if (ctx != null) {
       Scrollable.ensureVisible(
