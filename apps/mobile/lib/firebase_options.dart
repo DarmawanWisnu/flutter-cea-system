@@ -1,5 +1,3 @@
-// Firebase configuration loader (ENV-based version)
-
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
@@ -14,7 +12,6 @@ class DefaultFirebaseOptions {
       );
     }
 
-    // Pilih platform (Android / iOS)
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         return _fromEnv(isIOS: false);
@@ -37,10 +34,7 @@ class DefaultFirebaseOptions {
     }
   }
 
-  /// Ambil konfigurasi dari file `.env`
-  /// Jika `.env` tidak ditemukan atau kosong, akan lempar error
   static FirebaseOptions _fromEnv({required bool isIOS}) {
-    // Pastikan dotenv sudah dimuat sebelum dipanggil
     if (dotenv.env.isEmpty) {
       throw Exception(
         'File .env belum dimuat! '
@@ -48,7 +42,6 @@ class DefaultFirebaseOptions {
       );
     }
 
-    // Gunakan key berdasarkan platform
     final apiKey = isIOS
         ? dotenv.env['FIREBASE_IOS_API_KEY']
         : dotenv.env['FIREBASE_ANDROID_API_KEY'];
@@ -66,7 +59,6 @@ class DefaultFirebaseOptions {
       );
     }
 
-    // Kembalikan konfigurasi
     return FirebaseOptions(
       apiKey: apiKey!,
       appId: appId!,
