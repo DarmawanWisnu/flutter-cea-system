@@ -1,7 +1,19 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'package:fountaine/core/constants.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:fountaine/services/mqtt_service.dart';
+
+/// MQTT Provider (autoDispose) — aman dan stabil
+final mqttProvider = ChangeNotifierProvider.autoDispose<MqttVM>((ref) {
+  final vm = MqttVM();
+
+  // Pastikan ketika provider dihancurkan → MQTT disconnect aman
+  ref.onDispose(() {
+    vm.disposeSafely();
+  });
+
+  return vm;
+});
 
 class MqttVM extends ChangeNotifier {
   final MqttService _svc = MqttService();
@@ -10,48 +22,93 @@ class MqttVM extends ChangeNotifier {
   MqttConnState get state => _state;
 
   StreamSubscription<MqttConnState>? _connSub;
+
+  bool _initializing = false;
   bool _initialized = false;
   String? _currentKitId;
 
-  Future<void> init({String? kitId}) async {
-    if (_initialized) return;
-    _initialized = true;
+  bool get isConnected => _state == MqttConnState.connected;
 
-    _connSub = _svc.connectionState$.listen((s) {
+  // ------------------------------------------------------------
+  // INIT — idempotent & aman
+  // ------------------------------------------------------------
+  Future<void> init({required String kitId}) async {
+    if (_initializing) return;
+    _initializing = true;
+
+    // Pasang listener koneksi hanya sekali
+    _connSub ??= _svc.connectionState$.listen((s) {
       _state = s;
       notifyListeners();
     });
 
-    _currentKitId = kitId ?? AppConst.defaultKitId;
+    // CASE: pertama kali
+    if (!_initialized) {
+      _initialized = true;
+      _currentKitId = kitId;
 
-    await _svc.connect(kitId: _currentKitId!);
+      await _svc.connect(kitId: kitId);
+
+      _initializing = false;
+      return;
+    }
+
+    // CASE: sudah init tapi pindah KIT
+    if (kitId != _currentKitId) {
+      _currentKitId = kitId;
+
+      await _svc.disconnect();
+      await _svc.connect(kitId: kitId);
+    }
+
+    _initializing = false;
   }
 
+  // ------------------------------------------------------------
+  // ACCESS ke service (telemetry$, status$, publishControl)
+  // ------------------------------------------------------------
   MqttService get service => _svc;
 
+  // ------------------------------------------------------------
+  // SWITCH KIT (opsional)
+  // ------------------------------------------------------------
   Future<void> switchKit(String kitId) async {
     if (kitId == _currentKitId) return;
+
     _currentKitId = kitId;
     await _svc.disconnect();
     await _svc.connect(kitId: kitId);
   }
 
+  // ------------------------------------------------------------
+  // SEND CONTROL ke actuator (pH up/down, pump, nutrient, etc)
+  // ------------------------------------------------------------
   Future<void> sendControl(String cmd, Map<String, dynamic> args) async {
-    final id = _currentKitId ?? AppConst.defaultKitId;
-    await _svc.publishControl(id, cmd, args);
+    if (!isConnected) {
+      debugPrint("[MQTT] Cannot send control → not connected");
+      return;
+    }
+
+    await _svc.publishControl(cmd, args);
   }
 
-  Future<void> disposeConn() async {
+  // ------------------------------------------------------------
+  // SAFE DISPOSE — tidak menutup StreamController MQTT
+  // ------------------------------------------------------------
+  Future<void> disposeSafely() async {
+    // bersihkan listener
     await _connSub?.cancel();
     _connSub = null;
-    await _svc.dispose();
+
+    // hanya disconnect, jangan dispose full StreamController
+    await _svc.disconnect();
+
     _initialized = false;
-    _state = MqttConnState.disconnected;
+    _currentKitId = null;
   }
 
   @override
   void dispose() {
-    unawaited(disposeConn());
     super.dispose();
   }
 }

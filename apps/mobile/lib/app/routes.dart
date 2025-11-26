@@ -14,12 +14,16 @@ import 'package:fountaine/features/profile/profile_screen.dart';
 import 'package:fountaine/features/notifications/notification_screen.dart';
 import 'package:fountaine/providers/provider/auth_provider.dart';
 
+/// ============================
+///   AUTH GATE
+/// ============================
 class AuthGate extends ConsumerWidget {
   const AuthGate({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authStateProvider);
+
     return authState.when(
       data: (user) {
         if (user == null) return const LoginScreen();
@@ -34,6 +38,9 @@ class AuthGate extends ConsumerWidget {
   }
 }
 
+/// ============================
+///   ROUTE DEFINITIONS
+/// ============================
 class Routes {
   static const splash = '/';
   static const login = '/login';
@@ -48,63 +55,56 @@ class Routes {
   static const profile = '/profile';
   static const notifications = '/notifications';
 
+  /// ONLY static pages (no arguments)
   static final routes = <String, WidgetBuilder>{
-    splash: (c) => const AuthGate(),
-    login: (c) => const LoginScreen(),
-    register: (c) => const RegisterScreen(),
-    verify: (c) => const VerifyScreen(),
-    home: (c) => const HomeScreen(),
-    notifications: (c) => const NotificationScreen(),
-    addKit: (c) => const AddKitScreen(),
-    settings: (c) => const SettingsScreen(),
-    forgotPassword: (c) => const ForgotPasswordScreen(),
-    profile: (c) => const ProfileScreen(),
+    splash: (_) => const AuthGate(),
+    login: (_) => const LoginScreen(),
+    register: (_) => const RegisterScreen(),
+    verify: (_) => const VerifyScreen(),
+    home: (_) => const HomeScreen(),
+    notifications: (_) => const NotificationScreen(),
+    addKit: (_) => const AddKitScreen(),
+    settings: (_) => const SettingsScreen(),
+    forgotPassword: (_) => const ForgotPasswordScreen(),
+    profile: (_) => const ProfileScreen(),
   };
 }
 
+/// ============================
+///   ON GENERATE ROUTE
+///   (dynamic arguments only)
+/// ============================
 Route<dynamic>? onGenerateRoute(RouteSettings settings) {
   switch (settings.name) {
     case Routes.monitor:
-      {
-        // argumen opsional: {'kitId': 'devkit-01'}
-        String kitId = 'devkit-01';
-        final a = settings.arguments;
-        if (a is Map) {
-          kitId = (a['kitId'] as String?) ?? kitId;
-        }
-        return MaterialPageRoute(
-          builder: (_) => MonitorScreen(kitId: kitId),
-          settings: settings,
-        );
-      }
+      final args = settings.arguments as Map?;
+      final kitId = (args?['kitId'] as String?) ?? 'devkit-01';
+
+      return MaterialPageRoute(
+        builder: (_) => MonitorScreen(kitId: kitId),
+        settings: settings,
+      );
 
     case Routes.history:
-      {
-        // argumen opsional: {'kitId': 'devkit-01', 'targetTime': DateTime?}
-        String kitId = 'devkit-01';
-        DateTime? target;
-        final a = settings.arguments;
-        if (a is Map) {
-          kitId = (a['kitId'] as String?) ?? kitId;
-          target = a['targetTime'] as DateTime?;
-        }
-        return MaterialPageRoute(
-          builder: (_) => HistoryScreen(kitId: kitId, targetTime: target),
-          settings: settings,
-        );
-      }
+      final args = settings.arguments as Map?;
+      final kitId = (args?['kitId'] as String?) ?? 'devkit-01';
+      final target = args?['targetTime'] as DateTime?;
+
+      return MaterialPageRoute(
+        builder: (_) => HistoryScreen(kitId: kitId, targetTime: target),
+        settings: settings,
+      );
 
     default:
-      {
-        final builder = Routes.routes[settings.name];
-        if (builder != null) {
-          return MaterialPageRoute(builder: builder, settings: settings);
-        }
-        return MaterialPageRoute(
-          builder: (_) =>
-              const Scaffold(body: Center(child: Text('Route tidak dikenal'))),
-          settings: settings,
-        );
+      final builder = Routes.routes[settings.name];
+      if (builder != null) {
+        return MaterialPageRoute(builder: builder, settings: settings);
       }
+
+      return MaterialPageRoute(
+        builder: (_) =>
+            const Scaffold(body: Center(child: Text('Route tidak dikenal'))),
+        settings: settings,
+      );
   }
 }

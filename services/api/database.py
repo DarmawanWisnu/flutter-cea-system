@@ -3,6 +3,7 @@ import psycopg2.pool
 import os
 from dotenv import load_dotenv
 
+# Load .env
 env_path = os.path.join(os.path.dirname(__file__), ".env")
 load_dotenv(dotenv_path=env_path)
 
@@ -12,10 +13,8 @@ DB_USER = os.getenv("DB_USER", "postgres")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "")
 DB_PORT = int(os.getenv("DB_PORT", "5432"))
 
-print("DEBUG ENV → HOST:", DB_HOST)
-print("DEBUG ENV → USER:", DB_USER)
-
 _pool = None
+
 
 def init_pool():
     global _pool
@@ -29,13 +28,74 @@ def init_pool():
             password=DB_PASSWORD,
             port=DB_PORT,
         )
-        print(f"[DB] Pool connected → {DB_HOST}:{DB_PORT}/{DB_NAME}")
+        print(f"[DB] Pool → {DB_HOST}:{DB_PORT}/{DB_NAME}")
+
 
 def get_connection():
     if _pool is None:
         init_pool()
     return _pool.getconn()
 
+
 def release_connection(conn):
     if _pool and conn:
-        _pool.putconn(conn)
+        try:
+            _pool.putconn(conn)
+        except Exception:
+            pass
+
+
+def run_migrations():
+    """
+    Fresh, clean schema:
+      - kits
+      - telemetry (camelCase)
+      - actuator_event (camelCase)
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+
+    # KITS TABLE (camelCase)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS kits (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            "createdAt" TIMESTAMPTZ DEFAULT NOW()
+        );
+    """)
+
+    # TELEMETRY TABLE (full camelCase)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS telemetry (
+            "rowId" TEXT PRIMARY KEY,
+            "deviceId" TEXT NOT NULL,
+            "ingestTime" BIGINT NOT NULL,
+            "payloadJson" JSONB NOT NULL,
+            ppm FLOAT,
+            ph FLOAT,
+            "tempC" FLOAT,
+            humidity FLOAT,
+            "waterTemp" FLOAT,
+            "waterLevel" FLOAT,
+            "payloadHash" TEXT UNIQUE
+        );
+    """)
+
+    # ACTUATOR TABLE (already camelCase)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS actuator_event (
+            id SERIAL PRIMARY KEY,
+            "deviceId" TEXT NOT NULL,
+            "ingestTime" BIGINT NOT NULL,
+            "phUp" INT DEFAULT 0,
+            "phDown" INT DEFAULT 0,
+            "nutrientAdd" INT DEFAULT 0,
+            "valueS" FLOAT DEFAULT 0
+        );
+    """)
+
+    conn.commit()
+    cur.close()
+    release_connection(conn)
+
+    print("[DB] Migrations executed.")

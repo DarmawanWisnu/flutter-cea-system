@@ -1,7 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from typing import Optional
 from pydantic import BaseModel
-from dotenv import load_dotenv
 from database import get_connection, release_connection
 import uuid
 import hashlib
@@ -9,12 +8,11 @@ import time
 import json
 import actuator
 
-load_dotenv()
-
 app = FastAPI()
 app.include_router(actuator.router, prefix="/actuator")
 
-# TELEMETRY PAYLOAD
+# MODELS
+
 class TelemetryPayload(BaseModel):
     ppm: float
     ph: float
@@ -23,51 +21,166 @@ class TelemetryPayload(BaseModel):
     waterTemp: float
     waterLevel: float
 
-# INSERT TELEMETRY
-@app.post("/telemetry")
-def insert_telemetry(device_id: str, data: TelemetryPayload):
-    device_id = device_id.strip()
 
+class KitPayload(BaseModel):
+    id: str
+    name: str
+
+# KITS CRUD
+@app.post("/kits")
+def add_kit(payload: KitPayload):
     conn = get_connection()
     cur = conn.cursor()
 
-    row_id = str(uuid.uuid4())
-    ingest_time = int(time.time() * 1000)
-    json_str = json.dumps(data.dict())
-    payload_hash = hashlib.sha1(json_str.encode()).hexdigest()
-
     try:
         cur.execute("""
-            INSERT INTO telemetry (
-                row_id, device_id, ingest_time, payload_json,
-                ppm, ph, tempC, humidity, waterTemp, waterLevel,
-                payload_hash
-            )
-            VALUES (
-                %s, %s, %s, %s,
-                %s, %s, %s, %s, %s, %s,
-                %s
-            )
-            ON CONFLICT (payload_hash) DO NOTHING;
-        """, (
-            row_id, device_id, ingest_time, json_str,
-            data.ppm, data.ph, data.tempC, data.humidity, data.waterTemp, data.waterLevel,
-            payload_hash
-        ))
+            INSERT INTO kits (id, name)
+            VALUES (%s, %s)
+            ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name;
+        """, (payload.id.strip(), payload.name.strip()))
 
         conn.commit()
-        return {"status": "ok", "duplicate": cur.rowcount == 0}
+        return {"status": "ok"}
 
     except Exception as e:
         conn.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(500, str(e))
 
     finally:
         cur.close()
         release_connection(conn)
 
-# CLEAN MAPPER — camelCase only
-def map_payload(p):
+
+@app.get("/kits")
+def get_kits():
+    conn = get_connection()
+    cur = conn.cursor()
+
+    try:
+        cur.execute('SELECT id, name, "createdAt" FROM kits ORDER BY "createdAt" DESC;')
+        rows = cur.fetchall()
+
+        return [
+            {"id": r[0], "name": r[1], "createdAt": r[2]}
+            for r in rows
+        ]
+
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
+    finally:
+        cur.close()
+        release_connection(conn)
+
+
+@app.get("/kits/{kit_id}")
+def get_kit(kit_id: str):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    try:
+        cur.execute('SELECT id, name, "createdAt" FROM kits WHERE id = %s;', (kit_id,))
+        row = cur.fetchone()
+
+        if not row:
+            raise HTTPException(404, "Kit not found")
+
+        return {"id": row[0], "name": row[1], "createdAt": row[2]}
+
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
+    finally:
+        cur.close()
+        release_connection(conn)
+
+
+@app.get("/kits/with-latest")
+def get_kits_with_latest():
+    conn = get_connection()
+    cur = conn.cursor()
+
+    try:
+        cur.execute('SELECT id, name, "createdAt" FROM kits ORDER BY "createdAt" DESC;')
+        kits = cur.fetchall()
+
+        results = []
+
+        for kit in kits:
+            kit_id = kit[0]
+
+            cur.execute("""
+                SELECT "payloadJson", "ingestTime"
+                FROM telemetry
+                WHERE "deviceId" = %s
+                ORDER BY "ingestTime" DESC
+                LIMIT 1;
+            """, (kit_id,))
+
+            row = cur.fetchone()
+
+            if row:
+                telemetry = map_payload(row[0])
+                telemetry["ingestTime"] = row[1]
+            else:
+                telemetry = None
+
+            results.append({
+                "id": kit[0],
+                "name": kit[1],
+                "createdAt": kit[2],
+                "telemetry": telemetry
+            })
+
+        return results
+
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
+    finally:
+        cur.close()
+        release_connection(conn)
+
+
+@app.delete("/kits/{kit_id}")
+def delete_kit(kit_id: str):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    try:
+        cur.execute("DELETE FROM kits WHERE id = %s;", (kit_id,))
+        conn.commit()
+
+        return {"status": "deleted"}
+
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(500, str(e))
+
+    finally:
+        cur.close()
+        release_connection(conn)
+
+# HELPERS
+def is_valid_device(device_id: str):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT 1 FROM kits WHERE id = %s;", (device_id,))
+    found = cur.fetchone()
+    cur.close()
+    release_connection(conn)
+    return found is not None
+
+
+def map_payload(value):
+    if isinstance(value, dict):
+        p = value
+    else:
+        try:
+            p = json.loads(value)
+        except:
+            return {}
+
     return {
         "ppm": p.get("ppm"),
         "ph": p.get("ph"),
@@ -77,80 +190,129 @@ def map_payload(p):
         "waterLevel": p.get("waterLevel"),
     }
 
-# LATEST
+# TELEMETRY INSERT
+@app.post("/telemetry")
+def insert_telemetry(deviceId: str, data: TelemetryPayload):
+    deviceId = deviceId.strip()
+
+    if not is_valid_device(deviceId):
+        raise HTTPException(400, "Invalid deviceId. Register it via /kits first.")
+
+    conn = get_connection()
+    cur = conn.cursor()
+
+    rowId = str(uuid.uuid4())
+    ingestTime = int(time.time() * 1000)
+    payload_dict = data.dict()
+
+    payloadHash = hashlib.sha1(
+        f"{deviceId}-{json.dumps(payload_dict)}".encode()
+    ).hexdigest()
+
+    try:
+        cur.execute("""
+            INSERT INTO telemetry (
+                "rowId", "deviceId", "ingestTime", "payloadJson",
+                ppm, ph, "tempC", humidity, "waterTemp", "waterLevel",
+                "payloadHash"
+            )
+            VALUES (
+                %s, %s, %s, %s,
+                %s, %s, %s, %s, %s, %s,
+                %s
+            )
+            ON CONFLICT ("payloadHash") DO NOTHING;
+        """, (
+            rowId, deviceId, ingestTime, payload_dict,
+            data.ppm, data.ph, data.tempC, data.humidity,
+            data.waterTemp, data.waterLevel,
+            payloadHash
+        ))
+
+        conn.commit()
+        return {"status": "ok", "duplicate": cur.rowcount == 0}
+
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(500, str(e))
+
+    finally:
+        cur.close()
+        release_connection(conn)
+
+# TELEMETRY GET LATEST
 @app.get("/telemetry/latest")
-def get_latest(device_id: str):
+def get_latest(deviceId: str):
     conn = get_connection()
     cur = conn.cursor()
 
     try:
         cur.execute("""
-            SELECT payload_json, ingest_time
+            SELECT "payloadJson", "ingestTime"
             FROM telemetry
-            WHERE device_id = %s
-            ORDER BY ingest_time DESC
+            WHERE "deviceId" = %s
+            ORDER BY "ingestTime" DESC
             LIMIT 1;
-        """, (device_id,))
+        """, (deviceId,))
 
         row = cur.fetchone()
         if not row:
             return {"message": "no data"}
 
-        mapped = map_payload(row[0])
-
         return {
-            "device_id": device_id,
-            "ingest_time": row[1],
-            "data": mapped
+            "deviceId": deviceId,
+            "ingestTime": row[1],
+            "data": map_payload(row[0])
         }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(500, str(e))
 
     finally:
         cur.close()
-        conn.close()
+        release_connection(conn)
 
-# HISTORY
+# TELEMETRY GET HISTORY
 @app.get("/telemetry/history")
-def get_history(device_id: str, limit: int = 50):
+def get_history(deviceId: str, limit: int = 50):
+    limit = max(1, min(limit, 500))
+
     conn = get_connection()
     cur = conn.cursor()
 
     try:
         cur.execute("""
-            SELECT payload_json, ingest_time
+            SELECT "payloadJson", "ingestTime"
             FROM telemetry
-            WHERE device_id = %s
-            ORDER BY ingest_time DESC
+            WHERE "deviceId" = %s
+            ORDER BY "ingestTime" DESC
             LIMIT %s;
-        """, (device_id, limit))
+        """, (deviceId, limit))
 
         rows = cur.fetchall()
 
-        items = [
-            {
-                "ingest_time": r[1],
-                "data": map_payload(r[0])
-            }
-            for r in rows
-        ]
-
         return {
-            "device_id": device_id,
-            "count": len(items),
-            "items": items
+            "deviceId": deviceId,
+            "count": len(rows),
+            "items": [
+                {"ingestTime": r[1], "data": map_payload(r[0])}
+                for r in rows
+            ]
         }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(500, str(e))
 
     finally:
         cur.close()
-        conn.close()
+        release_connection(conn)
 
-# RUN UVICORN
+# SERVER RUNNER
 if __name__ == "__main__":
+    from database import init_pool, run_migrations
+    init_pool()
+    run_migrations()
+
     import uvicorn
     uvicorn.run(
         "main:app",

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'package:fountaine/app/routes.dart';
 import 'package:fountaine/providers/provider/auth_provider.dart';
 
@@ -27,16 +26,14 @@ class SettingsScreen extends ConsumerWidget {
             onPressed: () async {
               Navigator.pop(context);
               try {
-                // FIX: pakai signOut() beneran dari authProvider.notifier
                 await ref.read(authProvider.notifier).signOut();
-              } catch (_) {
-                // jangan bikin app crash kalau ada error aneh
-              }
+              } catch (_) {}
+
               if (context.mounted) {
                 Navigator.pushNamedAndRemoveUntil(
                   context,
                   Routes.login,
-                  (r) => false,
+                  (route) => false,
                 );
               }
             },

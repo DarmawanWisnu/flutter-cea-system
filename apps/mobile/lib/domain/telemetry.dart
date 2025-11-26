@@ -1,5 +1,6 @@
 class Telemetry {
   final int? id;
+  final int? ingestTime; // ⭐ FIX: tambahkan ini
   final double ppm;
   final double ph;
   final double tempC;
@@ -9,6 +10,7 @@ class Telemetry {
 
   const Telemetry({
     this.id,
+    this.ingestTime,
     required this.ppm,
     required this.ph,
     required this.tempC,
@@ -17,7 +19,6 @@ class Telemetry {
     required this.waterLevel,
   });
 
-  // Convert dynamic ke double aman
   static double _toDouble(dynamic v, [double def = 0]) {
     if (v == null) return def;
     if (v is num) return v.toDouble();
@@ -36,6 +37,7 @@ class Telemetry {
   factory Telemetry.fromJson(Map<String, dynamic> j) {
     return Telemetry(
       id: _toInt(j['id']),
+      ingestTime: _toInt(j['ingestTime']) ?? _toInt(j['ingest_time']), // ⭐ FIX
       ppm: _toDouble(j['ppm']),
       ph: _toDouble(j['ph']),
       tempC: _toDouble(j['tempC']),
@@ -47,6 +49,7 @@ class Telemetry {
 
   Map<String, dynamic> toJson() => {
     if (id != null) "id": id,
+    if (ingestTime != null) "ingestTime": ingestTime, // ⭐ FIX
     "ppm": ppm,
     "ph": ph,
     "tempC": tempC,
@@ -57,6 +60,7 @@ class Telemetry {
 
   Telemetry copyWith({
     int? id,
+    int? ingestTime,
     double? ppm,
     double? ph,
     double? tempC,
@@ -66,6 +70,7 @@ class Telemetry {
   }) {
     return Telemetry(
       id: id ?? this.id,
+      ingestTime: ingestTime ?? this.ingestTime,
       ppm: ppm ?? this.ppm,
       ph: ph ?? this.ph,
       tempC: tempC ?? this.tempC,
@@ -75,7 +80,6 @@ class Telemetry {
     );
   }
 
-  /// Untuk update 1 sensor dari MQTT realtime:
   Telemetry updateSensor(String sensor, double value) {
     switch (sensor) {
       case 'ppm':
