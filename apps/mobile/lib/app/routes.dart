@@ -85,11 +85,11 @@ Route<dynamic>? onGenerateRoute(RouteSettings settings) {
     // HISTORY SCREEN
     case Routes.history:
       final args = settings.arguments as Map?;
-      final kitId = args?['kitId'] as String? ?? 'unknown-kit';
-      final targetTime = args?['targetTime'] as DateTime?;
+      final kitId = (args?['kitId'] as String?) ?? "devkit-01";
+      final target = args?['targetTime'] as DateTime?;
 
       return MaterialPageRoute(
-        builder: (_) => HistoryScreen(kitId: kitId, targetTime: targetTime),
+        builder: (_) => HistoryScreen(kitId: kitId, targetTime: target),
         settings: settings,
       );
 

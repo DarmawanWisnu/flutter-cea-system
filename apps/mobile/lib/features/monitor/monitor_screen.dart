@@ -4,22 +4,6 @@ import 'package:fountaine/providers/provider/monitor_provider.dart';
 import 'package:fountaine/providers/provider/api_provider.dart';
 import '../../domain/telemetry.dart';
 
-final kitsProvider = FutureProvider.autoDispose((ref) async {
-  final api = ref.watch(apiServiceProvider);
-  final result = await api.getJson("/kits");
-
-  return (result as List)
-      .map((e) => Kit(id: e['id'], name: e['name']))
-      .toList();
-});
-
-class Kit {
-  final String id;
-  final String name;
-
-  Kit({required this.id, required this.name});
-}
-
 class MonitorScreen extends ConsumerStatefulWidget {
   final String? selectedKit;
 
@@ -30,7 +14,7 @@ class MonitorScreen extends ConsumerStatefulWidget {
 }
 
 class _MonitorScreenState extends ConsumerState<MonitorScreen> {
-  late String kitId;
+  String? kitId;
   bool isAuto = false;
 
   @override
@@ -38,25 +22,30 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
     super.initState();
 
     Future.microtask(() async {
-      final kits = await ref.read(apiKitsListProvider.future);
+      try {
+        final kits = await ref.read(apiKitsListProvider.future);
 
-      if (kits.isEmpty) {
-        if (mounted) {
-          Navigator.pushReplacementNamed(context, "/addkit");
+        if (kits.isEmpty) {
+          if (mounted) {
+            Navigator.pushReplacementNamed(context, "/addkit");
+          }
+          return;
         }
-        return;
-      }
 
-      kitId = widget.selectedKit ?? kits.first["id"];
-      setState(() {});
+        final initial = widget.selectedKit ?? (kits.first["id"] as String);
+
+        if (mounted) {
+          setState(() {
+            kitId = initial;
+          });
+        }
+      } catch (e) {}
     });
-
-    kitId = widget.selectedKit ?? "devkit-01";
   }
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(monitorTelemetryProvider(kitId));
+    final _kitId = kitId;
 
     const bg = Color(0xFFF6FBF6);
     const primary = Color(0xFF154B2E);
@@ -64,6 +53,25 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
 
     final size = MediaQuery.of(context).size;
     final s = size.width / 375.0;
+
+    if (_kitId == null) {
+      return Scaffold(
+        backgroundColor: bg,
+        appBar: AppBar(
+          backgroundColor: bg,
+          elevation: 0,
+          centerTitle: true,
+          title: const Text(
+            'Monitor',
+            style: TextStyle(color: primary, fontWeight: FontWeight.w800),
+          ),
+          iconTheme: const IconThemeData(color: primary),
+        ),
+        body: const SafeArea(child: Center(child: CircularProgressIndicator())),
+      );
+    }
+
+    final state = ref.watch(monitorTelemetryProvider(_kitId));
 
     Telemetry? t = state.data;
     final last = state.lastUpdated;
@@ -111,7 +119,6 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _kitSelector(s),
-
               SizedBox(height: 14 * s),
 
               GridView(
@@ -203,7 +210,7 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            kitId,
+                            _kitId,
                             style: TextStyle(
                               fontSize: 15 * s,
                               fontWeight: FontWeight.w700,
@@ -224,7 +231,7 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
 
               SizedBox(height: 20 * s),
 
-              _modeSection(context, s),
+              _modeSection(context, s, _kitId),
             ],
           ),
         ),
@@ -234,41 +241,49 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
 
   // KIT SELECTOR
   Widget _kitSelector(double s) {
-    return Consumer(
-      builder: (context, ref, _) {
-        final kitsAsync = ref.watch(kitsProvider);
+    final kitsAsync = ref.watch(apiKitsListProvider);
 
-        return kitsAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Text("Failed load kits: $e"),
-          data: (kits) {
-            if (kits.isEmpty) return const Text("No kits registered.");
+    return kitsAsync.when(
+      loading: () => Container(
+        padding: EdgeInsets.symmetric(horizontal: 12 * s),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14 * s),
+        ),
+        height: 48 * s,
+        child: const Center(child: CircularProgressIndicator()),
+      ),
+      error: (e, _) => Text("Failed load kits: $e"),
+      data: (kits) {
+        if (kits.isEmpty) return const Text("No kits registered.");
 
-            return Container(
-              padding: EdgeInsets.symmetric(horizontal: 12 * s),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14 * s),
-              ),
-              child: DropdownButton<String>(
-                value: kitId,
-                underline: const SizedBox(),
-                isExpanded: true,
-                items: kits
-                    .map(
-                      (k) => DropdownMenuItem(value: k.id, child: Text(k.name)),
-                    )
-                    .toList(),
-                onChanged: (v) {
-                  if (v != null) {
-                    setState(() {
-                      kitId = v;
-                    });
-                  }
-                },
-              ),
-            );
-          },
+        return Container(
+          padding: EdgeInsets.symmetric(horizontal: 12 * s),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14 * s),
+          ),
+          child: DropdownButton<String>(
+            value: kitId,
+            underline: const SizedBox(),
+            isExpanded: true,
+            items: kits.map<DropdownMenuItem<String>>((k) {
+              final id = k["id"] as String;
+              final name = k["name"] as String? ?? id;
+              return DropdownMenuItem(value: id, child: Text(name));
+            }).toList(),
+            onChanged: (v) async {
+              if (v != null && v != kitId) {
+                setState(() {
+                  kitId = v;
+                });
+
+                await ref
+                    .read(monitorTelemetryProvider(v).notifier)
+                    .switchKit(v);
+              }
+            },
+          ),
         );
       },
     );
@@ -347,7 +362,7 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
   }
 
   // MODE & CONTROL
-  Widget _modeSection(BuildContext context, double s) {
+  Widget _modeSection(BuildContext context, double s, String currentKitId) {
     const primary = Color(0xFF154B2E);
     const muted = Color(0xFF7A7A7A);
 
@@ -369,7 +384,12 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
           children: [
             Expanded(
               child: GestureDetector(
-                onTap: () => setState(() => isAuto = true),
+                onTap: () {
+                  setState(() => isAuto = true);
+                  ref
+                      .read(monitorTelemetryProvider(currentKitId).notifier)
+                      .setAuto();
+                },
                 child: Container(
                   padding: EdgeInsets.symmetric(vertical: 14 * s),
                   decoration: BoxDecoration(
@@ -398,7 +418,12 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
 
             Expanded(
               child: GestureDetector(
-                onTap: () => setState(() => isAuto = false),
+                onTap: () {
+                  setState(() => isAuto = false);
+                  ref
+                      .read(monitorTelemetryProvider(currentKitId).notifier)
+                      .setManual();
+                },
                 child: Container(
                   padding: EdgeInsets.symmetric(vertical: 14 * s),
                   decoration: BoxDecoration(
@@ -432,17 +457,41 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
             children: [
               Row(
                 children: [
-                  Expanded(child: _manualBtn(s, "PH UP")),
+                  Expanded(
+                    child: _manualBtn(s, "PH UP", () {
+                      ref
+                          .read(monitorTelemetryProvider(currentKitId).notifier)
+                          .phUp();
+                    }),
+                  ),
                   SizedBox(width: 12 * s),
-                  Expanded(child: _manualBtn(s, "PH DOWN")),
+                  Expanded(
+                    child: _manualBtn(s, "PH DOWN", () {
+                      ref
+                          .read(monitorTelemetryProvider(currentKitId).notifier)
+                          .phDown();
+                    }),
+                  ),
                 ],
               ),
               SizedBox(height: 12 * s),
               Row(
                 children: [
-                  Expanded(child: _manualBtn(s, "NUTRIENT")),
+                  Expanded(
+                    child: _manualBtn(s, "NUTRIENT", () {
+                      ref
+                          .read(monitorTelemetryProvider(currentKitId).notifier)
+                          .nutrientAdd();
+                    }),
+                  ),
                   SizedBox(width: 12 * s),
-                  Expanded(child: _manualBtn(s, "REFILL")),
+                  Expanded(
+                    child: _manualBtn(s, "REFILL", () {
+                      ref
+                          .read(monitorTelemetryProvider(currentKitId).notifier)
+                          .refill();
+                    }),
+                  ),
                 ],
               ),
               SizedBox(height: 22 * s),
@@ -465,27 +514,31 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
     );
   }
 
-  Widget _manualBtn(double s, String label) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 16 * s),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16 * s),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8 * s,
-            offset: Offset(0, 4 * s),
-          ),
-        ],
-      ),
-      child: Center(
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 15 * s,
-            fontWeight: FontWeight.bold,
-            color: const Color(0xFF154B2E),
+  Widget _manualBtn(double s, String label, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16 * s),
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 16 * s),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16 * s),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8 * s,
+              offset: Offset(0, 4 * s),
+            ),
+          ],
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 15 * s,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF154B2E),
+            ),
           ),
         ),
       ),
@@ -493,7 +546,6 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
   }
 }
 
-// GAUGE ARC
 class _ArcPainter extends CustomPainter {
   final Color color;
   final double fraction;

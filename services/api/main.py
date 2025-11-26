@@ -21,7 +21,6 @@ class TelemetryPayload(BaseModel):
     waterTemp: float
     waterLevel: float
 
-
 class KitPayload(BaseModel):
     id: str
     name: str
@@ -211,23 +210,22 @@ def insert_telemetry(deviceId: str, data: TelemetryPayload):
 
     try:
         cur.execute("""
-            INSERT INTO telemetry (
-                "rowId", "deviceId", "ingestTime", "payloadJson",
-                ppm, ph, "tempC", humidity, "waterTemp", "waterLevel",
-                "payloadHash"
-            )
-            VALUES (
-                %s, %s, %s, %s,
-                %s, %s, %s, %s, %s, %s,
-                %s
-            )
-            ON CONFLICT ("payloadHash") DO NOTHING;
-        """, (
-            rowId, deviceId, ingestTime, payload_dict,
-            data.ppm, data.ph, data.tempC, data.humidity,
-            data.waterTemp, data.waterLevel,
-            payloadHash
-        ))
+    INSERT INTO telemetry (
+        "rowId", "deviceId", "ingestTime", "payloadJson",
+        ppm, ph, "tempC", humidity, "waterTemp", "waterLevel",
+        "payloadHash"
+    )
+    VALUES (
+        %s, %s, %s, %s,
+        %s, %s, %s, %s, %s, %s,
+        %s
+    )
+""", (
+    rowId, deviceId, ingestTime, json.dumps(payload_dict),   # << FIX
+    data.ppm, data.ph, data.tempC, data.humidity,
+    data.waterTemp, data.waterLevel,
+    payloadHash
+))
 
         conn.commit()
         return {"status": "ok", "duplicate": cur.rowcount == 0}

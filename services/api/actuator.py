@@ -48,10 +48,13 @@ def is_valid_device(device_id: str):
 
 # PAYLOAD MODEL
 class ActuatorEvent(BaseModel):
-    phUp: int = Field(0, ge=0)          # 0 or 1
-    phDown: int = Field(0, ge=0)
-    nutrientAdd: int = Field(0, ge=0)
-    valueS: float = Field(0.0, ge=0.0)  # seconds / ml
+    phUp: int = 0
+    phDown: int = 0
+    nutrientAdd: int = 0
+    valueS: float = 0.0
+    manual: int = 0
+    auto: int = 0
+    refill: int = 0
 
     class Config:
         schema_extra = {
@@ -89,14 +92,17 @@ def insert_event(deviceId: str, data: ActuatorEvent):
 
     try:
         cur.execute("""
-            INSERT INTO actuator_event
-                ("deviceId", "ingestTime", "phUp", "phDown", "nutrientAdd", "valueS")
-            VALUES (%s, %s, %s, %s, %s, %s)
-            RETURNING id;
-        """, (
-            deviceId, ingestTime,
-            int(data.phUp), int(data.phDown), int(data.nutrientAdd), float(data.valueS)
-        ))
+    INSERT INTO actuator_event
+        ("deviceId", "ingestTime",
+         "phUp", "phDown", "nutrientAdd", "valueS",
+         "manual", "auto", "refill")
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+    RETURNING id;
+""", (
+    deviceId, ingestTime,
+    int(data.phUp), int(data.phDown), int(data.nutrientAdd), float(data.valueS),
+    int(data.manual), int(data.auto), int(data.refill)
+))
 
         new_id = cur.fetchone()[0]
         conn.commit()
@@ -124,7 +130,9 @@ def get_latest_event(deviceId: str):
 
     try:
         cur.execute("""
-            SELECT id, "deviceId", "ingestTime", "phUp", "phDown", "nutrientAdd", "valueS"
+            SELECT id, "deviceId", "ingestTime", 
+"phUp", "phDown", "nutrientAdd", "valueS",
+"manual", "auto", "refill"
             FROM actuator_event
             WHERE "deviceId" = %s
             ORDER BY "ingestTime" DESC
@@ -142,7 +150,10 @@ def get_latest_event(deviceId: str):
             "phUp": row[3],
             "phDown": row[4],
             "nutrientAdd": row[5],
-            "valueS": row[6]
+            "valueS": row[6],
+            "manual": row[7],
+            "auto": row[8],
+            "refill": row[9]
         }
 
     except Exception as e:
@@ -166,27 +177,32 @@ def get_event_history(deviceId: str, limit: int = 50):
     cur = conn.cursor()
 
     try:
-        cur.execute(f"""
-            SELECT id, "deviceId", "ingestTime", "phUp", "phDown", "nutrientAdd", "valueS"
-            FROM actuator_event
-            WHERE "deviceId" = %s
-            ORDER BY "ingestTime" DESC
-            LIMIT %s;
-        """, (deviceId, limit))
+        cur.execute("""
+    SELECT id, "deviceId", "ingestTime",
+    "phUp", "phDown", "nutrientAdd", "valueS",
+    "manual", "auto", "refill"
+    FROM actuator_event
+    WHERE "deviceId" = %s
+    ORDER BY "ingestTime" DESC
+    LIMIT %s;
+""", (deviceId, limit))
 
         rows = cur.fetchall()
         return [
-            {
-                "id": r[0],
-                "deviceId": r[1],
-                "ingestTime": r[2],
-                "phUp": r[3],
-                "phDown": r[4],
-                "nutrientAdd": r[5],
-                "valueS": r[6]
-            }
-            for r in rows
-        ]
+    {
+        "id": r[0],
+        "deviceId": r[1],
+        "ingestTime": r[2],
+        "phUp": r[3],
+        "phDown": r[4],
+        "nutrientAdd": r[5],
+        "valueS": r[6],
+        "manual": r[7],
+        "auto": r[8],
+        "refill": r[9]
+    }
+    for r in rows
+    ]
 
     except Exception as e:
         raise HTTPException(500, str(e))
@@ -208,25 +224,31 @@ def get_all_events(deviceId: str):
 
     try:
         cur.execute("""
-            SELECT id, "deviceId", "ingestTime", "phUp", "phDown", "nutrientAdd", "valueS"
-            FROM actuator_event
-            WHERE "deviceId" = %s
-            ORDER BY "ingestTime" DESC;
-        """, (deviceId,))
+    SELECT id, "deviceId", "ingestTime",
+    "phUp", "phDown", "nutrientAdd", "valueS",
+    "manual", "auto", "refill"
+    FROM actuator_event
+    WHERE "deviceId" = %s
+    ORDER BY "ingestTime" DESC
+    LIMIT %s;
+""", (deviceId,))
 
         rows = cur.fetchall()
         return [
-            {
-                "id": r[0],
-                "deviceId": r[1],
-                "ingestTime": r[2],
-                "phUp": r[3],
-                "phDown": r[4],
-                "nutrientAdd": r[5],
-                "valueS": r[6]
-            }
-            for r in rows
-        ]
+    {
+        "id": r[0],
+        "deviceId": r[1],
+        "ingestTime": r[2],
+        "phUp": r[3],
+        "phDown": r[4],
+        "nutrientAdd": r[5],
+        "valueS": r[6],
+        "manual": r[7],
+        "auto": r[8],
+        "refill": r[9]
+    }
+    for r in rows
+    ]
 
     except Exception as e:
         raise HTTPException(500, str(e))

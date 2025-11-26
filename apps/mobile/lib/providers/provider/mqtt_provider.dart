@@ -81,9 +81,10 @@ class MqttVM extends ChangeNotifier {
       return;
     }
 
-    final topic = "actuator/$_currentKitId/$command";
-
-    await _svc.publishControl(topic, {"cmd": command, "args": args ?? {}});
+    await _svc.publishControl(
+      command, // <-- ini CMD
+      args ?? {},
+    );
   }
 
   Future<void> phUp() => publishActuator("ph_up");

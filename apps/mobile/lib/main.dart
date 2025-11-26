@@ -36,12 +36,6 @@ Future<void> main() async {
                 'http://10.0.2.2:8000', // default emulator
           ),
         ),
-        // Override telemetry ApiService
-        apiServiceProvider.overrideWithValue(
-          ApiService(
-            baseUrl: dotenv.env['API_BASE_URL'] ?? 'http://10.0.2.2:8000',
-          ),
-        ),
       ],
       child: const FountaineApp(),
     ),

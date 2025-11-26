@@ -81,13 +81,20 @@ class MonitorNotifier extends StateNotifier<MonitorState> {
   Future<void> _actuatorEvent({required String field}) async {
     final api = ref.read(apiServiceProvider);
 
-    await api.postJson("/actuator/event", {
-      "deviceId": kitId,
-      "ingestTime": DateTime.now().millisecondsSinceEpoch,
-      field: 1,
-    });
+    final body = {
+      "phUp": 0,
+      "phDown": 0,
+      "nutrientAdd": 0,
+      "valueS": 0,
+      "manual": 0,
+      "auto": 0,
+      "refill": 0,
+    };
 
-    // publish MQTT
+    body[field] = 1;
+
+    await api.postJson("/actuator/event?deviceId=$kitId", body);
+
     ref.read(mqttProvider.notifier).publishActuator(field);
   }
 
@@ -95,8 +102,6 @@ class MonitorNotifier extends StateNotifier<MonitorState> {
   Future<void> phDown() => _actuatorEvent(field: "phDown");
   Future<void> nutrientAdd() => _actuatorEvent(field: "nutrientAdd");
   Future<void> refill() => _actuatorEvent(field: "refill");
-
-  /// Auto / Manual Mode
   Future<void> setManual() => _actuatorEvent(field: "manual");
   Future<void> setAuto() => _actuatorEvent(field: "auto");
 

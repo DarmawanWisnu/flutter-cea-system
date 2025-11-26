@@ -11,7 +11,7 @@ signal.signal(signal.SIGTERM, handle_signal)
 
 BROKER = "localhost"
 PORT = 1883
-KIT_ID = os.getenv("KIT_ID", "devkit-01")
+KIT_ID = os.getenv("KIT_ID", "CEA-01")
 TOPIC = f"kit/{KIT_ID}/telemetry"
 CSV_PATH = os.path.join(os.path.dirname(__file__), "data.csv")
 QOS = 1
