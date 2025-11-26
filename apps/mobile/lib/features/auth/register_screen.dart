@@ -1,13 +1,5 @@
-// lib/screens/auth/register_screen.dart
-// Register Screen gabungan: UI fancy + validator + Riverpod AuthNotifier.
-// - Field: name, email, password, location (sesuai desainmu)
-// - Logic: ref.read(authProvider.notifier).register(email, password)
-// - Setelah sukses: push ke VerifyScreen
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-// Sesuaikan path dengan project-mu
 import 'package:fountaine/app/routes.dart';
 import 'package:fountaine/utils/validators.dart';
 import 'package:fountaine/providers/provider/auth_provider.dart';
@@ -26,7 +18,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   final _formKey = GlobalKey<FormState>();
   bool _loading = false;
-  bool _obscure = true; // toggle lihat/tutup password
+  bool _obscure = true;
 
   static const Color _bgColor = Color(0xFFF6FBF6);
   static const Color _primaryColor = Color(0xFF154B2E);

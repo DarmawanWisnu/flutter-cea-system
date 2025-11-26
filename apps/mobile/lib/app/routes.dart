@@ -39,7 +39,7 @@ class AuthGate extends ConsumerWidget {
 }
 
 /// ============================
-///   ROUTE DEFINITIONS
+///       ROUTE DEFINITIONS
 /// ============================
 class Routes {
   static const splash = '/';
@@ -55,7 +55,6 @@ class Routes {
   static const profile = '/profile';
   static const notifications = '/notifications';
 
-  /// ONLY static pages (no arguments)
   static final routes = <String, WidgetBuilder>{
     splash: (_) => const AuthGate(),
     login: (_) => const LoginScreen(),
@@ -70,31 +69,31 @@ class Routes {
   };
 }
 
-/// ============================
-///   ON GENERATE ROUTE
-///   (dynamic arguments only)
-/// ============================
+/// ON GENERATE ROUTE=
 Route<dynamic>? onGenerateRoute(RouteSettings settings) {
   switch (settings.name) {
+    // MONITOR SCREEN
     case Routes.monitor:
       final args = settings.arguments as Map?;
-      final kitId = (args?['kitId'] as String?) ?? 'devkit-01';
+      final kitId = args?['kitId'] as String?;
 
       return MaterialPageRoute(
-        builder: (_) => MonitorScreen(kitId: kitId),
+        builder: (_) => MonitorScreen(selectedKit: kitId),
         settings: settings,
       );
 
+    // HISTORY SCREEN
     case Routes.history:
       final args = settings.arguments as Map?;
-      final kitId = (args?['kitId'] as String?) ?? 'devkit-01';
-      final target = args?['targetTime'] as DateTime?;
+      final kitId = args?['kitId'] as String? ?? 'unknown-kit';
+      final targetTime = args?['targetTime'] as DateTime?;
 
       return MaterialPageRoute(
-        builder: (_) => HistoryScreen(kitId: kitId, targetTime: target),
+        builder: (_) => HistoryScreen(kitId: kitId, targetTime: targetTime),
         settings: settings,
       );
 
+    // DEFAULT ROUTING
     default:
       final builder = Routes.routes[settings.name];
       if (builder != null) {

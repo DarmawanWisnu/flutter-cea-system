@@ -9,6 +9,10 @@ import 'package:fountaine/app/routes.dart';
 import 'package:fountaine/providers/provider/api_provider.dart';
 import 'package:fountaine/services/api_service.dart';
 
+class NavKey {
+  static final navKey = GlobalKey<NavigatorState>();
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -50,7 +54,8 @@ class FountaineApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Fountaine',
+      navigatorKey: NavKey.navKey,
+      title: 'Flutter-CEA-System',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(

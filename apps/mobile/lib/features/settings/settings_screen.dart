@@ -25,6 +25,7 @@ class SettingsScreen extends ConsumerWidget {
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
+
               try {
                 await ref.read(authProvider.notifier).signOut();
               } catch (_) {}
@@ -226,7 +227,7 @@ class SettingsScreen extends ConsumerWidget {
 
               SizedBox(height: 24 * s),
 
-              // Account Settings
+              // Account
               Text(
                 'Account Setting',
                 style: TextStyle(
@@ -263,7 +264,7 @@ class SettingsScreen extends ConsumerWidget {
 
               SizedBox(height: 24 * s),
 
-              // Legal Section
+              // Legal
               Text(
                 'Legal',
                 style: TextStyle(
@@ -304,7 +305,7 @@ class SettingsScreen extends ConsumerWidget {
 
               const Spacer(),
 
-              // Logout Button
+              // Logout
               Center(
                 child: OutlinedButton(
                   onPressed: () => _confirmLogout(context, ref),

@@ -1,10 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'package:fountaine/app/routes.dart';
 import 'package:fountaine/providers/provider/auth_provider.dart';
-import 'package:fountaine/providers/provider/kit_provider.dart';
+import 'package:fountaine/providers/provider/api_provider.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -16,49 +15,34 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authProvider);
-    final kits = ref.watch(kitListProvider);
 
-    // --- Mapping field Firebase User ---
+    // FETCH kits dari backend
+    final kitsAsync = ref.watch(apiKitsProvider).getKits().asStream();
+    // Pakai StreamProvider agar async tetap dalam ConsumerWidget
+    final kitsdata = ref.watch(StreamProvider((ref) => kitsAsync));
+
     final email = user?.email ?? '-';
     final uid = user?.uid ?? '-';
+
     final inferredName =
         (user?.displayName != null && user!.displayName!.trim().isNotEmpty)
         ? user.displayName!.trim()
         : (email != '-' ? email.split('@').first : 'Profile');
-    final name = inferredName;
 
-    // --- Ambil kit info ---
-    final kitName = kits.isNotEmpty ? kits.first.name : 'Your Kit Name';
-    final kitId = kits.isNotEmpty ? kits.first.id : 'SUF-XXXX-XXXX';
+    final name = inferredName;
 
     final s = MediaQuery.of(context).size.width / 375.0;
 
-    Future<void> seedDummy() async {
-      if (!kDebugMode) return;
-      try {
-        if (kits.isEmpty) {
-          await ref
-              .read(kitListProvider.notifier)
-              .addKit(
-                Kit(
-                  id: 'SUF-UINJKT-HM-F2000',
-                  name: 'Hydroponic Monitoring System',
-                ),
-              );
-        }
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Dummy kit ditambahkan ✅')),
-          );
-        }
-      } catch (e) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Seed failed: $e')));
-        }
+    // KIT dari backend
+    String kitName = 'Your Kit Name';
+    String kitId = 'SUF-XXXX-XXXX';
+
+    kitsdata.whenData((data) {
+      if (data.isNotEmpty) {
+        kitName = data.first.name;
+        kitId = data.first.id;
       }
-    }
+    });
 
     return Scaffold(
       backgroundColor: _bg,
@@ -68,7 +52,7 @@ class ProfileScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ===== Header =====
+              // HEADER
               Row(
                 children: [
                   _pillIconButton(
@@ -94,11 +78,10 @@ class ProfileScreen extends ConsumerWidget {
 
               SizedBox(height: 24 * s),
 
-              // ===== Avatar + name =====
+              // AVATAR + NAME
               Center(
                 child: Column(
                   children: [
-                    // ring avatar modern
                     Container(
                       padding: EdgeInsets.all(3 * s),
                       decoration: BoxDecoration(
@@ -158,12 +141,12 @@ class ProfileScreen extends ConsumerWidget {
 
               SizedBox(height: 22 * s),
 
-              // ===== Quick kit badge =====
+              // KIT BADGE
               _kitBadge(kitName, s),
 
               SizedBox(height: 14 * s),
 
-              // ===== Info Card =====
+              // INFO CARD
               Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
@@ -213,7 +196,7 @@ class ProfileScreen extends ConsumerWidget {
 
               SizedBox(height: 24 * s),
 
-              // ===== Actions =====
+              // EDIT & LOGOUT
               _primaryButton(
                 s: s,
                 label: 'Edit Profile',
@@ -236,18 +219,6 @@ class ProfileScreen extends ConsumerWidget {
               ),
 
               const SizedBox(height: 10),
-
-              if (kDebugMode)
-                Center(
-                  child: TextButton(
-                    onPressed: seedDummy,
-                    child: const Text(
-                      'Seed dummy kit (debug)',
-                      style: TextStyle(decoration: TextDecoration.underline),
-                    ),
-                  ),
-                ),
-              SizedBox(height: 8 * s),
             ],
           ),
         ),
@@ -255,7 +226,7 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  // ---------- widgets kecil ----------
+  // SMALL WIDGETS
 
   Widget _divider(double s) => Padding(
     padding: EdgeInsets.symmetric(horizontal: 16 * s),
@@ -391,7 +362,6 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  // Edit Profile & Logout buttons
   Widget _primaryButton({
     required double s,
     required String label,

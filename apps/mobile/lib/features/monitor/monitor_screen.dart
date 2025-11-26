@@ -4,7 +4,6 @@ import 'package:fountaine/providers/provider/monitor_provider.dart';
 import 'package:fountaine/providers/provider/api_provider.dart';
 import '../../domain/telemetry.dart';
 
-// Provider fetch kit list dari backend
 final kitsProvider = FutureProvider.autoDispose((ref) async {
   final api = ref.watch(apiServiceProvider);
   final result = await api.getJson("/kits");
@@ -32,10 +31,26 @@ class MonitorScreen extends ConsumerStatefulWidget {
 
 class _MonitorScreenState extends ConsumerState<MonitorScreen> {
   late String kitId;
+  bool isAuto = false;
 
   @override
   void initState() {
     super.initState();
+
+    Future.microtask(() async {
+      final kits = await ref.read(apiKitsListProvider.future);
+
+      if (kits.isEmpty) {
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, "/addkit");
+        }
+        return;
+      }
+
+      kitId = widget.selectedKit ?? kits.first["id"];
+      setState(() {});
+    });
+
     kitId = widget.selectedKit ?? "devkit-01";
   }
 
@@ -65,9 +80,8 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
           return (v / 100).clamp(0, 1);
         case 'temperature':
           return ((v + 10) / 60).clamp(0, 1);
-        default:
-          return 0;
       }
+      return 0;
     }
 
     String format(DateTime? dt) {
@@ -210,7 +224,7 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
 
               SizedBox(height: 20 * s),
 
-              _modeSection(context, ref, kitId, s),
+              _modeSection(context, s),
             ],
           ),
         ),
@@ -218,8 +232,7 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
     );
   }
 
-  // ========================= UI COMPONENTS =========================
-
+  // KIT SELECTOR
   Widget _kitSelector(double s) {
     return Consumer(
       builder: (context, ref, _) {
@@ -229,9 +242,7 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => Text("Failed load kits: $e"),
           data: (kits) {
-            if (kits.isEmpty) {
-              return const Text("No kits registered.");
-            }
+            if (kits.isEmpty) return const Text("No kits registered.");
 
             return Container(
               padding: EdgeInsets.symmetric(horizontal: 12 * s),
@@ -250,7 +261,9 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
                     .toList(),
                 onChanged: (v) {
                   if (v != null) {
-                    setState(() => kitId = v);
+                    setState(() {
+                      kitId = v;
+                    });
                   }
                 },
               ),
@@ -261,6 +274,7 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
     );
   }
 
+  // GAUGE BOX
   Widget _gaugeBox(
     double s,
     String label,
@@ -332,13 +346,11 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
     );
   }
 
-  Widget _modeSection(
-    BuildContext context,
-    WidgetRef ref,
-    String kitId,
-    double s,
-  ) {
-    // BALIKKAN MODE UI LO YANG LAMA DI SINI
+  // MODE & CONTROL
+  Widget _modeSection(BuildContext context, double s) {
+    const primary = Color(0xFF154B2E);
+    const muted = Color(0xFF7A7A7A);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -347,19 +359,141 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
           style: TextStyle(
             fontSize: 18 * s,
             fontWeight: FontWeight.w800,
-            color: const Color(0xFF154B2E),
+            color: primary,
           ),
         ),
 
-        SizedBox(height: 12 * s),
+        SizedBox(height: 14 * s),
 
-        // TODO: tempel block kontrol lama lo di sini
-        // toggle - pump - timer
+        Row(
+          children: [
+            Expanded(
+              child: GestureDetector(
+                onTap: () => setState(() => isAuto = true),
+                child: Container(
+                  padding: EdgeInsets.symmetric(vertical: 14 * s),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14 * s),
+                    border: Border.all(
+                      color: isAuto ? primary : Colors.grey.shade300,
+                      width: isAuto ? 2 : 1,
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      "AUTO",
+                      style: TextStyle(
+                        fontSize: 15 * s,
+                        fontWeight: FontWeight.w700,
+                        color: isAuto ? primary : muted,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            SizedBox(width: 12 * s),
+
+            Expanded(
+              child: GestureDetector(
+                onTap: () => setState(() => isAuto = false),
+                child: Container(
+                  padding: EdgeInsets.symmetric(vertical: 14 * s),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14 * s),
+                    border: Border.all(
+                      color: !isAuto ? primary : Colors.grey.shade300,
+                      width: !isAuto ? 2 : 1,
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      "MANUAL",
+                      style: TextStyle(
+                        fontSize: 15 * s,
+                        fontWeight: FontWeight.w700,
+                        color: !isAuto ? primary : muted,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+
+        SizedBox(height: 18 * s),
+
+        if (!isAuto)
+          Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(child: _manualBtn(s, "PH UP")),
+                  SizedBox(width: 12 * s),
+                  Expanded(child: _manualBtn(s, "PH DOWN")),
+                ],
+              ),
+              SizedBox(height: 12 * s),
+              Row(
+                children: [
+                  Expanded(child: _manualBtn(s, "NUTRIENT")),
+                  SizedBox(width: 12 * s),
+                  Expanded(child: _manualBtn(s, "REFILL")),
+                ],
+              ),
+              SizedBox(height: 22 * s),
+            ],
+          ),
+
+        Container(
+          alignment: Alignment.center,
+          padding: EdgeInsets.symmetric(vertical: 16 * s),
+          child: Text(
+            "SOON",
+            style: TextStyle(
+              fontSize: 18 * s,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey.shade500,
+            ),
+          ),
+        ),
       ],
+    );
+  }
+
+  Widget _manualBtn(double s, String label) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 16 * s),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16 * s),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8 * s,
+            offset: Offset(0, 4 * s),
+          ),
+        ],
+      ),
+      child: Center(
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 15 * s,
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF154B2E),
+          ),
+        ),
+      ),
     );
   }
 }
 
+// GAUGE ARC
 class _ArcPainter extends CustomPainter {
   final Color color;
   final double fraction;
