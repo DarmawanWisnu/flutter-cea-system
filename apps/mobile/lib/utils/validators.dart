@@ -1,27 +1,27 @@
 class Validators {
   static String? email(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Email tidak boleh kosong';
+      return 'Email cannot be empty';
     }
 
     final re = RegExp(r"^[\w\.-]+@[\w\.-]+\.\w+$");
     if (!re.hasMatch(value)) {
-      return 'Format email tidak valid';
+      return 'Invalid email format';
     }
 
-    return null; // ✅ valid
+    return null;
   }
 
   static String? password(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Password tidak boleh kosong';
+      return 'Password cannot be empty';
     }
 
     if (value.length < 8) {
-      return 'Password minimal 8 karakter';
+      return 'Password must be at least 8 characters long';
     }
 
-    return null; // ✅ valid
+    return null;
   }
 }
 
