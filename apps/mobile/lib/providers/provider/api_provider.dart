@@ -1,7 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:fountaine/domain/telemetry.dart';
 import 'package:fountaine/services/api_service.dart';
-import 'package:fountaine/services/api_telemetry_service.dart';
+import 'package:fountaine/models/kit.dart';
 
 /// BASE URL BACKEND
 final apiBaseUrlProvider = Provider.autoDispose<String>((ref) {
@@ -15,7 +16,68 @@ final apiServiceProvider = Provider.autoDispose<ApiService>((ref) {
 });
 
 /// TELEMETRY API SERVICE
-final apiTelemetryProvider = Provider.autoDispose<ApiTelemetryService>((ref) {
-  final api = ref.watch(apiServiceProvider);
-  return ApiTelemetryService(api: api);
+final apiTelemetryProvider = Provider.autoDispose<ApiService>((ref) {
+  return ref.watch(apiServiceProvider);
+});
+
+/// GET LATEST
+final latestTelemetryProvider = FutureProvider.autoDispose
+    .family<Telemetry?, String>((ref, kitId) async {
+      final api = ref.watch(apiTelemetryProvider);
+      return api.getLatestTelemetry(kitId);
+    });
+
+/// GET HISTORY
+final telemetryHistoryProvider = FutureProvider.autoDispose
+    .family<List<Telemetry>, TelemetryHistoryRequest>((ref, req) async {
+      final api = ref.watch(apiTelemetryProvider);
+      return api.getTelemetryHistory(req.kitId, limit: req.limit);
+    });
+
+/// REQUEST MODEL
+class TelemetryHistoryRequest {
+  final String kitId;
+  final int limit;
+
+  const TelemetryHistoryRequest({required this.kitId, this.limit = 50});
+}
+
+/// KITS API SERVICE
+final apiKitsProvider = Provider<ApiKitsService>((ref) {
+  final api = ref.read(apiServiceProvider);
+  return ApiKitsService(api);
+});
+
+class ApiKitsService {
+  final ApiService _api;
+
+  ApiKitsService(this._api);
+
+  /// GET all kits (returns List<Kit>)
+  Future<List<Kit>> getKits() async {
+    final res = await _api.getJson("/kits");
+    final list = (res as List).cast<Map<String, dynamic>>();
+
+    return list.map((e) => Kit.fromJson(e)).toList();
+  }
+
+  /// ADD KIT
+  Future<void> addKit({required String id, required String name}) async {
+    await _api.postJson("/kits", {"id": id, "name": name});
+  }
+
+  /// DELETE KIT
+  Future<void> deleteKit(String id) async {
+    await _api.deleteJson("/kits/$id");
+  }
+}
+
+/// RAW KIT LIST
+final apiKitsListProvider = FutureProvider<List<Map<String, dynamic>>>((
+  ref,
+) async {
+  final api = ref.read(apiServiceProvider);
+  final res = await api.getJson("/kits");
+
+  return (res as List).cast<Map<String, dynamic>>();
 });

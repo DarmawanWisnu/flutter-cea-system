@@ -55,7 +55,7 @@ def run_migrations():
     conn = get_connection()
     cur = conn.cursor()
 
-    # KITS TABLE (camelCase)
+    # KITS TABLE
     cur.execute("""
         CREATE TABLE IF NOT EXISTS kits (
             id TEXT PRIMARY KEY,
@@ -64,7 +64,7 @@ def run_migrations():
         );
     """)
 
-    # TELEMETRY TABLE (full camelCase)
+    # TELEMETRY TABLE
     cur.execute("""
         CREATE TABLE IF NOT EXISTS telemetry (
             "rowId" TEXT PRIMARY KEY,
@@ -81,7 +81,7 @@ def run_migrations():
         );
     """)
 
-    # ACTUATOR TABLE (already camelCase)
+    # ACTUATOR TABLE
     cur.execute("""
         CREATE TABLE IF NOT EXISTS actuator_event (
             id SERIAL PRIMARY KEY,

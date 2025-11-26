@@ -23,9 +23,7 @@ class MqttService {
   Timer? _reconnectTimer;
   String? _kitId;
 
-  // -------------------------------
   // CONNECT
-  // -------------------------------
   Future<void> connect({required String kitId}) async {
     _kitId = kitId;
     _connStateCtrl.add(MqttConnState.connecting);
@@ -117,9 +115,7 @@ class MqttService {
     }
   }
 
-  // -------------------------------
   // CONTROL (ACTUATOR PUBLISH)
-  // -------------------------------
   Future<void> publishControl(String cmd, Map<String, dynamic> data) async {
     final cli = _client;
     final kitId = _kitId;
@@ -145,9 +141,7 @@ class MqttService {
     );
   }
 
-  // -------------------------------
   // INTERNAL PUBLISH
-  // -------------------------------
   void _publish(String topic, Map<String, dynamic> obj, {bool retain = false}) {
     final cli = _client;
     if (cli == null) return;
@@ -162,9 +156,7 @@ class MqttService {
     );
   }
 
-  // -------------------------------
   // RECONNECT HANDLER
-  // -------------------------------
   void _scheduleReconnect() {
     _reconnectTimer?.cancel();
     if (_kitId == null) return;
@@ -180,18 +172,14 @@ class MqttService {
     _scheduleReconnect();
   }
 
-  // -------------------------------
   // DISCONNECT CLEAN
-  // -------------------------------
   Future<void> disconnect() async {
     _reconnectTimer?.cancel();
     _client?.disconnect();
     _connStateCtrl.add(MqttConnState.disconnected);
   }
 
-  // -------------------------------
   // DISPOSE INTERNAL
-  // -------------------------------
   Future<void> dispose() async {
     await disconnect();
     await _telemetryCtrl.close();

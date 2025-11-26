@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'package:fountaine/app/routes.dart';
 import 'package:fountaine/providers/provider/api_provider.dart';
 
@@ -28,9 +27,7 @@ class _AddKitScreenState extends ConsumerState<AddKitScreen> {
     super.dispose();
   }
 
-  // ============================================
-  //                  SAVE KIT
-  // ============================================
+  // SAVE KIT
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -40,13 +37,8 @@ class _AddKitScreenState extends ConsumerState<AddKitScreen> {
     setState(() => _loading = true);
 
     try {
-      // ===============================
-      //   POST KE BACKEND /kits
-      // ===============================
-      await ref.read(apiServiceProvider).postJson("/kits", {
-        "id": id,
-        "name": name,
-      });
+      // POST
+      await ref.read(apiKitsProvider).addKit(id: id, name: name);
 
       if (!mounted) return;
 
@@ -149,7 +141,7 @@ class _AddKitScreenState extends ConsumerState<AddKitScreen> {
 
                 SizedBox(height: 36 * s),
 
-                // Input field reusable
+                // Input
                 _modernField(
                   s: s,
                   label: "Kit Name",
@@ -191,9 +183,7 @@ class _AddKitScreenState extends ConsumerState<AddKitScreen> {
     );
   }
 
-  // ==================================================
-  //                    WIDGETS
-  // ==================================================
+  // WIDGETS
   Widget _modernField({
     required double s,
     required String label,

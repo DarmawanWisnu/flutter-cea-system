@@ -5,9 +5,7 @@ import time
 
 router = APIRouter()
 
-# -----------------------
-# MIGRATION (optional helper)
-# -----------------------
+# MIGRATION
 def run_actuator_migration():
     """
     Optional: run this if you prefer to migrate from actuator module.
@@ -36,10 +34,7 @@ def run_actuator_migration():
         cur.close()
         release_connection(conn)
 
-
-# -----------------------
 # HELPERS
-# -----------------------
 def is_valid_device(device_id: str):
     conn = get_connection()
     cur = conn.cursor()
@@ -51,15 +46,12 @@ def is_valid_device(device_id: str):
         cur.close()
         release_connection(conn)
 
-
-# -----------------------
-# PAYLOAD MODEL (camelCase)
-# -----------------------
+# PAYLOAD MODEL
 class ActuatorEvent(BaseModel):
-    phUp: int = Field(0, ge=0)          # 0 or 1 (or count)
+    phUp: int = Field(0, ge=0)          # 0 or 1
     phDown: int = Field(0, ge=0)
     nutrientAdd: int = Field(0, ge=0)
-    valueS: float = Field(0.0, ge=0.0)  # seconds / ml / as you define
+    valueS: float = Field(0.0, ge=0.0)  # seconds / ml
 
     class Config:
         schema_extra = {
@@ -71,10 +63,7 @@ class ActuatorEvent(BaseModel):
             }
         }
 
-
-# -----------------------
-# INSERT ACTUATOR EVENT (one row with many columns)
-# -----------------------
+# INSERT ACTUATOR EVENT
 @router.post("/event")
 def insert_event(deviceId: str, data: ActuatorEvent):
     """
@@ -122,10 +111,7 @@ def insert_event(deviceId: str, data: ActuatorEvent):
         cur.close()
         release_connection(conn)
 
-
-# -----------------------
-# GET LATEST ACTUATOR EVENT (single row)
-# -----------------------
+# GET LATEST ACTUATOR EVENT
 @router.get("/latest")
 def get_latest_event(deviceId: str):
     deviceId = deviceId.strip()
@@ -166,10 +152,7 @@ def get_latest_event(deviceId: str):
         cur.close()
         release_connection(conn)
 
-
-# -----------------------
-# GET HISTORY (limited)
-# -----------------------
+# GET HISTORY-
 @router.get("/history")
 def get_event_history(deviceId: str, limit: int = 50):
     deviceId = deviceId.strip()
@@ -212,10 +195,7 @@ def get_event_history(deviceId: str, limit: int = 50):
         cur.close()
         release_connection(conn)
 
-
-# -----------------------
-# GET ALL (full log)
-# -----------------------
+# GET ALL
 @router.get("/all")
 def get_all_events(deviceId: str):
     deviceId = deviceId.strip()

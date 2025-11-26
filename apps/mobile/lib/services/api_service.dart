@@ -1,13 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:fountaine/domain/telemetry.dart';
 
-/// ApiService versi lengkap dan aman.
-/// Mendukung dynamic JSON (Map / List),
-/// timeout, retry, logging, dan header custom.
 class ApiService {
   final String baseUrl;
   final Duration timeout;
@@ -17,9 +14,7 @@ class ApiService {
     this.timeout = const Duration(seconds: 10),
   });
 
-  /// ===========================
-  ///   BASIC REQUEST HANDLER
-  /// ===========================
+  // BASIC REQUEST
   Future<dynamic> _request(
     String path, {
     String method = 'GET',
@@ -29,7 +24,6 @@ class ApiService {
   }) async {
     final url = Uri.parse('$baseUrl$path');
 
-    // Default headers
     final finalHeaders = {'Content-Type': 'application/json', ...?headers};
 
     http.Response res;
@@ -47,42 +41,33 @@ class ApiService {
                 .post(url, headers: finalHeaders, body: jsonEncode(body))
                 .timeout(timeout);
             break;
-
           case 'PUT':
             res = await http
                 .put(url, headers: finalHeaders, body: jsonEncode(body))
                 .timeout(timeout);
             break;
-
           case 'DELETE':
             res = await http
                 .delete(url, headers: finalHeaders)
                 .timeout(timeout);
             break;
-
           default:
             res = await http.get(url, headers: finalHeaders).timeout(timeout);
         }
 
-        // Success Response
         if (res.statusCode >= 200 && res.statusCode < 300) {
-          final decoded = jsonDecode(res.body);
-          return decoded; // Bisa Map ATAU List
+          return jsonDecode(res.body);
         }
 
-        // Server Error Response
         throw HttpException('HTTP ${res.statusCode}: ${res.body}', uri: url);
-      }
-      // Timeout
-      catch (e) {
+      } catch (e) {
         if (e is SocketException || e is TimeoutException) {
           if (attempt == retry) {
             throw Exception('Request timeout: $method $path');
           }
-          continue; // Retry
+          continue;
         }
 
-        // Unexpected error
         debugPrint('API ERROR ($method $path): $e');
         rethrow;
       }
@@ -91,22 +76,59 @@ class ApiService {
     throw Exception('Unknown API error at $method $path');
   }
 
-  /// ===========================
-  ///   PUBLIC METHODS
-  /// ===========================
-  Future<dynamic> getJson(String path) async {
-    return _request(path, method: 'GET');
+  // PUBLIC JSON CALLS
+  Future<dynamic> getJson(String path) => _request(path, method: 'GET');
+
+  Future<dynamic> postJson(String path, Map<String, dynamic> data) =>
+      _request(path, method: 'POST', body: data);
+
+  Future<dynamic> putJson(String path, Map<String, dynamic> data) =>
+      _request(path, method: 'PUT', body: data);
+
+  Future<dynamic> deleteJson(String path) => _request(path, method: 'DELETE');
+
+  // TELEMETRY API
+
+  /// GET LATEST TELEMETRY
+  Future<Telemetry?> getLatestTelemetry(String deviceId) async {
+    try {
+      final res = await getJson('/telemetry/latest?deviceId=$deviceId');
+
+      if (res['data'] != null) {
+        final map = res['data'] as Map<String, dynamic>;
+        return Telemetry.fromJson({...map, "ingestTime": res["ingestTime"]});
+      }
+      return null;
+    } catch (e, s) {
+      debugPrint('getLatestTelemetry error: $e\n$s');
+      return null;
+    }
   }
 
-  Future<dynamic> postJson(String path, Map<String, dynamic> data) async {
-    return _request(path, method: 'POST', body: data);
-  }
+  /// GET TELEMETRY HISTORY
+  Future<List<Telemetry>> getTelemetryHistory(
+    String deviceId, {
+    int limit = 50,
+  }) async {
+    try {
+      final res = await getJson(
+        '/telemetry/history?deviceId=$deviceId&limit=$limit',
+      );
 
-  Future<dynamic> putJson(String path, Map<String, dynamic> data) async {
-    return _request(path, method: 'PUT', body: data);
-  }
+      if (res['items'] is! List) return [];
 
-  Future<dynamic> deleteJson(String path) async {
-    return _request(path, method: 'DELETE');
+      final arr = res['items'] as List;
+
+      return arr.map((item) {
+        final map = item as Map<String, dynamic>;
+        return Telemetry.fromJson({
+          ...map['data'],
+          "ingestTime": map["ingestTime"],
+        });
+      }).toList();
+    } catch (e, s) {
+      debugPrint('getTelemetryHistory error: $e\n$s');
+      return [];
+    }
   }
 }

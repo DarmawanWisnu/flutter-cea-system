@@ -8,7 +8,6 @@ import 'package:fountaine/firebase_options.dart';
 import 'package:fountaine/app/routes.dart';
 import 'package:fountaine/providers/provider/api_provider.dart';
 import 'package:fountaine/services/api_service.dart';
-import 'package:fountaine/services/api_telemetry_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,15 +32,10 @@ Future<void> main() async {
                 'http://10.0.2.2:8000', // default emulator
           ),
         ),
-
-        // Override ApiTelemetryService
-        apiTelemetryProvider.overrideWithValue(
-          ApiTelemetryService(
-            api: ApiService(
-              baseUrl:
-                  dotenv.env['API_BASE_URL'] ??
-                  'http://10.0.2.2:8000', // harus sama
-            ),
+        // Override telemetry ApiService
+        apiServiceProvider.overrideWithValue(
+          ApiService(
+            baseUrl: dotenv.env['API_BASE_URL'] ?? 'http://10.0.2.2:8000',
           ),
         ),
       ],

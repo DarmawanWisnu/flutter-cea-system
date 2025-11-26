@@ -8,7 +8,7 @@ final firebaseAuthProvider = Provider<FirebaseAuth>((ref) {
   return FirebaseAuth.instance;
 });
 
-// Service pembungkus FirebaseAuth
+// Service FirebaseAuth
 final authServiceProvider = Provider<AuthService>((ref) {
   final auth = ref.read(firebaseAuthProvider);
   return AuthService(auth);
@@ -20,22 +20,20 @@ final authStateProvider = StreamProvider<User?>((ref) {
   return service.authStateChanges();
 });
 
-// -------------------- StateNotifier --------------------
+// StateNotifier
 
 class AuthNotifier extends StateNotifier<User?> {
   final AuthService _service;
   late final Stream<User?> _sub;
 
   AuthNotifier(this._service) : super(_service.currentUser) {
-    // Sinkronkan state dengan authStateChanges supaya real-time
     _sub = _service.authStateChanges();
-    // ignore: cancel_subscriptions
     _sub.listen((u) => state = u);
   }
 
   Future<void> signIn({required String email, required String password}) async {
     await _service.signInWithEmailPassword(email, password);
-    state = _service.currentUser; // update state setelah login
+    state = _service.currentUser;
   }
 
   Future<void> register({

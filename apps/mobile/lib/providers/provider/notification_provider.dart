@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:fountaine/providers/provider/api_kits_provider.dart';
 import 'package:fountaine/core/constants.dart';
+import 'package:fountaine/providers/provider/api_provider.dart';
 
 String _norm(String? s) => (s ?? '').trim().toLowerCase();
 
@@ -38,19 +38,22 @@ class NotificationItem {
 
 class NotificationListNotifier extends StateNotifier<List<NotificationItem>> {
   NotificationListNotifier(this.ref) : super([]) {
-    _kitsSub = ref.listen(apiKitsProvider, (prev, next) {
+    // listen perubahan kit list
+    _kitsSub = ref.listen(apiKitsListProvider, (prev, next) {
       next.whenData((kits) => _evaluateAll(kits));
     });
 
-    Future.microtask(() async {
-      final kits = ref.read(apiKitsProvider).value ?? [];
+    // evaluasi awal setelah app load
+    Future.microtask(() {
+      final kits = ref.read(apiKitsListProvider).value ?? [];
       if (!_hasAnyViolationNow(kits)) {
         _emitSafeInfo();
       }
     });
 
+    // periodic safety check
     _safeTimer = Timer.periodic(const Duration(minutes: 1), (_) {
-      final kits = ref.read(apiKitsProvider).value ?? [];
+      final kits = ref.read(apiKitsListProvider).value ?? [];
       final now = DateTime.now();
       final last1m = now.subtract(const Duration(minutes: 1));
 
@@ -80,9 +83,9 @@ class NotificationListNotifier extends StateNotifier<List<NotificationItem>> {
   static const double _tMin = ThresholdConst.tempMin;
   static const double _tMax = ThresholdConst.tempMax;
 
-  // Helpers
+  // helpers
   Map<String, dynamic>? _telemetryOf(Map<String, dynamic> kit) {
-    final t = kit['telemetry'];
+    final t = kit["telemetry"];
     if (t is Map<String, dynamic>) return t;
     return null;
   }
@@ -94,6 +97,7 @@ class NotificationListNotifier extends StateNotifier<List<NotificationItem>> {
     return null;
   }
 
+  // cek apakah ada pelanggaran threshold
   bool _hasAnyViolationNow(List<Map<String, dynamic>> kits) {
     for (final kit in kits) {
       final t = _telemetryOf(kit);
@@ -112,6 +116,7 @@ class NotificationListNotifier extends StateNotifier<List<NotificationItem>> {
     return false;
   }
 
+  // evaluate semua kit
   void _evaluateAll(List<Map<String, dynamic>> kits) {
     for (final kit in kits) {
       _checkThreshold(kit);
@@ -200,8 +205,9 @@ class NotificationListNotifier extends StateNotifier<List<NotificationItem>> {
       ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
     if (lastInfo.isNotEmpty &&
-        now.difference(lastInfo.first.timestamp).inSeconds < 30)
+        now.difference(lastInfo.first.timestamp).inSeconds < 30) {
       return;
+    }
 
     final n = NotificationItem(
       id: 'safe_${now.millisecondsSinceEpoch}',
@@ -245,6 +251,7 @@ class NotificationListNotifier extends StateNotifier<List<NotificationItem>> {
   }
 }
 
+// PROVIDERS
 final notificationListProvider =
     StateNotifierProvider.autoDispose<
       NotificationListNotifier,
