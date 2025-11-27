@@ -60,45 +60,41 @@ def main():
     print(f"[OK] Publisher jalan — TOPIC = {TOPIC}")
     print("Publishing to:", BROKER, ":", PORT, "->", TOPIC)
 
-    last_sent = {k: 0 for k in INTERVALS.keys()}
+    state = {s: 0.0 for s in INTERVALS.keys()}  # nilai awal
+    last_update = {s: 0 for s in INTERVALS.keys()}
+
     row_idx = 0
 
     try:
         while RUNNING:
-            row = rows[row_idx]
             now = time.time()
+            row = rows[row_idx]
+            updated = False
 
-            sensor_values = {
-                "ppm": pick(row, "TDS", "tds"),
-                "ph": pick(row, "pH", "ph"),
-                "tempC": pick(row, "DHT_temp", "dht_temp", "tempC", "temperature"),
-                "humidity": pick(row, "DHT_humidity", "dht_humidity", "humidity"),
-                "waterTemp": pick(row, "water_temp", "waterTemp"),
-                "waterLevel": pick(row, "water_level", "waterLevel"),
-            }
+            # cek tiap sensor
+            for sensor in INTERVALS:
+                if now - last_update[sensor] >= INTERVALS[sensor]:
+                    # waktunya update sensor ini
+                    if sensor == "ppm":
+                        state["ppm"] = pick(row, "TDS", "tds")
+                    elif sensor == "ph":
+                        state["ph"] = pick(row, "pH", "ph")
+                    elif sensor == "tempC":
+                        state["tempC"] = pick(row, "DHT_temp", "dht_temp", "tempC", "temperature")
+                    elif sensor == "humidity":
+                        state["humidity"] = pick(row, "DHT_humidity", "dht_humidity", "humidity")
+                    elif sensor == "waterTemp":
+                        state["waterTemp"] = pick(row, "water_temp", "waterTemp")
+                    elif sensor == "waterLevel":
+                        state["waterLevel"] = pick(row, "water_level", "waterLevel")
 
-            # cek jika SEMUA sensor sudah memenuhi minimal interval
-            should_send = any(
-                now - last_sent[s] >= INTERVALS[s]
-                for s in INTERVALS
-            )
+                    last_update[sensor] = now
+                    updated = True
 
-            if should_send:
-                payload = {
-                    "ppm": sensor_values["ppm"],
-                    "ph": sensor_values["ph"],
-                    "tempC": sensor_values["tempC"],
-                    "humidity": sensor_values["humidity"],
-                    "waterTemp": sensor_values["waterTemp"],
-                    "waterLevel": sensor_values["waterLevel"]
-                }
-
-                client.publish(TOPIC, json.dumps(payload), qos=QOS, retain=RETAIN)
-                print("[PUB]", payload)
-
-                # update timestamp semua sensor
-                for s in INTERVALS:
-                    last_sent[s] = now
+            # hanya kirim jika ada sensor yg berubah
+            if updated:
+                client.publish(TOPIC, json.dumps(state), qos=QOS, retain=RETAIN)
+                print("[PUB]", state)
 
             row_idx = (row_idx + 1) % len(rows)
             time.sleep(0.1)
@@ -107,6 +103,7 @@ def main():
         print("[STOP] Publisher berhenti.")
         client.loop_stop()
         client.disconnect()
+
 
 if __name__ == "__main__":
     main()

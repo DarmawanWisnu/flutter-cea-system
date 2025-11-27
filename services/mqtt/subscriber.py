@@ -1,6 +1,12 @@
-import json, time, signal, os, requests
+import json
+import time
+import signal
+import os
+import requests
 from paho.mqtt import client as mqtt
 from statistics import median
+from collections import deque
+from threading import Lock
 
 RUNNING = True
 def handle_signal(signum, frame):
@@ -19,15 +25,13 @@ QOS = 1
 CLIENT_ID = f"csv-subscriber-{KIT_ID}"
 
 # Auto-detected interval
-AUTO_INTERVAL = 5         # default sementara
+AUTO_INTERVAL = 5.0         # default sementara (float)
 last_msg_time = None
-interval_samples = []     # ring buffer interval
+interval_samples = deque(maxlen=10)   # ring buffer interval
 MAX_SAMPLES = 10
 
-last_sent_payload = None
-
 # Tick counter
-LAST_TICK = 0
+LAST_TICK = 0.0
 
 STATE = {
     "ppm": None,
@@ -37,6 +41,9 @@ STATE = {
     "waterTemp": None,
     "waterLevel": None
 }
+
+# Lock to protect STATE and interval_samples across threads
+state_lock = Lock()
 
 print("[KIT_ID]", KIT_ID)
 print("[SUBSCRIBE]", TOPIC)
@@ -49,16 +56,21 @@ def update_interval():
     if len(interval_samples) < 3:
         return  # belum cukup data
 
-    new_interval = median(interval_samples)
+    try:
+        new_interval = float(median(list(interval_samples)))
+    except Exception:
+        return
 
     # batasan wajar (2-60 detik)
-    if 2 <= new_interval <= 60:
+    if 2.0 <= new_interval <= 60.0:
         AUTO_INTERVAL = new_interval
         print(f"[INTERVAL] Auto calibrated → {AUTO_INTERVAL:.2f} sec")
 
 
 def send_snapshot():
-    payload = {k: (v if v is not None else 0.0) for k, v in STATE.items()}
+    # baca STATE dengan lock supaya konsisten
+    with state_lock:
+        payload = {k: (v if v is not None else 0.0) for k, v in STATE.items()}
     print("[SEND PAYLOAD]", payload)
 
     try:
@@ -77,51 +89,60 @@ def on_connect(client, userdata, flags, reason_code, properties):
     client.subscribe(TOPIC, qos=QOS)
 
 
+def safe_float(x, default=None):
+    try:
+        if x is None:
+            return default
+        # handle strings like "" as default
+        if isinstance(x, str) and x.strip() == "":
+            return default
+        return float(x)
+    except Exception:
+        return default
+
+
 def on_message(client, userdata, msg):
-    """Update state dan hitung interval publisher otomatis."""
     global last_msg_time
 
     now = time.time()
 
-    # Hitung interval pesan untuk deteksi tempo publisher
+    # Hitung interval pesan
     if last_msg_time is not None:
         delta = now - last_msg_time
-
-        # buang noise aneh (<0.2s)
         if delta > 0.2:
-            interval_samples.append(delta)
-            if len(interval_samples) > MAX_SAMPLES:
-                interval_samples.pop(0)
+            with state_lock:
+                interval_samples.append(delta)
             update_interval()
 
     last_msg_time = now
 
-    # Update state
+    # Parse payload full row
     try:
         data = json.loads(msg.payload.decode())
 
-        sensor = data.get("sensor")
-        value = data.get("value")
+        # Update seluruh state atomically
+        with state_lock:
+            for key in STATE.keys():
+                if key in data:
+                    val = safe_float(data.get(key), default=None)
+                    # hanya update jika val bukan None (atau sesuai kebijakanmu)
+                    STATE[key] = val
 
-        if sensor in STATE:
-            STATE[sensor] = float(value)
-            print(f"[MQTT] UPDATE {sensor} = {value}")
-        else:
-            print("[WARN] Sensor tidak dikenal:", sensor)
+        print("[MQTT] STATE UPDATED →", STATE)
 
     except Exception as e:
         print("[ERR] parse MQTT:", e)
-        print("[STATE]", STATE)
+        print("[RAW]", msg.payload)
 
 
 def main():
     global LAST_TICK
 
     client = mqtt.Client(
-        mqtt.CallbackAPIVersion.VERSION2,
-        client_id=CLIENT_ID,
-        protocol=mqtt.MQTTv311
-    )
+    mqtt.CallbackAPIVersion.VERSION2,
+    client_id=CLIENT_ID,
+    protocol=mqtt.MQTTv311
+)
 
     client.on_connect = on_connect
     client.on_message = on_message
