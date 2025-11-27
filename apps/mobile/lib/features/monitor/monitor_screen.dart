@@ -35,9 +35,7 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
         final initial = widget.selectedKit ?? (kits.first["id"] as String);
 
         if (mounted) {
-          setState(() {
-            kitId = initial;
-          });
+          setState(() => kitId = initial);
         }
       } catch (e) {}
     });
@@ -67,7 +65,7 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
           ),
           iconTheme: const IconThemeData(color: primary),
         ),
-        body: const SafeArea(child: Center(child: CircularProgressIndicator())),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -121,6 +119,7 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
               _kitSelector(s),
               SizedBox(height: 14 * s),
 
+              // Grid gauges
               GridView(
                 padding: EdgeInsets.zero,
                 shrinkWrap: true,
@@ -173,7 +172,6 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
                   color: primary,
                 ),
               ),
-
               SizedBox(height: 10 * s),
 
               Container(
@@ -230,7 +228,6 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
               ),
 
               SizedBox(height: 20 * s),
-
               _modeSection(context, s, _kitId),
             ],
           ),
@@ -245,12 +242,12 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
 
     return kitsAsync.when(
       loading: () => Container(
+        height: 48 * s,
         padding: EdgeInsets.symmetric(horizontal: 12 * s),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(14 * s),
         ),
-        height: 48 * s,
         child: const Center(child: CircularProgressIndicator()),
       ),
       error: (e, _) => Text("Failed load kits: $e"),
@@ -274,10 +271,7 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
             }).toList(),
             onChanged: (v) async {
               if (v != null && v != kitId) {
-                setState(() {
-                  kitId = v;
-                });
-
+                setState(() => kitId = v);
                 await ref
                     .read(monitorTelemetryProvider(v).notifier)
                     .switchKit(v);
@@ -377,7 +371,6 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
             color: primary,
           ),
         ),
-
         SizedBox(height: 14 * s),
 
         Row(
@@ -413,9 +406,7 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
                 ),
               ),
             ),
-
             SizedBox(width: 12 * s),
-
             Expanded(
               child: GestureDetector(
                 onTap: () {
