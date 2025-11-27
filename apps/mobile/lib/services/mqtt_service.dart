@@ -27,6 +27,8 @@ class MqttService {
   Future<void> connect({required String kitId}) async {
     _kitId = kitId;
     _connStateCtrl.add(MqttConnState.connecting);
+    print("[MQTT] connected!");
+    print("[MQTT] connecting to ${MqttConst.host}:${MqttConst.port}");
 
     final clientId =
         "${MqttConst.clientPrefix}${DateTime.now().millisecondsSinceEpoch}";
@@ -79,6 +81,9 @@ class MqttService {
       final teleTopic = MqttConst.tTelemetry(kitId);
       final statTopic = MqttConst.tStatus(kitId);
 
+      print("[MQTT] subscribing to $teleTopic");
+      print("[MQTT] subscribing to $statTopic");
+
       c.subscribe(teleTopic, MqttQos.atLeastOnce);
       c.subscribe(statTopic, MqttQos.atLeastOnce);
 
@@ -89,6 +94,7 @@ class MqttService {
           final payload = MqttPublishPayload.bytesToStringAsString(
             msg.payload.message,
           );
+          print("[MQTT] EVENT → $topic : $payload");
 
           // TELEMETRY
           if (topic == teleTopic) {
@@ -125,7 +131,7 @@ class MqttService {
     final topic = MqttConst.tControl(kitId);
 
     final payload = {
-      "cmd": cmd,
+      "cmd": cmd, // <--- CAMEL CASE
       "data": data,
       "ts": DateTime.now().toIso8601String(),
     };
@@ -168,6 +174,7 @@ class MqttService {
   }
 
   void _onDisconnected() {
+    print("[MQTT] disconnected!");
     _connStateCtrl.add(MqttConnState.disconnected);
     _scheduleReconnect();
   }

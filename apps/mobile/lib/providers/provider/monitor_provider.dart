@@ -27,8 +27,11 @@ class MonitorState {
 }
 
 /// PROVIDER
-final monitorTelemetryProvider = StateNotifierProvider.autoDispose
-    .family<MonitorNotifier, MonitorState, String>((ref, kitId) {
+final monitorTelemetryProvider =
+    StateNotifierProvider.family<MonitorNotifier, MonitorState, String>((
+      ref,
+      kitId,
+    ) {
       return MonitorNotifier(ref, kitId);
     });
 
@@ -59,9 +62,10 @@ class MonitorNotifier extends StateNotifier<MonitorState> {
     );
 
     // MQTT realtime
+    // before publishing
     final mqttVM = ref.read(mqttProvider.notifier);
+    print("[MONITOR] calling mqtt init…");
     await mqttVM.init(kitId: kitId);
-
     // Listen stream
     _sub = mqttVM.service.telemetry$.listen((t) {
       state = state.copyWith(data: t, lastUpdated: DateTime.now());
@@ -93,9 +97,34 @@ class MonitorNotifier extends StateNotifier<MonitorState> {
 
     body[field] = 1;
 
-    await api.postJson("/actuator/event?deviceId=$kitId", body);
+    // 1. KIRIM KE BACKEND
+    api.postJson("/actuator/event?deviceId=$kitId", body);
 
-    ref.read(mqttProvider.notifier).publishActuator(field);
+    // 2. MQTT MAPPER (CAMELCASE)
+    final mqtt = ref.read(mqttProvider.notifier);
+
+    switch (field) {
+      case "phUp":
+        mqtt.phUp();
+        break;
+      case "phDown":
+        mqtt.phDown();
+        break;
+      case "nutrientAdd":
+        mqtt.nutrientAdd();
+        break;
+      case "refill":
+        mqtt.refill();
+        break;
+      case "manual":
+        mqtt.setManual();
+        break;
+      case "auto":
+        mqtt.setAuto();
+        break;
+      default:
+        print("[MQTT] Unknown actuator field: $field");
+    }
   }
 
   Future<void> phUp() => _actuatorEvent(field: "phUp");

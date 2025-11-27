@@ -24,6 +24,8 @@ last_msg_time = None
 interval_samples = []     # ring buffer interval
 MAX_SAMPLES = 10
 
+last_sent_payload = None
+
 # Tick counter
 LAST_TICK = 0
 

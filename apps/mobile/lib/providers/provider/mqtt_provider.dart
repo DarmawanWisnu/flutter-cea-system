@@ -3,7 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:fountaine/services/mqtt_service.dart';
 
-final mqttProvider = ChangeNotifierProvider.autoDispose<MqttVM>((ref) {
+final mqttProvider = ChangeNotifierProvider<MqttVM>((ref) {
+  ref.keepAlive();
   final vm = MqttVM();
 
   ref.onDispose(() {
@@ -33,6 +34,7 @@ class MqttVM extends ChangeNotifier {
 
     // Listen connection state (setup one-time only)
     _connSub ??= _svc.connectionState$.listen((s) {
+      print("[MQTT] state → $s");
       _state = s;
       notifyListeners();
     });
@@ -82,19 +84,19 @@ class MqttVM extends ChangeNotifier {
     }
 
     await _svc.publishControl(
-      command, // <-- ini CMD
+      command, // langsung camelCase
       args ?? {},
     );
   }
 
-  Future<void> phUp() => publishActuator("ph_up");
-  Future<void> phDown() => publishActuator("ph_down");
-  Future<void> nutrientAdd() => publishActuator("nutrient_add");
+  Future<void> phUp() => publishActuator("phUp");
+  Future<void> phDown() => publishActuator("phDown");
+  Future<void> nutrientAdd() => publishActuator("nutrientAdd");
   Future<void> refill() => publishActuator("refill");
 
   // Auto / Manual
-  Future<void> setAuto() => publishActuator("mode_auto");
-  Future<void> setManual() => publishActuator("mode_manual");
+  Future<void> setAuto() => publishActuator("auto");
+  Future<void> setManual() => publishActuator("manual");
 
   // DISPOSE SAFE
   Future<void> disposeSafely() async {

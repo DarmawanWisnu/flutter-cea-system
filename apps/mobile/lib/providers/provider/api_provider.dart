@@ -22,24 +22,24 @@ final apiTelemetryProvider = Provider.autoDispose<ApiService>((ref) {
 
 /// GET LATEST
 final latestTelemetryProvider = FutureProvider.autoDispose
-    .family<Telemetry?, String>((ref, kitId) async {
+    .family<Telemetry?, String>((ref, deviceId) async {
       final api = ref.watch(apiTelemetryProvider);
-      return api.getLatestTelemetry(kitId);
+      return api.getLatestTelemetry(deviceId);
     });
 
 /// GET HISTORY
 final telemetryHistoryProvider = FutureProvider.autoDispose
     .family<List<Telemetry>, TelemetryHistoryRequest>((ref, req) async {
       final api = ref.watch(apiTelemetryProvider);
-      return api.getTelemetryHistory(req.kitId, limit: req.limit);
+      return api.getTelemetryHistory(req.deviceId, limit: req.limit);
     });
 
 /// REQUEST MODEL
 class TelemetryHistoryRequest {
-  final String kitId;
+  final String deviceId;
   final int limit;
 
-  const TelemetryHistoryRequest({required this.kitId, this.limit = 50});
+  const TelemetryHistoryRequest({required this.deviceId, this.limit = 50});
 }
 
 /// KITS API SERVICE
@@ -73,11 +73,10 @@ class ApiKitsService {
 }
 
 /// RAW KIT LIST
-final apiKitsListProvider = FutureProvider<List<Map<String, dynamic>>>((
-  ref,
-) async {
-  final api = ref.read(apiServiceProvider);
-  final res = await api.getJson("/kits");
+final apiKitsListProvider =
+    FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
+      final api = ref.read(apiServiceProvider);
+      final res = await api.getJson("/kits");
 
-  return (res as List).cast<Map<String, dynamic>>();
-});
+      return (res as List).cast<Map<String, dynamic>>();
+    });

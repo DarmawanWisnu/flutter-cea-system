@@ -55,9 +55,10 @@ def main():
         protocol=mqtt.MQTTv311
     )
 
-    client.loop_start()
     client.connect(BROKER, PORT)
+    client.loop_start()
     print(f"[OK] Publisher jalan — TOPIC = {TOPIC}")
+    print("Publishing to:", BROKER, ":", PORT, "->", TOPIC)
 
     last_sent = {k: 0 for k in INTERVALS.keys()}
     row_idx = 0
@@ -76,15 +77,28 @@ def main():
                 "waterLevel": pick(row, "water_level", "waterLevel"),
             }
 
-            for sensor, interval in INTERVALS.items():
-                if now - last_sent[sensor] >= interval:
-                    payload = {
-                        "sensor": sensor,
-                        "value": sensor_values[sensor]
-                    }
-                    client.publish(TOPIC, json.dumps(payload), qos=QOS, retain=RETAIN)
-                    print(f"[PUB] {payload}")
-                    last_sent[sensor] = now
+            # cek jika SEMUA sensor sudah memenuhi minimal interval
+            should_send = any(
+                now - last_sent[s] >= INTERVALS[s]
+                for s in INTERVALS
+            )
+
+            if should_send:
+                payload = {
+                    "ppm": sensor_values["ppm"],
+                    "ph": sensor_values["ph"],
+                    "tempC": sensor_values["tempC"],
+                    "humidity": sensor_values["humidity"],
+                    "waterTemp": sensor_values["waterTemp"],
+                    "waterLevel": sensor_values["waterLevel"]
+                }
+
+                client.publish(TOPIC, json.dumps(payload), qos=QOS, retain=RETAIN)
+                print("[PUB]", payload)
+
+                # update timestamp semua sensor
+                for s in INTERVALS:
+                    last_sent[s] = now
 
             row_idx = (row_idx + 1) % len(rows)
             time.sleep(0.1)
