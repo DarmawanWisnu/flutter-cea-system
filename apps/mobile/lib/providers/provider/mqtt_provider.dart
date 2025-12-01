@@ -1,13 +1,15 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:fountaine/services/mqtt_service.dart';
 import 'package:fountaine/domain/telemetry.dart';
 import 'package:fountaine/domain/device_status.dart';
+import 'package:fountaine/providers/provider/api_provider.dart';
 
 final mqttProvider = ChangeNotifierProvider<MqttVM>((ref) {
   ref.keepAlive();
-  final vm = MqttVM();
+  final vm = MqttVM(ref);
 
   ref.onDispose(vm.disposeSafely);
 
@@ -16,10 +18,12 @@ final mqttProvider = ChangeNotifierProvider<MqttVM>((ref) {
 
 class MqttVM extends ChangeNotifier {
   final MqttService _svc = MqttService();
+  final Ref _ref;
 
   MqttConnState _state = MqttConnState.disconnected;
   MqttConnState get state => _state;
 
+  final Set<String> _autoModeDevices = {};
   final Map<String, Telemetry> telemetryMap = {};
   final Map<String, DeviceStatus> statusMap = {};
 
@@ -28,6 +32,8 @@ class MqttVM extends ChangeNotifier {
   StreamSubscription<MapEntry<String, DeviceStatus>>? _statSub;
 
   bool _initialized = false;
+
+  MqttVM(this._ref);
 
   Future<void> init() async {
     if (_initialized) return;
@@ -39,7 +45,14 @@ class MqttVM extends ChangeNotifier {
     });
 
     _teleSub = _svc.telemetry$.listen((entry) {
-      telemetryMap[entry.key] = entry.value;
+      final deviceId = entry.key;
+      telemetryMap[deviceId] = entry.value;
+
+      // Auto mode: trigger actuator event when telemetry arrives
+      if (_autoModeDevices.contains(deviceId)) {
+        _triggerAutoActuator(deviceId);
+      }
+
       notifyListeners();
     });
 
@@ -58,6 +71,36 @@ class MqttVM extends ChangeNotifier {
   }) async {
     if (!(_state == MqttConnState.connected)) return;
     await _svc.publishControl(command, args ?? {}, kitId);
+  }
+
+  Future<void> _triggerAutoActuator(String deviceId) async {
+    try {
+      final api = _ref.read(apiServiceProvider);
+      await api.postJson("/actuator/event?deviceId=$deviceId", {
+        "phUp": 0,
+        "phDown": 0,
+        "nutrientAdd": 0,
+        "valueS": 0,
+        "manual": 0,
+        "auto": 1,
+        "refill": 0,
+      });
+      print("[MQTT] Auto actuator event sent for $deviceId");
+    } catch (e) {
+      print("[MQTT] Error sending auto actuator: $e");
+    }
+  }
+
+  void enableAutoMode(String deviceId) {
+    _autoModeDevices.add(deviceId);
+    print("[MQTT] Auto mode ENABLED for $deviceId");
+    notifyListeners();
+  }
+
+  void disableAutoMode(String deviceId) {
+    _autoModeDevices.remove(deviceId);
+    print("[MQTT] Auto mode DISABLED for $deviceId");
+    notifyListeners();
   }
 
   Future<void> disposeSafely() async {

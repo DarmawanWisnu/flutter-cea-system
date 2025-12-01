@@ -78,7 +78,7 @@ class MqttService {
             msg.payload.message,
           );
 
-          print("[MQTT] EVENT → $topic : $payload");
+          // print("[MQTT] EVENT → $topic : $payload");
 
           final parts = topic.split("/");
           if (parts.length < 3) continue;

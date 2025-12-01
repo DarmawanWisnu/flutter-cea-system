@@ -108,6 +108,7 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
 
         # AUTO MODE
         if data.auto == 1:
+            print(f"\n[AUTO MODE] Triggered for device: {deviceId}")
 
             # Ambil telemetry terbaru
             cur.execute("""
@@ -121,8 +122,10 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
 
             if t:
                 ppm, ph, tempC, humidity, wl = t
+                print(f"[AUTO MODE] Telemetry - pH:{ph}, PPM:{ppm}, Temp:{tempC}°C, Humidity:{humidity}%, WaterLevel:{wl}%")
             else:
                 ppm, ph, tempC, humidity, wl = (0, 0, 0, 0, 0)
+                print("[AUTO MODE] WARNING: No telemetry found, using zeros")
 
             # ==== TRY MACHINE LEARNING IN BACKGROUND (NON-BLOCKING) ====
             # Add ML prediction as background task - this won't block the response
@@ -163,6 +166,7 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
             data.valueS = float(max(
                 phUpSec, phDownSec, nutrientSec, refillSec
             ))
+            print(f"[AUTO MODE] Initial → phUp:{data.phUp}, phDown:{data.phDown}, nutrient:{data.nutrientAdd}, refill:{data.refill}")
             
             # MICRO ADJUSTMENT
 
@@ -187,8 +191,10 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
             data.valueS = float(max(
                 data.phUp, data.phDown, data.nutrientAdd, data.refill
             ))
+            print(f"[AUTO MODE] Final → phUp:{data.phUp}, phDown:{data.phDown}, nutrient:{data.nutrientAdd}, refill:{data.refill}, valueS:{data.valueS}")
 
         # INSERT FINAL ACTUATOR EVENT
+        print(f"[ACTUATOR] Inserting to DB - auto:{data.auto}, manual:{data.manual}")
         cur.execute("""
             INSERT INTO actuator_event
                 ("deviceId", "ingestTime",
@@ -204,8 +210,21 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
 
         new_id = cur.fetchone()[0]
         conn.commit()
+        print(f"[ACTUATOR] ✓ Inserted successfully with ID: {new_id}")
 
-        return {"status": "ok", "id": new_id}
+        return {
+            "status": "ok", 
+            "id": new_id,
+            "data": {
+                "phUp": int(data.phUp),
+                "phDown": int(data.phDown),
+                "nutrientAdd": int(data.nutrientAdd),
+                "refill": int(data.refill),
+                "valueS": float(data.valueS),
+                "auto": int(data.auto),
+                "manual": int(data.manual)
+            }
+        }
 
     except Exception as e:
         conn.rollback()

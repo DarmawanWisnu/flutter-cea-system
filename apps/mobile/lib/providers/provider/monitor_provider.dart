@@ -106,6 +106,7 @@ class MonitorNotifier extends StateNotifier<MonitorState> {
 
   /// ACTUATOR API
   Future<void> _actuatorEvent({required String field}) async {
+    print("[Flutter] _actuatorEvent called with field: $field");
     final api = ref.read(apiServiceProvider);
 
     final body = {
@@ -119,13 +120,21 @@ class MonitorNotifier extends StateNotifier<MonitorState> {
     };
 
     body[field] = 1;
+    print(
+      "[Flutter] Sending to /actuator/event?deviceId=$kitId with body: $body",
+    );
 
     // Await with error handling
+    Map<String, dynamic>? responseData;
     try {
-      await api.postJson("/actuator/event?deviceId=$kitId", body);
+      final res = await api.postJson("/actuator/event?deviceId=$kitId", body);
+      print("[Flutter] Response received: $res"); // ADD THIS
+      if (res != null && res['data'] != null) {
+        responseData = res['data'];
+        print("[Flutter] Response data: $responseData"); // ADD THIS
+      }
     } catch (e) {
       print("[Actuator] Error: $e");
-      // Optional: show error to user
     }
 
     // 2. MQTT CONTROL
@@ -133,22 +142,26 @@ class MonitorNotifier extends StateNotifier<MonitorState> {
 
     switch (field) {
       case "phUp":
-        mqtt.publishActuator("phUp", kitId: kitId);
+        mqtt.publishActuator(
+          "phUp",
+          kitId: kitId,
+          args: responseData,
+        ); // <--- 3. Add args
         break;
       case "phDown":
-        mqtt.publishActuator("phDown", kitId: kitId);
+        mqtt.publishActuator("phDown", kitId: kitId, args: responseData);
         break;
       case "nutrientAdd":
-        mqtt.publishActuator("nutrientAdd", kitId: kitId);
+        mqtt.publishActuator("nutrientAdd", kitId: kitId, args: responseData);
         break;
       case "refill":
-        mqtt.publishActuator("refill", kitId: kitId);
+        mqtt.publishActuator("refill", kitId: kitId, args: responseData);
         break;
       case "manual":
-        mqtt.publishActuator("manual", kitId: kitId);
+        mqtt.publishActuator("manual", kitId: kitId, args: responseData);
         break;
       case "auto":
-        mqtt.publishActuator("auto", kitId: kitId);
+        mqtt.publishActuator("auto", kitId: kitId, args: responseData);
         break;
     }
   }
@@ -157,8 +170,19 @@ class MonitorNotifier extends StateNotifier<MonitorState> {
   Future<void> phDown() => _actuatorEvent(field: "phDown");
   Future<void> nutrientAdd() => _actuatorEvent(field: "nutrientAdd");
   Future<void> refill() => _actuatorEvent(field: "refill");
-  Future<void> setManual() => _actuatorEvent(field: "manual");
-  Future<void> setAuto() => _actuatorEvent(field: "auto");
+  Future<void> setAuto() async {
+    await _actuatorEvent(field: "auto");
+
+    // Enable auto mode in MQTT provider
+    ref.read(mqttProvider.notifier).enableAutoMode(kitId);
+  }
+
+  Future<void> setManual() async {
+    await _actuatorEvent(field: "manual");
+
+    // Disable auto mode in MQTT provider
+    ref.read(mqttProvider.notifier).disableAutoMode(kitId);
+  }
 
   /// DISPOSE
   @override

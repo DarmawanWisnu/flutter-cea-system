@@ -90,7 +90,10 @@ def run_migrations():
             "phUp" INT DEFAULT 0,
             "phDown" INT DEFAULT 0,
             "nutrientAdd" INT DEFAULT 0,
-            "valueS" FLOAT DEFAULT 0
+            "valueS" FLOAT DEFAULT 0,
+            "manual" INT DEFAULT 0,
+            "auto" INT DEFAULT 0,
+            "refill" INT DEFAULT 0
         );
     """)
 
