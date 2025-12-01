@@ -20,15 +20,15 @@ def init_pool():
     global _pool
     if _pool is None:
         _pool = psycopg2.pool.SimpleConnectionPool(
-            minconn=1,
-            maxconn=10,
+            minconn=5,
+            maxconn=50,  # Increased from 10 to 50 for high-frequency auto mode
             host=DB_HOST,
             database=DB_NAME,
             user=DB_USER,
             password=DB_PASSWORD,
             port=DB_PORT,
         )
-        print(f"[DB] Pool → {DB_HOST}:{DB_PORT}/{DB_NAME}")
+        print(f"[DB] Pool → {DB_HOST}:{DB_PORT}/{DB_NAME} (max connections: 50)")
 
 
 def get_connection():
@@ -41,8 +41,8 @@ def release_connection(conn):
     if _pool and conn:
         try:
             _pool.putconn(conn)
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"[DB] Warning: Failed to release connection: {e}")
 
 
 def run_migrations():

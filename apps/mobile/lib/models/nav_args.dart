@@ -2,9 +2,15 @@
 class HistoryRouteArgs {
   final DateTime? targetTime; // waktu notifikasi terjadi
   final String? kitName; // nama kit terkait
+  final String? kitId; // ID kit untuk history
   final String? reason; // pesan/penyebab notifikasi
 
-  const HistoryRouteArgs({this.targetTime, this.kitName, this.reason});
+  const HistoryRouteArgs({
+    this.targetTime,
+    this.kitName,
+    this.kitId,
+    this.reason,
+  });
 }
 
 // models/nav_args.dart

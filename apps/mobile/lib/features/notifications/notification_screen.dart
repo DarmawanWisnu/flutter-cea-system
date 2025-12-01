@@ -257,6 +257,7 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
                         arguments: HistoryRouteArgs(
                           targetTime: n.timestamp,
                           kitName: n.kitName,
+                          kitId: n.kitName, // Use kitName as kitId
                           reason: n.message,
                         ),
                       );

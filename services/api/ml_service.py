@@ -29,6 +29,9 @@ def ml_predict(payload: TelemetryPayload):
     try:
         result = predict_from_dict(data, clamp_limits=DEFAULT_CLAMPS)
     except Exception as e:
+        print(f"[ML Service] Prediction error: {type(e).__name__}: {str(e)}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
     # optional: log prediction

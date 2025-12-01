@@ -17,9 +17,7 @@ class ProfileScreen extends ConsumerWidget {
     final user = ref.watch(authProvider);
 
     // FETCH kits dari backend
-    final kitsAsync = ref.watch(apiKitsProvider).getKits().asStream();
-    // Pakai StreamProvider agar async tetap dalam ConsumerWidget
-    final kitsdata = ref.watch(StreamProvider((ref) => kitsAsync));
+    final kitsAsync = ref.watch(apiKitsListProvider);
 
     final email = user?.email ?? '-';
     final uid = user?.uid ?? '-';
@@ -37,10 +35,10 @@ class ProfileScreen extends ConsumerWidget {
     String kitName = 'Your Kit Name';
     String kitId = 'SUF-XXXX-XXXX';
 
-    kitsdata.whenData((data) {
+    kitsAsync.whenData((data) {
       if (data.isNotEmpty) {
-        kitName = data.first.name;
-        kitId = data.first.id;
+        kitName = data.first["name"] as String? ?? 'Your Kit Name';
+        kitId = data.first["id"] as String? ?? 'SUF-XXXX-XXXX';
       }
     });
 

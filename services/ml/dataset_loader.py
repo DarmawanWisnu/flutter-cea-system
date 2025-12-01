@@ -1,3 +1,7 @@
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
+
 import pandas as pd
 import json
 from services.api.database import get_connection, release_connection
@@ -82,3 +86,6 @@ def export_csv(path="data/raw/dataset_pairs.csv", limit=None, device_id=None):
     df.to_csv(path, index=False)
     print(f"[dataset_loader] exported {len(df)} rows to {path}")
     return path
+
+if __name__ == "__main__":
+    export_csv()

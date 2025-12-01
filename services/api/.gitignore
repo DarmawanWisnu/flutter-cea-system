@@ -5,15 +5,18 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+.mypy_cache/
+.pytest_cache/
 
 # Virtual environments
 venv/
 .venv/
 env/
 .env/
+ENV/
 
 # ============================
-# CONFIG & SECRETS
+# SECRETS & CREDENTIALS
 # ============================
 .env
 .env.*
@@ -21,9 +24,11 @@ env/
 *.pem
 *.crt
 *.p12
+secrets/
+credentials/
 
 # ============================
-# DATABASE & MIGRATIONS
+# DATABASE FILES
 # ============================
 *.db
 *.sqlite3
@@ -38,10 +43,24 @@ alembic/
 logs/
 tmp/
 temp/
+*.tmp
 
 # ============================
-# MODELS / GENERATED
+# EDITOR & OS
 # ============================
-*.json
-*.yaml
-*.yml
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+*.sublime-*
+
+# ============================
+# TESTING
+# ============================
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/

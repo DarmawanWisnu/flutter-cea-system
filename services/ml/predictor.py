@@ -4,7 +4,9 @@ import numpy as np
 from threading import Lock
 import json
 
-MODEL_REGISTRY = "model_registry"
+# Use absolute path based on this file's location
+_CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_REGISTRY = os.path.join(_CURRENT_DIR, "model_registry")
 
 _TELEMETRY_FEATURES = ["ppm", "ph", "tempC", "humidity", "waterTemp", "waterLevel"]
 _TARGETS = ["phUp", "phDown", "nutrientAdd", "refill"]
@@ -21,20 +23,33 @@ def _load_latest():
             return
 
         latest_marker = os.path.join(MODEL_REGISTRY, "LATEST")
+        version_dir = None
+        version = "direct"
+        
+        # Check if LATEST file exists
         if os.path.exists(latest_marker):
             with open(latest_marker, "r") as f:
                 version = f.read().strip()
             version_dir = os.path.join(MODEL_REGISTRY, version)
         else:
+            # Look for versioned subdirectories
             candidates = [
                 os.path.join(MODEL_REGISTRY, d)
                 for d in os.listdir(MODEL_REGISTRY)
-                if d.startswith("v")
+                if os.path.isdir(os.path.join(MODEL_REGISTRY, d)) and d.startswith("v")
             ]
-            if not candidates:
-                raise RuntimeError("No model found in registry.")
-            version_dir = sorted(candidates, key=os.path.getmtime)[-1]
-            version = os.path.basename(version_dir)
+            if candidates:
+                version_dir = sorted(candidates, key=os.path.getmtime)[-1]
+                version = os.path.basename(version_dir)
+            else:
+                # No versioned directories, check if model files are directly in MODEL_REGISTRY
+                direct_model = os.path.join(MODEL_REGISTRY, "model.pkl")
+                if os.path.exists(direct_model):
+                    version_dir = MODEL_REGISTRY
+                    version = "direct"
+                    print("[predictor] Using model files directly from model_registry/")
+                else:
+                    raise RuntimeError("No model found in registry.")
 
         model_path = os.path.join(version_dir, "model.pkl")
         scaler_path = os.path.join(version_dir, "scaler.pkl")

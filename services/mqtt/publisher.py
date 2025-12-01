@@ -114,14 +114,19 @@ def main():
             for kit in device_ids
         }
 
-        row_idx = 0
+        # CHANGED: Each kit has its own random row index
+        device_row_idx = {
+            kit: random.randint(0, len(rows) - 1)
+            for kit in device_ids
+        }
 
         while RUNNING:
             now = time.time()
 
             for kit in device_ids:
                 client = clients[kit]
-                row = rows[row_idx]
+                # CHANGED: Each kit uses its own random row
+                row = rows[device_row_idx[kit]]
                 updated = False
 
                 for sensor in INTERVALS:
@@ -147,9 +152,11 @@ def main():
                     payload = json.dumps(device_state[kit])
                     client.publish(topic, payload, qos=QOS, retain=RETAIN)
 
-                    print(f"[PUB] {kit} →", device_state[kit])
+                    print(f"[PUB] {kit} → row#{device_row_idx[kit]}", device_state[kit])
+                    
+                    # CHANGED: Move to next random row for this kit
+                    device_row_idx[kit] = random.randint(0, len(rows) - 1)
 
-            row_idx = (row_idx + 1) % len(rows)
             time.sleep(0.2)
 
 

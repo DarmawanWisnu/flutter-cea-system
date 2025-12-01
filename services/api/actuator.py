@@ -89,23 +89,6 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
     ingestTime = int(time.time() * 1000)
 
     try:
-        # BLOCK AUTO IF SOURCE IS ML (prevent duplicate auto events)
-        if data.auto == 1 and AUTO_MODE_SOURCE != "rule":
-            cur.execute("""
-                INSERT INTO actuator_event
-                    ("deviceId", "ingestTime",
-                     "phUp", "phDown", "nutrientAdd", "valueS",
-                     "manual", "auto", "refill")
-                VALUES (%s, %s, 0, 0, 0, 0, %s, %s, 0)
-                RETURNING id;
-            """, (
-                deviceId, ingestTime,
-                int(data.manual), int(data.auto)
-            ))
-            new_id = cur.fetchone()[0]
-            conn.commit()
-            return {"status": "ok", "id": new_id}
-
         # AUTO MODE
         if data.auto == 1:
             print(f"\n[AUTO MODE] Triggered for device: {deviceId}")
@@ -122,20 +105,50 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
 
             if t:
                 ppm, ph, tempC, humidity, wl = t
-                print(f"[AUTO MODE] Telemetry - pH:{ph}, PPM:{ppm}, Temp:{tempC}°C, Humidity:{humidity}%, WaterLevel:{wl}%")
+                print(f"[AUTO MODE] Telemetry - pH:{ph}, PPM:{ppm}, Temp:{tempC}°C, Humidity:{humidity}%, WaterLevel:{wl} (0-3 scale)")
             else:
                 ppm, ph, tempC, humidity, wl = (0, 0, 0, 0, 0)
                 print("[AUTO MODE] WARNING: No telemetry found, using zeros")
 
-            # ==== TRY MACHINE LEARNING IN BACKGROUND (NON-BLOCKING) ====
-            # Add ML prediction as background task - this won't block the response
-            # background_tasks.add_task(
-               # try_ml_prediction_and_update,
-                # deviceId, ppm, ph, tempC, humidity, wl, ingestTime
-            #)
+            # ==== TRY MACHINE LEARNING FIRST (SYNCHRONOUS WITH TIMEOUT) ====
+            # COMMENTED OUT FOR DATA COLLECTION - USING RULE-BASED ONLY
+            ml_success = False
+            # try:
+            #     ml_payload = {
+            #         "ppm": ppm,
+            #         "ph": ph,
+            #         "tempC": tempC,
+            #         "humidity": humidity,
+            #         "waterTemp": 0.0,
+            #         "waterLevel": wl
+            #     }
+            #     
+            #     print("[AUTO MODE] Attempting ML prediction...")
+            #     async with httpx.AsyncClient(timeout=2.0) as client:
+            #         r = await client.post("http://127.0.0.1:8000/ml/predict", json=ml_payload)
+            #     
+            #     if r.status_code == 200:
+            #         ml = r.json()
+            #         data.phUp = int(ml.get("phUp", 0))
+            #         data.phDown = int(ml.get("phDown", 0))
+            #         data.nutrientAdd = int(ml.get("nutrientAdd", 0))
+            #         data.refill = int(ml.get("refill", 0))
+            #         data.valueS = float(max(data.phUp, data.phDown, data.nutrientAdd, data.refill))
+            #         
+            #         AUTO_MODE_SOURCE = "ml"
+            #         ml_success = True
+            #         print(f"[AUTO MODE] ✓ ML SUCCESS → phUp:{data.phUp}, phDown:{data.phDown}, nutrient:{data.nutrientAdd}, refill:{data.refill}, model:{ml.get('model_version', 'unknown')}")
+            #     else:
+            #         print(f"[AUTO MODE] ML service returned status {r.status_code}")
+            #         
+            # except (httpx.TimeoutException, httpx.ConnectError) as e:
+            #     print(f"[AUTO MODE] ML timeout/connection error: {e}")
+            # except Exception as e:
+            #     print(f"[AUTO MODE] ML prediction failed: {e}")
 
-            # ==== USE RULE-BASED AS IMMEDIATE RESPONSE (FALLBACK) ====
-            # This ensures we always return quickly with rule-based logic
+            # ==== USING RULE-BASED ONLY (FOR DATA COLLECTION) ====
+            # if not ml_success:  # COMMENTED OUT - ALWAYS USE RULE-BASED
+            print("[AUTO MODE] Using rule-based logic for data collection...")
             AUTO_MODE_SOURCE = "rule"
 
             # PH UP
@@ -153,10 +166,10 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
             if ppm < 560:
                 nutrientSec = max(0, min(20, (560 - ppm) / 20))
 
-            # REFILL
+            # REFILL (water_level is 0-3 scale: 0=empty, 1=low, 2=medium, 3=high)
             refillSec = 0
-            if wl < 40:
-                refillSec = max(0, min(25, (40 - wl) * 0.8))
+            if wl < 1.2:  # Below low level
+                refillSec = max(0, min(25, (1.2 - wl) * 20))
 
             # Set hasil rule
             data.phUp = int(phUpSec)
@@ -182,9 +195,9 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
                 if ppm < 650:
                     data.nutrientAdd = max(data.nutrientAdd, 1)
 
-            # Micro refill
-            if 40 <= wl <= 85:
-                if wl < 50:
+            # Micro refill (water_level 0-3 scale)
+            if 1.2 <= wl <= 2.5:  # Between low and medium-high
+                if wl < 1.5:  # Closer to low
                     data.refill = max(data.refill, 1)
 
             # Recalculate valueS

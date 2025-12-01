@@ -76,16 +76,29 @@ class MqttVM extends ChangeNotifier {
   Future<void> _triggerAutoActuator(String deviceId) async {
     try {
       final api = _ref.read(apiServiceProvider);
-      await api.postJson("/actuator/event?deviceId=$deviceId", {
+
+      // Send auto mode request
+      final res = await api.postJson("/actuator/event?deviceId=$deviceId", {
         "phUp": 0,
         "phDown": 0,
         "nutrientAdd": 0,
         "valueS": 0,
         "manual": 0,
-        "auto": 1,
+        "auto": 1, // ← This triggers ML/rule-based calculation
         "refill": 0,
       });
-      print("[MQTT] Auto actuator event sent for $deviceId");
+
+      // Extract calculated values from response
+      if (res != null && res['data'] != null) {
+        final data = res['data'] as Map<String, dynamic>;
+
+        // Send calculated values to MQTT
+        await _svc.publishControl("auto", data, deviceId);
+
+        print("[MQTT] Auto actuator event sent for $deviceId with data: $data");
+      } else {
+        print("[MQTT] Auto actuator response missing data");
+      }
     } catch (e) {
       print("[MQTT] Error sending auto actuator: $e");
     }

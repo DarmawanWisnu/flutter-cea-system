@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:fountaine/core/constants.dart';
-import 'package:fountaine/providers/provider/api_provider.dart';
+import '../../core/constants.dart';
+import '../../core/fuzzy.dart';
+import './api_provider.dart';
 
 String _norm(String? s) => (s ?? '').trim().toLowerCase();
 
@@ -73,13 +74,16 @@ class NotificationListNotifier extends StateNotifier<List<NotificationItem>> {
   final Map<String, DateTime> _lastAlertAt = {};
   static const Duration _cooldown = Duration(seconds: 20);
 
-  // Threshold
+  // Fuzzy logic service for severity determination
+  final _fuzzyService = NotificationSeverityService();
+
+  // Threshold - Warning levels (still used for detection)
   static const double _phMin = ThresholdConst.phMin;
   static const double _phMax = ThresholdConst.phMax;
   static const double _ppmMin = ThresholdConst.ppmMin;
   static const double _ppmMax = ThresholdConst.ppmMax;
-  static const double _humMin = ThresholdConst.wlMinPercent;
-  static const double _humMax = ThresholdConst.wlMaxPercent;
+  static const double _wlMin = ThresholdConst.wlMin;
+  static const double _wlMax = ThresholdConst.wlMax;
   static const double _tMin = ThresholdConst.tempMin;
   static const double _tMax = ThresholdConst.tempMax;
 
@@ -107,8 +111,8 @@ class NotificationListNotifier extends StateNotifier<List<NotificationItem>> {
       final ppm = _get(t, 'ppm');
       if (ppm != null && (ppm < _ppmMin || ppm > _ppmMax)) return true;
 
-      final hum = _get(t, 'humidity');
-      if (hum != null && (hum < _humMin || hum > _humMax)) return true;
+      final wl = _get(t, 'waterLevel');
+      if (wl != null && (wl < _wlMin || wl > _wlMax)) return true;
 
       final temp = _get(t, 'tempC');
       if (temp != null && (temp < _tMin || temp > _tMax)) return true;
@@ -128,48 +132,58 @@ class NotificationListNotifier extends StateNotifier<List<NotificationItem>> {
     final t = _telemetryOf(kit);
     if (t == null) return;
 
-    final ph = _get(t, 'ph');
-    final ppm = _get(t, 'ppm');
-    final hum = _get(t, 'humidity');
-    final temp = _get(t, 'tempC');
+    final ph = _get(t, 'ph') ?? 6.0;
+    final ppm = _get(t, 'ppm') ?? 700.0;
+    final wl = _get(t, 'waterLevel') ?? 1.8;
+    final temp = _get(t, 'tempC') ?? 21.0;
 
-    if (ph != null && (ph < _phMin || ph > _phMax)) {
+    // Check if any parameter is out of ideal range
+    final hasViolation =
+        (ph < _phMin || ph > _phMax) ||
+        (ppm < _ppmMin || ppm > _ppmMax) ||
+        (wl < _wlMin || wl > _wlMax) ||
+        (temp < _tMin || temp > _tMax);
+
+    if (!hasViolation) {
+      // All parameters normal - emit info notification periodically
       _emitThreshold(
         kitName: name,
-        param: 'pH',
-        message:
-            'pH ${ph < _phMin ? "Dropped" : "Spiked"} to ${ph.toStringAsFixed(2)}',
-        dir: ph < _phMin ? 'below' : 'above',
+        param: 'System',
+        message: 'All Parameters Within Safe Limits',
+        dir: 'normal',
+        level: 'info',
       );
+      return;
     }
 
-    if (ppm != null && (ppm < _ppmMin || ppm > _ppmMax)) {
-      _emitThreshold(
-        kitName: name,
-        param: 'PPM',
-        message:
-            'PPM ${ppm < _ppmMin ? "Dropped" : "Spiked"} to ${ppm.toStringAsFixed(0)}',
-        dir: ppm < _ppmMin ? 'below' : 'above',
-      );
-    }
+    // Use fuzzy logic to determine severity
+    final severity = _fuzzyService.evaluateSeverity(
+      ph: ph,
+      ppm: ppm,
+      temp: temp,
+      waterLevel: wl,
+    );
 
-    if (hum != null && (hum < _humMin || hum > _humMax)) {
-      _emitThreshold(
-        kitName: name,
-        param: 'Humidity',
-        message: 'Humidity ${hum.toStringAsFixed(1)}%',
-        dir: hum < _humMin ? 'below' : 'above',
-      );
-    }
+    // Build detailed message
+    final violations = <String>[];
+    if (ph < _phMin) violations.add('pH Low: ${ph.toStringAsFixed(2)}');
+    if (ph > _phMax) violations.add('pH High: ${ph.toStringAsFixed(2)}');
+    if (ppm < _ppmMin) violations.add('PPM Low: ${ppm.toStringAsFixed(0)}');
+    if (ppm > _ppmMax) violations.add('PPM High: ${ppm.toStringAsFixed(0)}');
+    if (wl < _wlMin) violations.add('Water Low: ${wl.toStringAsFixed(1)}');
+    if (wl > _wlMax) violations.add('Water High: ${wl.toStringAsFixed(1)}');
+    if (temp < _tMin) violations.add('Temp Low: ${temp.toStringAsFixed(1)}°C');
+    if (temp > _tMax) violations.add('Temp High: ${temp.toStringAsFixed(1)}°C');
 
-    if (temp != null && (temp < _tMin || temp > _tMax)) {
-      _emitThreshold(
-        kitName: name,
-        param: 'Temperature',
-        message: 'Temperature ${temp.toStringAsFixed(1)} °C',
-        dir: temp < _tMin ? 'below' : 'above',
-      );
-    }
+    final message = violations.join(', ');
+
+    _emitThreshold(
+      kitName: name,
+      param: 'Telemetry',
+      message: message,
+      dir: 'deviation',
+      level: severity,
+    );
   }
 
   void _emitThreshold({
@@ -177,10 +191,12 @@ class NotificationListNotifier extends StateNotifier<List<NotificationItem>> {
     required String param,
     required String message,
     required String dir,
+    required String level,
   }) {
     final key = '$kitName:$param:$dir';
     final now = DateTime.now();
 
+    // Cooldown check - prevents notification spam
     final last = _lastAlertAt[key];
     if (last != null && now.difference(last) < _cooldown) return;
 
@@ -188,8 +204,10 @@ class NotificationListNotifier extends StateNotifier<List<NotificationItem>> {
 
     final n = NotificationItem(
       id: now.millisecondsSinceEpoch.toString(),
-      level: 'warning',
-      title: 'Warning',
+      level: level,
+      title: level == 'urgent'
+          ? 'Urgent'
+          : (level == 'warning' ? 'Warning' : 'Info'),
       message: message,
       timestamp: now,
       kitName: kitName,

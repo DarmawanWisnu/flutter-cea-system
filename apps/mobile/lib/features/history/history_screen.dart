@@ -7,9 +7,9 @@ import '../../domain/telemetry.dart';
 import '../../models/nav_args.dart';
 
 class HistoryScreen extends ConsumerStatefulWidget {
-  final String kitId;
+  final String? kitId;
   final DateTime? targetTime;
-  const HistoryScreen({super.key, this.kitId = 'devkit-01', this.targetTime});
+  const HistoryScreen({super.key, this.kitId, this.targetTime});
 
   @override
   ConsumerState<HistoryScreen> createState() => _HistoryScreenState();
@@ -17,6 +17,8 @@ class HistoryScreen extends ConsumerStatefulWidget {
 
 class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   DateTime? selectedDate;
+  String? kitId;
+  bool _inited = false;
 
   final ScrollController _scroll = ScrollController();
   final Map<int, GlobalKey> _itemKeys = {};
@@ -31,8 +33,20 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   List<Map<String, dynamic>> _entries = [];
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_inited) return;
+
+    // Extract kitId from route args or widget
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is HistoryRouteArgs) {
+      kitId = args.kitId;
+    } else if (args is Map) {
+      kitId = args['kitId'] as String?;
+    }
+    kitId ??= widget.kitId;
+
+    _inited = true;
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _loadData();
@@ -52,10 +66,12 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
   // LOAD FROM BACKEND
   Future<void> _loadData() async {
+    if (kitId == null) return;
+    
     final api = ref.read(apiServiceProvider);
 
     final res = await api.getJson(
-      "/telemetry/history?deviceId=${widget.kitId}&limit=500",
+      "/telemetry/history?deviceId=$kitId&limit=500",
     );
 
     final List items = res["items"] ?? [];
@@ -66,6 +82,18 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
       return {"t": t, "ts": ts};
     }).toList();
+  }
+
+  // SWITCH KIT
+  Future<void> _switchKit(String newKitId) async {
+    if (newKitId == kitId) return;
+    setState(() {
+      kitId = newKitId;
+      _entries = [];
+      selectedDate = null;
+      _pendingTargetTime = null;
+    });
+    await _loadData();
   }
 
   @override
@@ -181,6 +209,11 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                 ),
               ),
 
+              SizedBox(height: 12 * s),
+
+              // KIT SELECTOR
+              _kitSelector(s),
+
               SizedBox(height: 18 * s),
 
               // EMPTY / LIST
@@ -250,7 +283,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                      widget.kitId,
+                                      kitId ?? 'Unknown Kit',
                                       style: TextStyle(
                                         color: _primary,
                                         fontSize: 17 * s,
@@ -374,6 +407,110 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  // KIT SELECTOR DROPDOWN
+  Widget _kitSelector(double s) {
+    final kitsAsync = ref.watch(apiKitsListProvider);
+
+    return kitsAsync.when(
+      loading: () => Container(
+        height: 50 * s,
+        padding: EdgeInsets.symmetric(horizontal: 18 * s),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18 * s),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10 * s,
+              offset: Offset(0, 3 * s),
+            ),
+          ],
+        ),
+        child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+      ),
+      error: (e, _) => Text("Failed to load kits: $e"),
+      data: (kits) {
+        if (kits.isEmpty) return const Text("No kits registered.");
+
+        // If kitId is null, use first kit
+        if (kitId == null && kits.isNotEmpty) {
+          Future.microtask(() {
+            setState(() => kitId = kits.first["id"] as String);
+            _loadData();
+          });
+        }
+
+        return Container(
+          padding: EdgeInsets.symmetric(horizontal: 18 * s, vertical: 14 * s),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(18 * s),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10 * s,
+                offset: Offset(0, 3 * s),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  const Icon(
+                    Icons.devices_rounded,
+                    color: _primary,
+                    size: 20,
+                  ),
+                  SizedBox(width: 8 * s),
+                  Text(
+                    'Kit:',
+                    style: TextStyle(
+                      color: _muted,
+                      fontSize: 15 * s,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(width: 8 * s),
+                  DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: kitId,
+                      icon: Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        color: _primary,
+                        size: 20 * s,
+                      ),
+                      items: kits.map<DropdownMenuItem<String>>((k) {
+                        final id = k["id"] as String;
+                        return DropdownMenuItem(
+                          value: id,
+                          child: Text(
+                            id,
+                            style: TextStyle(
+                              fontSize: 15 * s,
+                              fontWeight: FontWeight.w700,
+                              color: _primary,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (v) {
+                        if (v != null && v != kitId) {
+                          _switchKit(v);
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 

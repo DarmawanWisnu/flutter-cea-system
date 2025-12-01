@@ -13,6 +13,7 @@ import 'package:fountaine/features/settings/settings_screen.dart';
 import 'package:fountaine/features/profile/profile_screen.dart';
 import 'package:fountaine/features/notifications/notification_screen.dart';
 import 'package:fountaine/providers/provider/auth_provider.dart';
+import 'package:fountaine/models/nav_args.dart';
 
 /// ============================
 ///   AUTH GATE
@@ -84,9 +85,17 @@ Route<dynamic>? onGenerateRoute(RouteSettings settings) {
 
     // HISTORY SCREEN
     case Routes.history:
-      final args = settings.arguments as Map?;
-      final kitId = (args?['kitId'] as String?) ?? "devkit-01";
-      final target = args?['targetTime'] as DateTime?;
+      final args = settings.arguments;
+      String? kitId;
+      DateTime? target;
+
+      if (args is HistoryRouteArgs) {
+        kitId = args.kitId;
+        target = args.targetTime;
+      } else if (args is Map) {
+        kitId = args['kitId'] as String?;
+        target = args['targetTime'] as DateTime?;
+      }
 
       return MaterialPageRoute(
         builder: (_) => HistoryScreen(kitId: kitId, targetTime: target),

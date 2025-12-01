@@ -49,8 +49,9 @@ class ThresholdConst {
   static const double tempMin = 18.0;
   static const double tempMax = 24.0;
 
-  static const double wlMinPercent = 40.0;
-  static const double wlMaxPercent = 85.0;
+  // Water level thresholds (0-3 scale: 0=empty, 1=low, 2=medium, 3=high)
+  static const double wlMin = 1.2;
+  static const double wlMax = 2.5;
 
   static const double hysteresisPercent = 5.0;
   static const int confirmSamples = 3;

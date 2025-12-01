@@ -5,20 +5,18 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
-
-# Virtual environments
-venv/
-.env/
-.venv/
-ENV/
-env/
-
-# MyPy / static analysis
 .mypy_cache/
 .pytest_cache/
 
+# Virtual environments
+venv/
+.venv/
+env/
+.env/
+ENV/
+
 # ============================
-# ENV FILES
+# SECRETS & CREDENTIALS
 # ============================
 .env
 .env.*
@@ -26,6 +24,7 @@ env/
 # ============================
 # DATASETS & RAW DATA
 # ============================
+# Ignore large dataset folders
 Lettuce Dataset/
 Lettuce Dataset 2/
 datasets/
@@ -33,6 +32,8 @@ dataset/
 data/
 data_raw/
 data_processed/
+
+# Ignore data files
 **/*.csv
 **/*.tsv
 **/*.xlsx
@@ -43,8 +44,6 @@ data_processed/
 # Large binary data formats
 **/*.npy
 **/*.npz
-**/*.pkl
-**/*.pickle
 
 # Images
 **/*.jpg
@@ -55,6 +54,17 @@ data_processed/
 # ============================
 # TRAINED MODELS & CHECKPOINTS
 # ============================
+# Ignore model binary files (they're large and can be regenerated)
+model_registry/**/*.pkl
+model_registry/**/*.joblib
+model_registry/**/scaler.pkl
+model_registry/**/model.pkl
+
+# BUT keep metadata and version tracking
+!model_registry/**/metadata.json
+!model_registry/LATEST
+
+# Other model formats
 checkpoints/
 weights/
 models/
@@ -62,14 +72,11 @@ experiments/
 runs/
 outputs/
 
-# Common ML model formats
 *.pt
 *.pth
 *.h5
 *.hdf5
 *.ckpt
-*.joblib
-*.pkl
 *.onnx
 *.savedmodel
 *.pb
@@ -83,11 +90,26 @@ tb_logs/
 # NOTEBOOKS
 # ============================
 .ipynb_checkpoints/
+
+# Ignore all notebooks EXCEPT the training notebook
 **/*.ipynb
+!colab_training.ipynb
 
 # ============================
-# EDITOR & MISC
+# EDITOR & OS
 # ============================
 .DS_Store
 Thumbs.db
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+*.sublime-*
+
+# ============================
+# LOGS & TEMP
+# ============================
 *.log
+tmp/
+temp/
