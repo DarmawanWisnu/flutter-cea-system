@@ -40,18 +40,47 @@ class MonitorNotifier extends StateNotifier<MonitorState> {
   final Ref ref;
   String kitId;
 
-  StreamSubscription<Telemetry>? _sub;
+  late final ProviderSubscription _mqttSub;
 
   MonitorNotifier(this.ref, this.kitId)
     : super(const MonitorState(loading: true)) {
     _init();
+    _setupListener();
   }
 
-  /// INIT / SWITCH KIT
+  /// Listen telemetryMap from mqttProvider
+  void _setupListener() {
+    _mqttSub = ref.listen(mqttProvider, (_, next) {
+      final map = next.telemetryMap;
+      if (map.containsKey(kitId)) {
+        state = state.copyWith(data: map[kitId], lastUpdated: DateTime.now());
+      }
+    }, fireImmediately: true);
+  }
+
+  /// INIT (API snapshot first)
   Future<void> _init() async {
     state = state.copyWith(loading: true);
 
-    // Snapshot pertama dari API
+    final api = ref.read(apiServiceProvider);
+    final latest = await api.getLatestTelemetry(kitId);
+
+    state = state.copyWith(
+      data: latest,
+      lastUpdated: DateTime.now(),
+      loading: false,
+    );
+  }
+
+  /// SWITCH KIT (does NOT touch MQTT anymore)
+  Future<void> switchKit(String newKitId) async {
+    if (newKitId == kitId) return;
+
+    kitId = newKitId;
+
+    state = state.copyWith(loading: true);
+
+    // re-fetch snapshot from API
     final api = ref.read(apiServiceProvider);
     final latest = await api.getLatestTelemetry(kitId);
 
@@ -61,24 +90,7 @@ class MonitorNotifier extends StateNotifier<MonitorState> {
       loading: false,
     );
 
-    // MQTT realtime
-    // before publishing
-    final mqttVM = ref.read(mqttProvider.notifier);
-    print("[MONITOR] calling mqtt init…");
-    await mqttVM.init(kitId: kitId);
-    // Listen stream
-    _sub = mqttVM.service.telemetry$.listen((t) {
-      state = state.copyWith(data: t, lastUpdated: DateTime.now());
-    });
-  }
-
-  /// SWITCH KIT
-  Future<void> switchKit(String newKitId) async {
-    if (newKitId == kitId) return;
-
-    kitId = newKitId;
-    await _sub?.cancel();
-    await _init();
+    // stream real-time akan update otomatis dari listener
   }
 
   /// ACTUATOR API
@@ -100,30 +112,28 @@ class MonitorNotifier extends StateNotifier<MonitorState> {
     // 1. KIRIM KE BACKEND
     api.postJson("/actuator/event?deviceId=$kitId", body);
 
-    // 2. MQTT MAPPER (CAMELCASE)
+    // 2. MQTT CONTROL
     final mqtt = ref.read(mqttProvider.notifier);
 
     switch (field) {
       case "phUp":
-        mqtt.phUp();
+        mqtt.publishActuator("phUp", kitId: kitId);
         break;
       case "phDown":
-        mqtt.phDown();
+        mqtt.publishActuator("phDown", kitId: kitId);
         break;
       case "nutrientAdd":
-        mqtt.nutrientAdd();
+        mqtt.publishActuator("nutrientAdd", kitId: kitId);
         break;
       case "refill":
-        mqtt.refill();
+        mqtt.publishActuator("refill", kitId: kitId);
         break;
       case "manual":
-        mqtt.setManual();
+        mqtt.publishActuator("manual", kitId: kitId);
         break;
       case "auto":
-        mqtt.setAuto();
+        mqtt.publishActuator("auto", kitId: kitId);
         break;
-      default:
-        print("[MQTT] Unknown actuator field: $field");
     }
   }
 
@@ -137,7 +147,7 @@ class MonitorNotifier extends StateNotifier<MonitorState> {
   /// DISPOSE
   @override
   void dispose() {
-    _sub?.cancel();
+    _mqttSub.close();
     super.dispose();
   }
 }

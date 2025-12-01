@@ -1,15 +1,17 @@
 from fastapi import FastAPI, HTTPException
 from typing import Optional
 from pydantic import BaseModel
-from database import get_connection, release_connection
+from services.api.database import get_connection, release_connection
+from services.api.ml_service import ml_router
 import uuid
 import hashlib
 import time
 import json
-import actuator
+from services.api import actuator
 
 app = FastAPI()
 app.include_router(actuator.router, prefix="/actuator")
+app.include_router(ml_router, prefix="/ml")
 
 # MODELS
 
@@ -309,7 +311,7 @@ def get_history(deviceId: str, limit: int = 50):
 
 # SERVER RUNNER
 if __name__ == "__main__":
-    from database import init_pool, run_migrations
+    from services.api.database import init_pool, run_migrations
     init_pool()
     run_migrations()
 

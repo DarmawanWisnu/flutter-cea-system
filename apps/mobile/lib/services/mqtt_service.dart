@@ -13,22 +13,23 @@ class MqttService {
   final _connStateCtrl = StreamController<MqttConnState>.broadcast();
   Stream<MqttConnState> get connectionState$ => _connStateCtrl.stream;
 
-  final _telemetryCtrl = StreamController<Telemetry>.broadcast();
-  Stream<Telemetry> get telemetry$ => _telemetryCtrl.stream;
+  // WILDCARD → kita kirim pair: (kitId, Telemetry)
+  final _telemetryCtrl =
+      StreamController<MapEntry<String, Telemetry>>.broadcast();
+  Stream<MapEntry<String, Telemetry>> get telemetry$ => _telemetryCtrl.stream;
 
-  final _statusCtrl = StreamController<DeviceStatus>.broadcast();
-  Stream<DeviceStatus> get status$ => _statusCtrl.stream;
+  final _statusCtrl =
+      StreamController<MapEntry<String, DeviceStatus>>.broadcast();
+  Stream<MapEntry<String, DeviceStatus>> get status$ => _statusCtrl.stream;
 
   MqttServerClient? _client;
   Timer? _reconnectTimer;
-  String? _kitId;
 
-  // CONNECT
-  Future<void> connect({required String kitId}) async {
-    _kitId = kitId;
-    _connStateCtrl.add(MqttConnState.connecting);
-    print("[MQTT] connected!");
+  bool _intentionalDisconnect = false;
+
+  Future<void> connect() async {
     print("[MQTT] connecting to ${MqttConst.host}:${MqttConst.port}");
+    _connStateCtrl.add(MqttConnState.connecting);
 
     final clientId =
         "${MqttConst.clientPrefix}${DateTime.now().millisecondsSinceEpoch}";
@@ -43,17 +44,10 @@ class MqttService {
     c.onDisconnected = _onDisconnected;
     c.onConnected = () => _connStateCtrl.add(MqttConnState.connected);
 
-    // Will message (offline)
-    final willTopic = MqttConst.tStatus(kitId);
+    // WILL message tetap dipakai CEA-01 default
     c.connectionMessage = MqttConnectMessage()
         .withClientIdentifier(clientId)
-        .startClean()
-        .withWillTopic(willTopic)
-        .withWillMessage(
-          jsonEncode({"online": false, "ts": DateTime.now().toIso8601String()}),
-        )
-        .withWillQos(MqttQos.atLeastOnce)
-        .withWillRetain();
+        .startClean();
 
     try {
       final status = await c.connect(
@@ -69,23 +63,12 @@ class MqttService {
       }
 
       _client = c;
-      _connStateCtrl.add(MqttConnState.connected);
 
-      // Publish ONLINE status
-      _publish(willTopic, {
-        "online": true,
-        "ts": DateTime.now().toIso8601String(),
-      }, retain: true);
+      // SUBSCRIBE WILDCARD
+      c.subscribe("kit/+/telemetry", MqttQos.atLeastOnce);
+      c.subscribe("kit/+/status", MqttQos.atLeastOnce);
 
-      // SUBSCRIBE
-      final teleTopic = MqttConst.tTelemetry(kitId);
-      final statTopic = MqttConst.tStatus(kitId);
-
-      print("[MQTT] subscribing to $teleTopic");
-      print("[MQTT] subscribing to $statTopic");
-
-      c.subscribe(teleTopic, MqttQos.atLeastOnce);
-      c.subscribe(statTopic, MqttQos.atLeastOnce);
+      print("[MQTT] wildcard subscribed: kit/+/telemetry & kit/+/status");
 
       c.updates?.listen((events) {
         for (final ev in events) {
@@ -94,44 +77,52 @@ class MqttService {
           final payload = MqttPublishPayload.bytesToStringAsString(
             msg.payload.message,
           );
+
           print("[MQTT] EVENT → $topic : $payload");
 
-          // TELEMETRY
-          if (topic == teleTopic) {
+          final parts = topic.split("/");
+          if (parts.length < 3) continue;
+
+          final kitId = parts[1];
+
+          if (topic.contains("/telemetry")) {
             try {
               final map = jsonDecode(payload);
               final t = Telemetry.fromJson(map);
-              _telemetryCtrl.add(t);
+              _telemetryCtrl.add(MapEntry(kitId, t));
             } catch (_) {}
           }
 
-          // STATUS
-          if (topic == statTopic) {
+          if (topic.contains("/status")) {
             try {
               final s = DeviceStatus.fromJson(jsonDecode(payload));
-              _statusCtrl.add(s);
+              _statusCtrl.add(MapEntry(kitId, s));
             } catch (_) {}
           }
         }
       });
-    } catch (_) {
+    } catch (e) {
+      print("[MQTT] connect error: $e");
       _connStateCtrl.add(MqttConnState.error);
-      _client?.disconnect();
+      try {
+        _client?.disconnect();
+      } catch (_) {}
       _scheduleReconnect();
     }
   }
 
-  // CONTROL (ACTUATOR PUBLISH)
-  Future<void> publishControl(String cmd, Map<String, dynamic> data) async {
+  Future<void> publishControl(
+    String cmd,
+    Map<String, dynamic> data,
+    String kitId,
+  ) async {
     final cli = _client;
-    final kitId = _kitId;
-
-    if (cli == null || kitId == null) return;
+    if (cli == null) return;
 
     final topic = MqttConst.tControl(kitId);
 
     final payload = {
-      "cmd": cmd, // <--- CAMEL CASE
+      "cmd": cmd,
       "data": data,
       "ts": DateTime.now().toIso8601String(),
     };
@@ -147,46 +138,35 @@ class MqttService {
     );
   }
 
-  // INTERNAL PUBLISH
-  void _publish(String topic, Map<String, dynamic> obj, {bool retain = false}) {
-    final cli = _client;
-    if (cli == null) return;
-
-    final builder = MqttClientPayloadBuilder()..addUTF8String(jsonEncode(obj));
-
-    cli.publishMessage(
-      topic,
-      MqttQos.atLeastOnce,
-      builder.payload!,
-      retain: retain,
-    );
-  }
-
-  // RECONNECT HANDLER
   void _scheduleReconnect() {
     _reconnectTimer?.cancel();
-    if (_kitId == null) return;
-
-    _reconnectTimer = Timer(
-      const Duration(seconds: 5),
-      () => connect(kitId: _kitId!),
-    );
+    _reconnectTimer = Timer(const Duration(seconds: 5), () => connect());
   }
 
   void _onDisconnected() {
-    print("[MQTT] disconnected!");
+    print("[MQTT] DISCONNECTED");
     _connStateCtrl.add(MqttConnState.disconnected);
+
+    if (_intentionalDisconnect) return;
     _scheduleReconnect();
   }
 
-  // DISCONNECT CLEAN
   Future<void> disconnect() async {
+    _intentionalDisconnect = true;
+
     _reconnectTimer?.cancel();
-    _client?.disconnect();
+    _reconnectTimer = null;
+
+    try {
+      _client?.disconnect();
+    } catch (_) {}
+
+    _client = null;
+
     _connStateCtrl.add(MqttConnState.disconnected);
+    _intentionalDisconnect = false;
   }
 
-  // DISPOSE INTERNAL
   Future<void> dispose() async {
     await disconnect();
     await _telemetryCtrl.close();

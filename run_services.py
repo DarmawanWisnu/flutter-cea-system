@@ -30,8 +30,8 @@ services = [
     },
     {
         "name": "API Service",
-        "cmd": "python main.py",
-        "cwd": os.path.join(ROOT, "services", "api"),
+        "cmd": "uvicorn services.api.main:app --reload --port 8000",
+        "cwd": ROOT,  
         "log": os.path.join(LOG_DIR, "api.log")
     },
     # {

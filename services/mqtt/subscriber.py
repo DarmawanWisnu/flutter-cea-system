@@ -4,9 +4,8 @@ import signal
 import os
 import requests
 from paho.mqtt import client as mqtt
-from statistics import median
-from collections import deque
 from threading import Lock
+from datetime import datetime
 
 RUNNING = True
 def handle_signal(signum, frame):
@@ -18,131 +17,120 @@ signal.signal(signal.SIGTERM, handle_signal)
 
 BROKER = "localhost"
 PORT = 1883
-KIT_ID = os.getenv("KIT_ID", "CEA-01")
-TOPIC = f"kit/{KIT_ID}/telemetry"
+
+KIT_ID = os.getenv("KIT_ID")
+IS_MULTI = KIT_ID is None
+
+if IS_MULTI:
+    TOPIC = "kit/+/telemetry"
+else:
+    TOPIC = f"kit/{KIT_ID}/telemetry"
+
 BACKEND_URL = "http://127.0.0.1:8000/telemetry"
 QOS = 1
+
 CLIENT_ID = f"csv-subscriber-{KIT_ID}"
 
-# Auto-detected interval
-AUTO_INTERVAL = 5.0         # default sementara (float)
-last_msg_time = None
-interval_samples = deque(maxlen=10)   # ring buffer interval
-MAX_SAMPLES = 10
-
-# Tick counter
-LAST_TICK = 0.0
-
-STATE = {
-    "ppm": None,
-    "ph": None,
-    "tempC": None,
-    "humidity": None,
-    "waterTemp": None,
-    "waterLevel": None
-}
-
-# Lock to protect STATE and interval_samples across threads
+STATE = {}   # per-device state
 state_lock = Lock()
 
-print("[KIT_ID]", KIT_ID)
-print("[SUBSCRIBE]", TOPIC)
-
-
-def update_interval():
-    """Hitung interval publisher otomatis berdasarkan median sampel."""
-    global AUTO_INTERVAL
-
-    if len(interval_samples) < 3:
-        return  # belum cukup data
-
-    try:
-        new_interval = float(median(list(interval_samples)))
-    except Exception:
-        return
-
-    # batasan wajar (2-60 detik)
-    if 2.0 <= new_interval <= 60.0:
-        AUTO_INTERVAL = new_interval
-        print(f"[INTERVAL] Auto calibrated → {AUTO_INTERVAL:.2f} sec")
-
-
-def send_snapshot():
-    # baca STATE dengan lock supaya konsisten
-    with state_lock:
-        payload = {k: (v if v is not None else 0.0) for k, v in STATE.items()}
-    print("[SEND PAYLOAD]", payload)
-
-    try:
-        r = requests.post(
-            f"{BACKEND_URL}?deviceId={KIT_ID}",
-            json=payload,
-            timeout=5
-        )
-        print("[BACKEND]", r.status_code, "→", r.text)
-    except Exception as e:
-        print("[ERR] Backend gagal:", e)
-
-
-def on_connect(client, userdata, flags, reason_code, properties):
-    print("[OK] Subscriber konek:", TOPIC)
-    client.subscribe(TOPIC, qos=QOS)
-
+print("[INIT] KIT_ID:", KIT_ID)
+print("[INIT] SUBSCRIBING:", TOPIC)
 
 def safe_float(x, default=None):
     try:
         if x is None:
             return default
-        # handle strings like "" as default
         if isinstance(x, str) and x.strip() == "":
             return default
         return float(x)
-    except Exception:
+    except:
         return default
 
+def pretty_json(obj):
+    return json.dumps(obj, indent=2, ensure_ascii=False)
+
+def send_snapshot(kit_id):
+    with state_lock:
+        payload = STATE.get(kit_id, {})
+
+    print("\n📤 Sending Snapshot to Backend...")
+    print(f"POST /telemetry?deviceId={kit_id}")
+    print(pretty_json(payload))
+
+    try:
+        r = requests.post(
+            f"{BACKEND_URL}?deviceId={kit_id}",
+            json=payload,
+            timeout=5
+        )
+        print(f"Backend Status → {r.status_code} | {r.text}")
+    except Exception as e:
+        print("[ERR] Backend error:", e)
+
+def on_connect(client, userdata, flags, reason_code, properties):
+    print("[MQTT] Connected →", TOPIC)
+    client.subscribe(TOPIC, qos=QOS)
 
 def on_message(client, userdata, msg):
-    global last_msg_time
+    t = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    now = time.time()
+    print("\n──────────────────────────────────────────────")
+    print("📥 MQTT MESSAGE RECEIVED")
+    print(f"🕒 {t}")
+    print(f"📡 Topic: {msg.topic}")
 
-    # Hitung interval pesan
-    if last_msg_time is not None:
-        delta = now - last_msg_time
-        if delta > 0.2:
-            with state_lock:
-                interval_samples.append(delta)
-            update_interval()
-
-    last_msg_time = now
-
-    # Parse payload full row
     try:
         data = json.loads(msg.payload.decode())
 
-        # Update seluruh state atomically
-        with state_lock:
-            for key in STATE.keys():
-                if key in data:
-                    val = safe_float(data.get(key), default=None)
-                    # hanya update jika val bukan None (atau sesuai kebijakanmu)
-                    STATE[key] = val
+        # detect deviceId from topic
+        if IS_MULTI:
+            kit_id = msg.topic.split("/")[1]
+        else:
+            kit_id = KIT_ID
 
-        print("[MQTT] STATE UPDATED →", STATE)
+        print(f"🔧 Device ID: {kit_id}")
+        print("──────────────────────────────────────────────\n")
+
+        print("Payload:")
+        print(pretty_json(data))
+        print()
+
+        # ensure this device has its own state
+        with state_lock:
+            if kit_id not in STATE:
+                STATE[kit_id] = {
+                    "ppm": 0.0,
+                    "ph": 0.0,
+                    "tempC": 0.0,
+                    "humidity": 0.0,
+                    "waterTemp": 0.0,
+                    "waterLevel": 0.0,
+                }
+
+                for key in STATE[kit_id]:
+                    STATE[kit_id][key] = safe_float(data.get(key, STATE[kit_id][key]), STATE[kit_id][key])
+
+
+        print("Updated State:")
+        print(pretty_json(STATE[kit_id]))
+        print()
+
+        send_snapshot(kit_id)
+
+        print("──────────────────────────────────────────────")
 
     except Exception as e:
-        print("[ERR] parse MQTT:", e)
+        print("[ERR] Failed to parse MQTT:", e)
         print("[RAW]", msg.payload)
-
+        print("──────────────────────────────────────────────")
 
 def main():
-    global LAST_TICK
-
     client = mqtt.Client(
-    mqtt.CallbackAPIVersion.VERSION2,
-    client_id=CLIENT_ID,
-    protocol=mqtt.MQTTv311
-)
+        mqtt.CallbackAPIVersion.VERSION2,
+        client_id=CLIENT_ID,
+        protocol=mqtt.MQTTv311
+    )
 
     client.on_connect = on_connect
     client.on_message = on_message
@@ -150,25 +138,15 @@ def main():
     client.loop_start()
     client.connect(BROKER, PORT)
 
-    LAST_TICK = time.time()
-    print("[INFO] Subscriber jalan.")
+    print("[INFO] Subscriber running...\n")
 
     try:
         while RUNNING:
-            now = time.time()
-
-            # snapshot based on auto interval
-            if now - LAST_TICK >= AUTO_INTERVAL:
-                send_snapshot()
-                LAST_TICK = now
-
             time.sleep(0.1)
-
     finally:
-        print("[STOP] Subscriber berhenti.")
+        print("\n[STOP] Subscriber berhenti.")
         client.loop_stop()
         client.disconnect()
-
 
 if __name__ == "__main__":
     main()

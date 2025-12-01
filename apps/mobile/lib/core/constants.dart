@@ -38,21 +38,21 @@ class MqttConst {
   static String tControl(String kitId) => "kit/$kitId/control";
 }
 
-/// THRESHOLDS
+/// THRESHOLDS Selada Hydroponic
 class ThresholdConst {
-  static const double ppmMin = 800.0;
-  static const double ppmMax = 1100.0;
+  static const double ppmMin = 560.0;
+  static const double ppmMax = 840.0;
 
-  static const double phMin = 5.8;
-  static const double phMax = 6.2;
+  static const double phMin = 5.5;
+  static const double phMax = 6.5;
 
-  static const double tempMin = 20.0;
-  static const double tempMax = 26.0;
+  static const double tempMin = 18.0;
+  static const double tempMax = 24.0;
 
-  static const double wlMinPercent = 50.0;
-  static const double wlMaxPercent = 90.0;
+  static const double wlMinPercent = 40.0;
+  static const double wlMaxPercent = 85.0;
 
   static const double hysteresisPercent = 5.0;
-  static const int confirmSamples = 2;
+  static const int confirmSamples = 3;
   static const int alertCooldownMin = 5;
 }

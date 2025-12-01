@@ -1,0 +1,12 @@
+# config.yaml (put to project root)
+model_registry: model_registry
+retrain:
+  schedule: "weekly"
+trainer:
+  n_estimators: 100
+  random_state: 42
+clamps:
+  phUp: [0, 300]
+  phDown: [0, 300]
+  nutrientAdd: [0, 600]
+  refill: [0, 600]
