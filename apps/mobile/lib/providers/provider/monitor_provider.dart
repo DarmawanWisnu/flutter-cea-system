@@ -44,6 +44,7 @@ class MonitorNotifier extends StateNotifier<MonitorState> {
 
   MonitorNotifier(this.ref, this.kitId)
     : super(const MonitorState(loading: true)) {
+    _initMqtt();
     _init();
     _setupListener();
   }
@@ -70,6 +71,16 @@ class MonitorNotifier extends StateNotifier<MonitorState> {
       lastUpdated: DateTime.now(),
       loading: false,
     );
+  }
+
+  /// Initialize MQTT connection
+  Future<void> _initMqtt() async {
+    try {
+      await ref.read(mqttProvider.notifier).init();
+      print("[Monitor] MQTT initialized");
+    } catch (e) {
+      print("[Monitor] MQTT init error: $e");
+    }
   }
 
   /// SWITCH KIT (does NOT touch MQTT anymore)

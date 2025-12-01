@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fountaine/providers/provider/monitor_provider.dart';
 import 'package:fountaine/providers/provider/api_provider.dart';
+import 'package:fountaine/providers/provider/mqtt_provider.dart';
 import '../../domain/telemetry.dart';
 import 'dart:ui';
 import 'dart:math' as math;
@@ -86,8 +87,13 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
   void initState() {
     super.initState();
 
+    // INITIALIZE MQTT CONNECTION
     Future.microtask(() async {
       try {
+        // Start MQTT connection
+        await ref.read(mqttProvider.notifier).init();
+
+        // Then load kits
         final kits = await ref.read(apiKitsListProvider.future);
 
         if (kits.isEmpty) {
@@ -102,7 +108,9 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
         if (mounted) {
           setState(() => kitId = initial);
         }
-      } catch (e) {}
+      } catch (e) {
+        print("[Monitor] Init error: $e");
+      }
     });
   }
 
