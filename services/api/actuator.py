@@ -76,7 +76,7 @@ class ActuatorEvent(BaseModel):
 
 # INSERT ACTUATOR EVENT
 @router.post("/event")
-async def insert_event(deviceId: str, data: ActuatorEvent):
+async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: BackgroundTasks):
     global AUTO_MODE_SOURCE
     deviceId = deviceId.strip()
 
@@ -124,95 +124,69 @@ async def insert_event(deviceId: str, data: ActuatorEvent):
             else:
                 ppm, ph, tempC, humidity, wl = (0, 0, 0, 0, 0)
 
-            # ==== TRY MACHINE LEARNING FIRST ====
-            ml_success = False
-            try:
-                ml_payload = {
-                    "ppm": ppm,
-                    "ph": ph,
-                    "tempC": tempC,
-                    "humidity": humidity,
-                    "waterTemp": 0.0,
-                    "waterLevel": wl
-                }
+            # ==== TRY MACHINE LEARNING IN BACKGROUND (NON-BLOCKING) ====
+            # Add ML prediction as background task - this won't block the response
+            # background_tasks.add_task(
+               # try_ml_prediction_and_update,
+                # deviceId, ppm, ph, tempC, humidity, wl, ingestTime
+            #)
 
-                async with httpx.AsyncClient(timeout=0.3) as client:
-                    r = await client.post("http://127.0.0.1:8000/ml/predict", json=ml_payload)
+            # ==== USE RULE-BASED AS IMMEDIATE RESPONSE (FALLBACK) ====
+            # This ensures we always return quickly with rule-based logic
+            AUTO_MODE_SOURCE = "rule"
 
-                if r.status_code == 200:
-                    ml = r.json()
-                    data.phUp = ml.get("phUp", 0)
-                    data.phDown = ml.get("phDown", 0)
-                    data.nutrientAdd = ml.get("nutrientAdd", 0)
-                    data.refill = ml.get("refill", 0)
-                    data.valueS = float(max(
-                        data.phUp, data.phDown, data.nutrientAdd, data.refill
-                    ))
+            # PH UP
+            phUpSec = 0
+            if ph < 5.5:
+                phUpSec = max(0, min(12, (5.5 - ph) * 8))
 
-                    AUTO_MODE_SOURCE = "ml"
-                ml_success = True
+            # PH DOWN
+            phDownSec = 0
+            if ph > 6.5:
+                phDownSec = max(0, min(12, (ph - 6.5) * 8))
 
-            except (httpx.TimeoutException, httpx.ConnectError) as e:
-                print(f"[ML] Timeout/Connection error: {e}")
-            except Exception as e:
-                print(f"[ML] Unexpected error: {e}")
+            # NUTRIENT
+            nutrientSec = 0
+            if ppm < 560:
+                nutrientSec = max(0, min(20, (560 - ppm) / 20))
 
-            # ==== FALLBACK KE RULE-BASED ====
-            if not ml_success:
-                AUTO_MODE_SOURCE = "rule"
+            # REFILL
+            refillSec = 0
+            if wl < 40:
+                refillSec = max(0, min(25, (40 - wl) * 0.8))
 
-                # PH UP
-                phUpSec = 0
-                if ph < 5.5:
-                    phUpSec = max(0, min(12, (5.5 - ph) * 8))
+            # Set hasil rule
+            data.phUp = int(phUpSec)
+            data.phDown = int(phDownSec)
+            data.nutrientAdd = int(nutrientSec)
+            data.refill = int(refillSec)
+            data.valueS = float(max(
+                phUpSec, phDownSec, nutrientSec, refillSec
+            ))
+            
+            # MICRO ADJUSTMENT
 
-                # PH DOWN
-                phDownSec = 0
-                if ph > 6.5:
-                    phDownSec = max(0, min(12, (ph - 6.5) * 8))
+            # Micro pH
+            if 5.5 <= ph <= 6.5:
+                if ph < 5.7:
+                    data.phUp = max(data.phUp, 1)
+                elif ph > 6.3:
+                    data.phDown = max(data.phDown, 1)
 
-                # NUTRIENT
-                nutrientSec = 0
-                if ppm < 560:
-                    nutrientSec = max(0, min(20, (560 - ppm) / 20))
+            # Micro nutrient
+            if 560 <= ppm <= 840:
+                if ppm < 650:
+                    data.nutrientAdd = max(data.nutrientAdd, 1)
 
-                # REFILL
-                refillSec = 0
-                if wl < 40:
-                    refillSec = max(0, min(25, (40 - wl) * 0.8))
+            # Micro refill
+            if 40 <= wl <= 85:
+                if wl < 50:
+                    data.refill = max(data.refill, 1)
 
-                # Set hasil rule
-                data.phUp = int(phUpSec)
-                data.phDown = int(phDownSec)
-                data.nutrientAdd = int(nutrientSec)
-                data.refill = int(refillSec)
-                data.valueS = float(max(
-                    phUpSec, phDownSec, nutrientSec, refillSec
-                )
-                )
-                # MICRO ADJUSTMENT
-
-                # Micro pH
-                if 5.5 <= ph <= 6.5:
-                    if ph < 5.7:
-                        data.phUp = max(data.phUp, 1)
-                    elif ph > 6.3:
-                        data.phDown = max(data.phDown, 1)
-
-                # Micro nutrient
-                if 560 <= ppm <= 840:
-                    if ppm < 650:
-                        data.nutrientAdd = max(data.nutrientAdd, 1)
-
-                # Micro refill
-                if 40 <= wl <= 85:
-                    if wl < 50:
-                        data.refill = max(data.refill, 1)
-
-                # Recalculate valueS
-                data.valueS = float(max(
-                    data.phUp, data.phDown, data.nutrientAdd, data.refill
-                ))
+            # Recalculate valueS
+            data.valueS = float(max(
+                data.phUp, data.phDown, data.nutrientAdd, data.refill
+            ))
 
         # INSERT FINAL ACTUATOR EVENT
         cur.execute("""
@@ -240,6 +214,71 @@ async def insert_event(deviceId: str, data: ActuatorEvent):
     finally:
         cur.close()
         release_connection(conn)
+
+
+# BACKGROUND TASK: Try ML prediction and update event if successful
+async def try_ml_prediction_and_update(deviceId: str, ppm: float, ph: float, 
+                                       tempC: float, humidity: float, wl: float, 
+                                       ingestTime: int):
+    """
+    This runs in the background and won't block the main response.
+    If ML succeeds, it updates the actuator event that was just created.
+    """
+    global AUTO_MODE_SOURCE
+    
+    try:
+        ml_payload = {
+            "ppm": ppm,
+            "ph": ph,
+            "tempC": tempC,
+            "humidity": humidity,
+            "waterTemp": 0.0,
+            "waterLevel": wl
+        }
+
+        # Increased timeout since this is non-blocking now
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            r = await client.post("http://127.0.0.1:8000/ml/predict", json=ml_payload)
+
+        if r.status_code == 200:
+            ml = r.json()
+            ml_phUp = ml.get("phUp", 0)
+            ml_phDown = ml.get("phDown", 0)
+            ml_nutrientAdd = ml.get("nutrientAdd", 0)
+            ml_refill = ml.get("refill", 0)
+            ml_valueS = float(max(ml_phUp, ml_phDown, ml_nutrientAdd, ml_refill))
+
+            # Update the most recent actuator event with ML results
+            conn = get_connection()
+            cur = conn.cursor()
+            
+            try:
+                cur.execute("""
+                    UPDATE actuator_event
+                    SET "phUp" = %s, "phDown" = %s, "nutrientAdd" = %s, 
+                        "refill" = %s, "valueS" = %s
+                    WHERE "deviceId" = %s AND "ingestTime" = %s;
+                """, (
+                    int(ml_phUp), int(ml_phDown), int(ml_nutrientAdd),
+                    int(ml_refill), float(ml_valueS),
+                    deviceId, ingestTime
+                ))
+                conn.commit()
+                
+                AUTO_MODE_SOURCE = "ml"
+                print(f"[ML] Successfully updated actuator event for {deviceId} with ML predictions")
+                
+            except Exception as e:
+                conn.rollback()
+                print(f"[ML] Failed to update actuator event: {e}")
+            finally:
+                cur.close()
+                release_connection(conn)
+
+    except (httpx.TimeoutException, httpx.ConnectError) as e:
+        print(f"[ML Background] Timeout/Connection error: {e}")
+    except Exception as e:
+        print(f"[ML Background] Unexpected error: {e}")
 
 # GET LATEST ACTUATOR EVENT
 @router.get("/latest")

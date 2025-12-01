@@ -109,8 +109,13 @@ class MonitorNotifier extends StateNotifier<MonitorState> {
 
     body[field] = 1;
 
-    // 1. KIRIM KE BACKEND
-    api.postJson("/actuator/event?deviceId=$kitId", body);
+    // Await with error handling
+    try {
+      await api.postJson("/actuator/event?deviceId=$kitId", body);
+    } catch (e) {
+      print("[Actuator] Error: $e");
+      // Optional: show error to user
+    }
 
     // 2. MQTT CONTROL
     final mqtt = ref.read(mqttProvider.notifier);

@@ -15,7 +15,14 @@ MAX_BYTES = 10 * 1024 * 1024   # 10 MB
 BACKUP_COUNT = 5               # Keep 5 backups
 
 # Services to run
+# Services to run
 services = [
+    {
+        "name": "API Service",
+        "cmd": "uvicorn services.api.main:app --reload --port 8000",
+        "cwd": ROOT,  
+        "log": os.path.join(LOG_DIR, "api.log")
+    },
     {
         "name": "MQTT Subscriber",
         "cmd": "python subscriber.py",
@@ -27,12 +34,6 @@ services = [
         "cmd": "python publisher.py",
         "cwd": os.path.join(ROOT, "services", "mqtt"),
         "log": os.path.join(LOG_DIR, "mqtt_pub.log")
-    },
-    {
-        "name": "API Service",
-        "cmd": "uvicorn services.api.main:app --reload --port 8000",
-        "cwd": ROOT,  
-        "log": os.path.join(LOG_DIR, "api.log")
     },
     # {
     #     "name": "ML Service",
@@ -84,8 +85,12 @@ for svc in services:
     subprocess.Popen(command, shell=True)
 
     logger.info(f"{svc['name']} started.")
-
-    time.sleep(0.4)
+    
+    # Give API extra time to fully start
+    if svc['name'] == "API Service":
+        time.sleep(3)  # Wait 3 seconds for API to be ready
+    else:
+        time.sleep(0.4)
 
 print("\n=== All services started successfully! ===")
 print("Log files located at: logs/")
