@@ -111,100 +111,116 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
                 print("[AUTO MODE] WARNING: No telemetry found, using zeros")
 
             # ==== TRY MACHINE LEARNING FIRST (SYNCHRONOUS WITH TIMEOUT) ====
-            # COMMENTED OUT FOR DATA COLLECTION - USING RULE-BASED ONLY
             ml_success = False
-            # try:
-            #     ml_payload = {
-            #         "ppm": ppm,
-            #         "ph": ph,
-            #         "tempC": tempC,
-            #         "humidity": humidity,
-            #         "waterTemp": 0.0,
-            #         "waterLevel": wl
-            #     }
-            #     
-            #     print("[AUTO MODE] Attempting ML prediction...")
-            #     async with httpx.AsyncClient(timeout=2.0) as client:
-            #         r = await client.post("http://127.0.0.1:8000/ml/predict", json=ml_payload)
-            #     
-            #     if r.status_code == 200:
-            #         ml = r.json()
-            #         data.phUp = int(ml.get("phUp", 0))
-            #         data.phDown = int(ml.get("phDown", 0))
-            #         data.nutrientAdd = int(ml.get("nutrientAdd", 0))
-            #         data.refill = int(ml.get("refill", 0))
-            #         data.valueS = float(max(data.phUp, data.phDown, data.nutrientAdd, data.refill))
-            #         
-            #         AUTO_MODE_SOURCE = "ml"
-            #         ml_success = True
-            #         print(f"[AUTO MODE] ✓ ML SUCCESS → phUp:{data.phUp}, phDown:{data.phDown}, nutrient:{data.nutrientAdd}, refill:{data.refill}, model:{ml.get('model_version', 'unknown')}")
-            #     else:
-            #         print(f"[AUTO MODE] ML service returned status {r.status_code}")
-            #         
-            # except (httpx.TimeoutException, httpx.ConnectError) as e:
-            #     print(f"[AUTO MODE] ML timeout/connection error: {e}")
-            # except Exception as e:
-            #     print(f"[AUTO MODE] ML prediction failed: {e}")
+            try:
+                ml_payload = {
+                    "ppm": ppm,
+                    "ph": ph,
+                    "tempC": tempC,
+                    "humidity": humidity,
+                    "waterTemp": 0.0,
+                    "waterLevel": wl
+                }
+                
+                print("[AUTO MODE] Attempting ML prediction...")
+                async with httpx.AsyncClient(timeout=2.0) as client:
+                    r = await client.post("http://127.0.0.1:8000/ml/predict", json=ml_payload)
+                
+                if r.status_code == 200:
+                    ml = r.json()
+                    data.phUp = int(ml.get("phUp", 0))
+                    data.phDown = int(ml.get("phDown", 0))
+                    data.nutrientAdd = int(ml.get("nutrientAdd", 0))
+                    data.refill = int(ml.get("refill", 0))
+                    data.valueS = float(max(data.phUp, data.phDown, data.nutrientAdd, data.refill))
+                    
+                    AUTO_MODE_SOURCE = "ml"
+                    ml_success = True
+                    print(f"[AUTO MODE] ✓ ML SUCCESS → phUp:{data.phUp}, phDown:{data.phDown}, nutrient:{data.nutrientAdd}, refill:{data.refill}, model:{ml.get('model_version', 'unknown')}")
+                else:
+                    print(f"[AUTO MODE] ML service returned status {r.status_code}")
+                    
+            except (httpx.TimeoutException, httpx.ConnectError) as e:
+                print(f"[AUTO MODE] ML timeout/connection error: {e}")
+            except Exception as e:
+                print(f"[AUTO MODE] ML prediction failed: {e}")
 
-            # ==== USING RULE-BASED ONLY (FOR DATA COLLECTION) ====
-            # if not ml_success:  # COMMENTED OUT - ALWAYS USE RULE-BASED
-            print("[AUTO MODE] Using rule-based logic for data collection...")
+            # ==== FALLBACK TO RULE-BASED IF ML FAILS ====
+            if not ml_success:
+            print("[AUTO MODE] Using rule-based logic with priority system...")
             AUTO_MODE_SOURCE = "rule"
 
-            # PH UP
+            # Initialize all actions to 0
             phUpSec = 0
-            if ph < 5.5:
-                phUpSec = max(0, min(12, (5.5 - ph) * 8))
-
-            # PH DOWN
             phDownSec = 0
-            if ph > 6.5:
-                phDownSec = max(0, min(12, (ph - 6.5) * 8))
-
-            # NUTRIENT
             nutrientSec = 0
-            if ppm < 560:
-                nutrientSec = max(0, min(20, (560 - ppm) / 20))
-
-            # REFILL (water_level is 0-3 scale: 0=empty, 1=low, 2=medium, 3=high)
             refillSec = 0
-            if wl < 1.2:  # Below low level
-                refillSec = max(0, min(25, (1.2 - wl) * 20))
 
-            # Set hasil rule
+            # ========================================
+            # PRIORITY SYSTEM (prevents conflicts)
+            # ========================================
+            
+            # PRIORITY 1: Critical Water Level (Safety First)
+            # If water is critically low, ONLY refill (skip other actions)
+            if wl < 1.2:
+                refillSec = max(0, min(25, (1.2 - wl) * 20))
+                print(f"[AUTO MODE] Priority 1: Critical water level → Refill only")
+            
+            # PRIORITY 2: High PPM Dilution
+            # If PPM is high AND water level allows, dilute (skip pH/nutrient)
+            elif ppm > 840 and wl < 2.5:
+                refillSec = max(0, min(15, (ppm - 840) / 20))
+                print(f"[AUTO MODE] Priority 2: High PPM → Dilute (skip pH/nutrient)")
+            
+            # PRIORITY 3: pH Adjustment
+            # Only adjust pH if water is stable and PPM is not critical
+            elif ph < 5.5 or ph > 6.5:
+                if ph < 5.5:
+                    phUpSec = max(0, min(12, (5.5 - ph) * 8))
+                    print(f"[AUTO MODE] Priority 3: Low pH → pH Up")
+                elif ph > 6.5:
+                    phDownSec = max(0, min(12, (ph - 6.5) * 8))
+                    print(f"[AUTO MODE] Priority 3: High pH → pH Down")
+            
+            # PRIORITY 4: Nutrient Addition
+            # Only add nutrients if pH is stable (5.5-6.5) and PPM is low
+            elif ppm < 560:
+                nutrientSec = max(0, min(20, (560 - ppm) / 20))
+                print(f"[AUTO MODE] Priority 4: Low PPM → Add Nutrient")
+            
+            # PRIORITY 5: Micro-adjustments (fine-tuning)
+            # Only apply if no major action was taken
+            else:
+                # Micro pH adjustments (when pH is slightly off but within range)
+                if 5.5 <= ph < 5.7:
+                    phUpSec = 1
+                    print(f"[AUTO MODE] Priority 5: Micro pH Up")
+                elif 6.3 < ph <= 6.5:
+                    phDownSec = 1
+                    print(f"[AUTO MODE] Priority 5: Micro pH Down")
+                
+                # Micro nutrient (when PPM is slightly low but within range)
+                elif 560 <= ppm < 650:
+                    nutrientSec = 1
+                    print(f"[AUTO MODE] Priority 5: Micro Nutrient")
+                
+                # Micro refill (when water is slightly low but not critical)
+                elif 1.2 <= wl < 1.5:
+                    refillSec = 1
+                    print(f"[AUTO MODE] Priority 5: Micro Refill")
+                
+                else:
+                    print(f"[AUTO MODE] All parameters stable → No action")
+
+            # Set final values
             data.phUp = int(phUpSec)
             data.phDown = int(phDownSec)
             data.nutrientAdd = int(nutrientSec)
             data.refill = int(refillSec)
-            data.valueS = float(max(
-                phUpSec, phDownSec, nutrientSec, refillSec
-            ))
-            print(f"[AUTO MODE] Initial → phUp:{data.phUp}, phDown:{data.phDown}, nutrient:{data.nutrientAdd}, refill:{data.refill}")
+            data.valueS = float(max(phUpSec, phDownSec, nutrientSec, refillSec))
             
-            # MICRO ADJUSTMENT
-
-            # Micro pH
-            if 5.5 <= ph <= 6.5:
-                if ph < 5.7:
-                    data.phUp = max(data.phUp, 1)
-                elif ph > 6.3:
-                    data.phDown = max(data.phDown, 1)
-
-            # Micro nutrient
-            if 560 <= ppm <= 840:
-                if ppm < 650:
-                    data.nutrientAdd = max(data.nutrientAdd, 1)
-
-            # Micro refill (water_level 0-3 scale)
-            if 1.2 <= wl <= 2.5:  # Between low and medium-high
-                if wl < 1.5:  # Closer to low
-                    data.refill = max(data.refill, 1)
-
-            # Recalculate valueS
-            data.valueS = float(max(
-                data.phUp, data.phDown, data.nutrientAdd, data.refill
-            ))
             print(f"[AUTO MODE] Final → phUp:{data.phUp}, phDown:{data.phDown}, nutrient:{data.nutrientAdd}, refill:{data.refill}, valueS:{data.valueS}")
+
 
         # INSERT FINAL ACTUATOR EVENT
         print(f"[ACTUATOR] Inserting to DB - auto:{data.auto}, manual:{data.manual}")

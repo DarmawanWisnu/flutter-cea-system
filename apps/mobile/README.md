@@ -1,319 +1,417 @@
-# **Fountaine**
+# 📱 Fountaine Mobile App
 
-*Hydroponic Monitoring App — Flutter + Firebase + MQTT*
+*Hydroponic Monitoring App — Flutter + Firebase + MQTT + Fuzzy Logic*
 
----
-
-## **Table of Contents**
-
-* **Project Info**
-* **Tech Stack**
-* **Dependencies**
-* **Architecture**
-
-  * Pattern
-  * Layers
-* **Features**
-* **IoT & MQTT Flow**
-* **Environment Variables**
-* **Project Structure**
-* **Setup & Installation**
-* **Build & Deployment**
-* **Troubleshooting**
-* **Future Stack Sections (Template)**
-* **License**
+![Flutter](https://img.shields.io/badge/Flutter-3.38.1-02569B)
+![Dart](https://img.shields.io/badge/Dart-3.10.0-0175C2)
+![Firebase](https://img.shields.io/badge/Firebase-Latest-FFCA28)
+![MQTT](https://img.shields.io/badge/MQTT-10.11.1-660066)
 
 ---
 
-## **Project Info**
+## 📋 **Table of Contents**
 
-Fountaine adalah aplikasi monitoring hidroponik berbasis mobile yang menyediakan pemantauan kondisi tanaman secara real-time menggunakan teknologi IoT. Dibangun menggunakan Flutter dan Firebase dengan komunikasi MQTT, aplikasi ini memungkinkan pengguna melihat data sensor secara instan dan akurat.
-
-**Detail Informasi:**
-
-* **Name:** Fountaine
-* **Category:** IoT Hydroponic Monitoring App
-* **Type:** Mobile Application (Flutter)
-* **Platform:** Android & iOS
-* **Minimum Flutter SDK:** 3.35.0 – 4.x
-* **MQTT Transport:** TCP (TLS Optional)
-
----
-
-## **Tech Stack — Core**
-
-| Layer            | Technology     |
-| ---------------- | -------------- |
-| Mobile Framework | Flutter 3.38.1 |
-| Language         | Dart 3.10.0    |
-| Backend Cloud    | Firebase       |
-| Authentication   | Firebase Auth  |
-| Realtime IoT     | MQTT           |
-| State Management | Riverpod       |
-| Local Storage    | SQLite         |
-| Build System     | Gradle 8.12    |
-| JVM              | Java 17        |
-| Node Tools       | Node.js 22.19  |
+- [Overview](#overview)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Architecture](#architecture)
+- [Fuzzy Logic](#fuzzy-logic)
+- [Setup & Installation](#setup--installation)
+- [Project Structure](#project-structure)
+- [MQTT Integration](#mqtt-integration)
+- [Build & Deployment](#build--deployment)
+- [Code Quality](#code-quality)
+- [Troubleshooting](#troubleshooting)
 
 ---
 
-## **Dependencies — Flutter Packages**
+## 🎯 **Overview**
 
-| Package            | Version  | Description             |
-| ------------------ | -------- | ----------------------- |
-| cupertino_icons    | ^1.0.8   | iOS icons               |
-| firebase_core      | ^4.1.0   | Firebase core           |
-| firebase_auth      | ^6.0.2   | Authentication          |
-| firebase_messaging | ^16.0.3  | Push notifications      |
-| cloud_firestore    | ^6.0.1   | Firestore DB            |
-| firebase_analytics | ^12.0.1  | Analytics               |
-| firebase_app_check | ^0.4.0+1 | App verification        |
-| mqtt_client        | ^10.11.1 | MQTT client             |
-| shared_preferences | ^2.5.3   | Local key-value storage |
-| fl_chart           | ^1.1.1   | Charts & graphs         |
-| flutter_riverpod   | ^3.0.3   | State management        |
-| intl               | ^0.20.2  | Date formatting         |
-| url_launcher       | ^6.3.0   | External URL launcher   |
-| flutter_dotenv     | ^6.0.0   | Environment variables   |
-| rxdart             | 0.28.0   | Reactive extensions     |
-| http               | ^1.5.0   | HTTP requests           |
-| sqflite            | ^2.4.2   | SQLite database         |
-| path               | ^1.9.1   | File system helper      |
-| crypto             | ^3.0.6   | Hash & crypto utils     |
-| uuid               | ^4.5.1   | UUID generator          |
-| tflite_flutter     | ^0.12.1  | TensorFlow Lite         |
+Fountaine is an intelligent hydroponic monitoring mobile application that provides real-time plant condition monitoring using IoT technology. Built with Flutter and Firebase, featuring MQTT communication and **fuzzy logic** for smart notifications.
+
+**Key Information:**
+
+| Property | Value |
+|----------|-------|
+| **Name** | Fountaine |
+| **Category** | IoT Hydroponic Monitoring |
+| **Platform** | Android & iOS |
+| **Flutter SDK** | 3.35.0 – 4.x |
+| **Min Android** | API 21 (Lollipop) |
+| **Min iOS** | iOS 12.0 |
 
 ---
 
-## **Architecture**
+## ✨ **Features**
 
-### **Pattern**
+### **🤖 Intelligent Monitoring**
+- **Fuzzy Logic Notifications** - Smart severity determination (info/warning/urgent)
+- **Real-time Telemetry** - Live sensor data via MQTT
+- **Multi-device Support** - Monitor multiple hydroponic kits
+- **Historical Charts** - Visualize sensor trends with fl_chart
 
-Aplikasi ini menggunakan pendekatan **Clean-ish Architecture** dengan pemisahan kode secara jelas untuk meningkatkan maintainability dan skalabilitas.
+### **🎛️ Control**
+- **Manual Mode** - Direct actuator control
+- **Auto Mode** - ML-powered automation (backend)
+- **Remote Control** - Control from anywhere via MQTT
 
-Flow utama:
-**Presentation Layer → State Management → Domain Layer → Data Layer → Device/Service Layer**
+### **👤 User Management**
+- **Firebase Authentication** - Secure login/register
+- **Email Verification** - Account security
+- **Password Reset** - Forgot password flow
+- **Profile Management** - User settings
 
-### **Layers Explanation**
-
-* **Presentation Layer** — UI, widget, komponen visual (folder `features/`)
-* **State Layer** — Riverpod untuk state management global (folder `providers/`)
-* **Domain Layer** — Entities & logic rules (folder `domain/`)
-* **Data Layer** — Repository, Firestore, SQLite, mapping (folder `data/`, `models/`)
-* **Device Layer** — MQTT, Firebase services, storage, network utilities (folder `services/`)
-
----
-
-## **Features**
-
-| Feature              | Description                     |
-| -------------------- | ------------------------------- |
-| Login/Register       | Firebase Authentication         |
-| Dashboard Monitoring | Real-time MQTT sensor data      |
-| History Logs         | Optional Firestore history      |
-| Chart Visualization  | Sensor charts via fl_chart      |
-| Environment Config   | Secure .env settings            |
-| Connectivity Status  | Real-time connection tracking   |
-| Preferences          | Local settings (theme, session) |
+### **📊 Visualization**
+- **Real-time Dashboard** - Live sensor readings
+- **Historical Graphs** - Trend analysis
+- **Notification Center** - Smart alerts
+- **Kit Management** - Add/remove devices
 
 ---
 
-## **IoT & MQTT Flow**
+## 🛠️ **Tech Stack**
+
+### **Core**
+
+| Layer | Technology |
+|-------|------------|
+| **Framework** | Flutter 3.38.1 |
+| **Language** | Dart 3.10.0 |
+| **Backend** | Firebase + FastAPI |
+| **Auth** | Firebase Auth |
+| **Realtime** | MQTT (HiveMQ) |
+| **State** | Riverpod 3.0.3 |
+| **Storage** | SharedPreferences |
+| **Charts** | fl_chart 1.1.1 |
+
+### **Key Dependencies**
+
+| Package | Version | Purpose |
+|---------|---------|---------|
+| `firebase_core` | ^4.1.0 | Firebase initialization |
+| `firebase_auth` | ^6.0.2 | Authentication |
+| `mqtt_client` | ^10.11.1 | MQTT communication |
+| `flutter_riverpod` | ^3.0.3 | State management |
+| `fl_chart` | ^1.1.1 | Charts & graphs |
+| `http` | ^1.5.0 | HTTP requests |
+| `shared_preferences` | ^2.5.3 | Local storage |
+| `intl` | ^0.20.2 | Date formatting |
+
+---
+
+## 🏗️ **Architecture**
+
+### **Pattern: Clean-ish Architecture**
 
 ```
-[Sensor Node IoT]
-        ↓ Publish (JSON Payload)
-[MQTT Broker]
-        ↓ Subscribe (mqtt_client)
-[Flutter App]
-        ↓ Providers (Riverpod)
-[UI Update]
+┌─────────────────────────────────────┐
+│     Presentation Layer (UI)         │
+│  features/home, monitor, etc.       │
+└──────────────┬──────────────────────┘
+               │
+┌──────────────▼──────────────────────┐
+│     State Management (Riverpod)     │
+│  providers/mqtt, api, auth          │
+└──────────────┬──────────────────────┘
+               │
+┌──────────────▼──────────────────────┐
+│     Domain Layer (Logic)            │
+│  core/fuzzy.dart, constants         │
+└──────────────┬──────────────────────┘
+               │
+┌──────────────▼──────────────────────┐
+│     Services Layer                  │
+│  MQTT, Firebase, HTTP               │
+└─────────────────────────────────────┘
 ```
 
-**Additional Notes:**
+### **Layers**
 
-* QoS 0/1 supported
-* Auto reconnect enabled
-* Username/Password optional
-* JSON decoded into provider layer
+1. **Presentation** - UI widgets and screens (`features/`)
+2. **State** - Riverpod providers (`providers/`)
+3. **Domain** - Business logic and fuzzy logic (`core/`)
+4. **Services** - External integrations (`services/`)
 
 ---
 
-## **Data Flow Diagram**
+## 🧠 **Fuzzy Logic**
 
+### **Notification Severity System**
+
+The app uses **fuzzy logic** to determine notification severity based on sensor deviations:
+
+```dart
+// Fuzzy membership functions
+low:    0-20% deviation  → info
+medium: 15-50% deviation → warning
+high:   45%+ deviation   → urgent
 ```
-         +-------------+
-         | MQTT Broker |
-         +------^------+
-                |
-                | JSON Payload
-                v
-      +---------------------+
-      | MQTT Service        |
-      +----------+----------+
-                 |
-                 | Stream Data
-                 v
-       +---------------------+
-       | Riverpod Providers  |
-       +----------+----------+
-                 |
-                 | State Updates
-                 v
-       +---------------------+
-       | UI (Features/*)     |
-       +---------------------+
+
+### **Decision Rules**
+
+1. **Any parameter highly deviated** (>45%) → **Urgent**
+2. **2+ parameters medium deviated** (20-50%) → **Urgent**
+3. **Any parameter medium deviated** → **Warning**
+4. **All parameters stable** → **Info**
+
+### **Ideal Ranges**
+
+| Parameter | Min | Max | Ideal |
+|-----------|-----|-----|-------|
+| **pH** | 5.5 | 6.5 | 5.5-6.5 |
+| **PPM** | 560 | 840 | 560-840 |
+| **Temperature** | 18°C | 24°C | 18-24°C |
+| **Water Level** | 1.2 | 2.5 | 1.2-2.5 |
+
+**Implementation:** `lib/core/fuzzy.dart`
+
+---
+
+## 🚀 **Setup & Installation**
+
+### **Prerequisites**
+- Flutter SDK 3.35.0+
+- Dart 3.10.0+
+- Android Studio / Xcode
+- Firebase project
+
+### **Installation Steps**
+
+```bash
+# 1. Clone repository
+git clone <your-repo>
+cd flutter-cea-system/apps/mobile
+
+# 2. Install dependencies
+flutter pub get
+
+# 3. Configure Firebase
+# - Add google-services.json (Android)
+# - Add GoogleService-Info.plist (iOS)
+
+# 4. Run app
+flutter run
+```
+
+### **Environment Setup**
+
+Create `.env` file (if needed):
+```env
+API_BASE_URL=http://your-backend-url:8000
+MQTT_BROKER=your-mqtt-broker
 ```
 
 ---
 
-## **Environment Variables**
+## 📁 **Project Structure**
 
-| Variable           | Description               |
-| ------------------ | ------------------------- |
-| MQTT_BROKER_URL    | Broker URL                |
-| MQTT_PORT          | MQTT port number          |
-| MQTT_USERNAME      | Username (optional)       |
-| MQTT_PASSWORD      | Password (optional)       |
-| MQTT_TOPIC_SENSOR  | Topic for receiving data  |
-| MQTT_TOPIC_CONTROL | Topic for sending command |
-
----
-
-## **Project Structure (Simplified Modern)**
-
-```txt
+```
 lib/
-├── app/               # Routing & navigation
-├── core/              # Constants, helpers, configs
-├── data/              # Repository & data sources (SQLite/Firestore)
-├── domain/            # Entities & logic rules
-├── enums/             # App enums
-├── features/          # All UI screens/modules
-│   ├── auth/          # Login, register, verify, forgot
-│   ├── home/
-│   ├── monitor/
-│   ├── history/
-│   ├── notifications/
-│   ├── profile/
-│   ├── settings/
-│   ├── splash/
-│   └── add_kit/
-├── models/            # DTOs & models
-├── providers/         # Riverpod providers
-├── services/          # Firebase, MQTT, DB services
-├── utils/             # Firebase options, shared utils
-└── main.dart          # App entry point
+├── app/                    # App routing & navigation
+├── core/                   # Core utilities
+│   ├── constants.dart      # App constants
+│   └── fuzzy.dart          # Fuzzy logic system ⭐
+├── domain/                 # Business logic
+├── features/               # Feature modules
+│   ├── auth/               # Login, register, verify
+│   ├── home/               # Home dashboard
+│   ├── monitor/            # Real-time monitoring ⭐
+│   ├── history/            # Historical data
+│   ├── notifications/      # Notification center ⭐
+│   ├── profile/            # User profile
+│   ├── settings/           # App settings
+│   ├── splash/             # Splash screen
+│   └── add_kit/            # Add new kit
+├── models/                 # Data models
+├── providers/              # Riverpod providers
+│   ├── api_provider.dart   # HTTP API
+│   ├── auth_provider.dart  # Authentication
+│   ├── mqtt_provider.dart  # MQTT connection ⭐
+│   ├── monitor_provider.dart # Monitor state
+│   └── notification_provider.dart # Fuzzy notifications ⭐
+├── services/               # External services
+│   ├── api_service.dart    # HTTP client
+│   ├── mqtt_service.dart   # MQTT client
+│   └── storage_service.dart # Local storage
+├── utils/                  # Utilities
+└── main.dart               # App entry point
+```
+
+**⭐ = Key files for ML/IoT integration**
+
+---
+
+## 📡 **MQTT Integration**
+
+### **Data Flow**
+
+```
+┌─────────────┐
+│  IoT Kit    │ Publish telemetry
+│  (ESP32)    │ every 5 seconds
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│ MQTT Broker │ HiveMQ Cloud
+│  (TLS 8883) │ QoS 1
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│ Flutter App │ Subscribe
+│ mqtt_client │ Update UI
+└─────────────┘
+```
+
+### **Topics**
+
+| Topic | Direction | Purpose |
+|-------|-----------|---------|
+| `kit/{kitId}/telemetry` | Kit → App | Sensor data |
+| `kit/{kitId}/status` | Kit ↔ App | Online/offline |
+| `kit/{kitId}/control` | App → Kit | Commands |
+
+### **Payload Example**
+
+```json
+{
+  "ts": "2025-12-02T08:00:00Z",
+  "ppm": 750.0,
+  "ph": 6.1,
+  "tempC": 22.5,
+  "humidity": 68.0,
+  "waterLevel": 2.0,
+  "waterTemp": 21.0
+}
+```
+
+**See:** [ICD Documentation](../../docs/icd.md)
+
+---
+
+## 📦 **Build & Deployment**
+
+### **Android**
+
+```bash
+# Debug APK
+flutter build apk --debug
+
+# Release APK
+flutter build apk --release
+
+# App Bundle (for Play Store)
+flutter build appbundle --release
+```
+
+### **iOS**
+
+```bash
+# Install pods
+cd ios && pod install && cd ..
+
+# Build
+flutter build ios --release
+
+# Note: Requires macOS and Xcode
+```
+
+### **Release Checklist**
+
+- [ ] Update version in `pubspec.yaml`
+- [ ] Add Firebase config files
+- [ ] Configure signing certificates
+- [ ] Test on physical devices
+- [ ] Run `flutter analyze`
+- [ ] Run `flutter test`
+
+---
+
+## ✅ **Code Quality**
+
+### **Analysis Results**
+
+```
+Total Issues: 83
+Errors: 0
+Warnings: 0
+Info: 83 (code quality suggestions)
+```
+
+**Status:** ✅ **Production Ready**
+
+### **Main Issues**
+
+1. 🔵 BuildContext async gaps (~40) - Add `if (!mounted) return;`
+2. 🔵 Print statements (~20) - Replace with logger
+3. 🔵 Deprecated APIs (~10) - Update to new APIs
+
+**See:** [Flutter App Audit](../../docs/flutter_app_audit.md)
+
+---
+
+## 🐛 **Troubleshooting**
+
+| Issue | Cause | Fix |
+|-------|-------|-----|
+| **MQTT not connecting** | Wrong broker URL | Check `.env` or hardcoded URL |
+| **No data received** | Topic mismatch | Verify publish/subscribe topics |
+| **Firebase error** | Missing SHA fingerprint | Add SHA-1 & SHA-256 to Firebase |
+| **Build fails** | Dependency conflict | Run `flutter clean && flutter pub get` |
+| **Fuzzy logic not working** | Missing imports | Check `core/fuzzy.dart` imports |
+| **Notifications not showing** | Provider not listening | Verify Riverpod setup |
+
+---
+
+## 📚 **Documentation**
+
+- [Main README](../../README.md) - Project overview
+- [ICD](../../docs/icd.md) - MQTT communication protocol
+- [ML Algorithm](../../docs/ml_algorithm_explanation.md) - Backend ML system
+- [App Audit](../../docs/flutter_app_audit.md) - Code quality report
+
+---
+
+## 🧪 **Testing**
+
+```bash
+# Run all tests
+flutter test
+
+# Run with coverage
+flutter test --coverage
+
+# Analyze code
+flutter analyze
 ```
 
 ---
 
-## **Setup & Installation**
+## 🎨 **UI/UX**
 
-```txt
-1. Clone
-   git clone <your-repo>
-   cd fountaine
+### **Design System**
+- **Primary Color:** Blue (#2196F3)
+- **Accent Color:** Green (#4CAF50)
+- **Typography:** Roboto
+- **Icons:** Material Icons
 
-2. Install
-   flutter pub get
-
-3. Env
-   setup file .env
-
-4. Run
-   flutter run
-```
-
----
-
-## **Build & Deployment**
-
-```txt
-Android
-   flutter build apk --release
-
-iOS
-   Requires macOS
-   cd ios && pod install
-   Add GoogleService-Info.plist
-   Update Bundle ID
-   Configure Signing & Capabilities
-   flutter build ios --release
-```
+### **Screens**
+- Splash Screen
+- Login/Register
+- Home Dashboard
+- Monitor (Real-time)
+- History Charts
+- Notifications
+- Profile
+- Settings
 
 ---
 
-## **Troubleshooting**
+## 📄 **License**
 
-| Issue                 | Cause                | Fix                       |
-| --------------------- | -------------------- | ------------------------- |
-| MQTT tidak connect    | Broker salah         | Cek .env                  |
-| App nggak nerima data | Topic mismatch       | Samakan topic publish/sub |
-| Firebase error        | Fingerprint kurang   | Tambah SHA-1 & SHA-256    |
-| Env tidak terbaca     | Release mode         | Pastikan .env ter-embed   |
-| MQTT reconnect loop   | Jaringan drop        | Aktifkan auto reconnect   |
-| Payload JSON rusak    | Data IoT tidak valid | Validasi firmware IoT     |
-| Firestore throttle    | Write terlalu sering | Gunakan batch/limit       |
+© **Wisnu Darmawan 2025** — MIT License
 
 ---
 
-## **Backend**
-
-* Runtime
-* Framework
-* Database
-* Realtime Engine
-* Deployment Strategy
-
----
-
-## **Database**
-
-* Type
-* Tables
-* ORM
-* Backup Strategy
-
----
-
-## **Machine Learning**
-
-* Model
-* Dataset
-* Platform
-* Inference Format
-
----
-
-## **API Docs**
-
-* Base URL
-* Auth Method
-* Endpoints
-
----
-
-## **Hardware**
-
-* Board
-* Sensors
-* PCB
-* Firmware Repo
-
----
-
-## **UI/UX**
-
-* Design System
-* Palette
-* Typography
-* Components
-
----
-
-## **License**
-
-© **Wisnu 2025** — MIT License
-
----
+**Built with ❤️ for sustainable agriculture** 🌱

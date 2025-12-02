@@ -55,3 +55,13 @@ Thumbs.db
 *.swp
 *.orig
 **/data/
+
+# Documentation - Generated diagram images
+docs/diagrams/**/*.png
+docs/diagrams/**/*.svg
+docs/diagrams/**/*.pdf
+
+# Documentation - Temporary/draft files
+docs/**/*.draft.md
+docs/**/*~
+docs/**/.~*

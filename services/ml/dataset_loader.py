@@ -8,10 +8,60 @@ from services.api.database import get_connection, release_connection
 
 TELEMETRY_FEATURES = ["ppm", "ph", "tempC", "humidity", "waterTemp", "waterLevel"]
 
+def load_from_csv(telemetry_csv, actuator_csv):
+    """
+    Load and merge telemetry and actuator CSV files.
+    Matches the Colab notebook approach.
+    
+    Args:
+        telemetry_csv: Path to synthetic_telemetry.csv
+        actuator_csv: Path to synthetic_actuator_event.csv
+    
+    Returns:
+        pandas.DataFrame with merged data
+    """
+    print(f"[dataset_loader] Loading telemetry from: {telemetry_csv}")
+    print(f"[dataset_loader] Loading actuator from: {actuator_csv}")
+    
+    telemetry_df = pd.read_csv(telemetry_csv)
+    actuator_df = pd.read_csv(actuator_csv)
+    
+    print(f"[dataset_loader] Telemetry rows: {len(telemetry_df):,}")
+    print(f"[dataset_loader] Actuator rows:  {len(actuator_df):,}")
+    
+    # Merge on common columns
+    # Note: telemetry has 'rowId', actuator has 'id'
+    # We'll merge on deviceId and ingestTime
+    df = pd.merge(
+        telemetry_df,
+        actuator_df,
+        on=['deviceId', 'ingestTime'],
+        how='inner',
+        suffixes=('_telemetry', '_actuator')
+    )
+    
+    print(f"[dataset_loader] Merged dataset: {len(df):,} rows")
+    
+    # Safety cast numeric values
+    numeric_cols = TELEMETRY_FEATURES + ["phUp", "phDown", "nutrientAdd", "refill", "valueS"]
+    for col in numeric_cols:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+    
+    # Drop rows with missing telemetry features
+    df = df.dropna(subset=TELEMETRY_FEATURES, how="any")
+    
+    print(f"[dataset_loader] After cleaning: {len(df):,} rows")
+    
+    return df
+
+
 def load_joined_dataset(limit=None, device_id=None):
     """
-    Mengambil paired rows: telemetry (nearest BEFORE) dan actuator_event.
+    Load paired rows from database: telemetry (nearest BEFORE) and actuator_event.
     Returns pandas.DataFrame with columns: telemetry features + actuator outputs.
+    
+    This is the original database-based loader, kept for backward compatibility.
     """
     conn = get_connection()
     cur = conn.cursor()
@@ -50,7 +100,6 @@ def load_joined_dataset(limit=None, device_id=None):
             sql += " LIMIT %s"
             params.append(limit)
 
-        # FIX: execute dengan benar
         if len(params) > 0:
             cur.execute(sql, tuple(params))
         else:
@@ -67,7 +116,7 @@ def load_joined_dataset(limit=None, device_id=None):
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors="coerce")
 
-        # Buang pair yang tidak punya telemetry
+        # Drop rows without telemetry
         df = df.dropna(subset=TELEMETRY_FEATURES, how="any")
 
         return df
@@ -78,6 +127,7 @@ def load_joined_dataset(limit=None, device_id=None):
 
 
 def export_csv(path="data/raw/dataset_pairs.csv", limit=None, device_id=None):
+    """Export database data to CSV (legacy function)."""
     df = load_joined_dataset(limit=limit, device_id=device_id)
 
     import os
@@ -88,4 +138,14 @@ def export_csv(path="data/raw/dataset_pairs.csv", limit=None, device_id=None):
     return path
 
 if __name__ == "__main__":
-    export_csv()
+    # Example: Load from synthetic CSVs
+    telemetry_path = "synthetic_telemetry.csv"
+    actuator_path = "synthetic_actuator_event.csv"
+    
+    if os.path.exists(telemetry_path) and os.path.exists(actuator_path):
+        df = load_from_csv(telemetry_path, actuator_path)
+        print(f"\nDataset shape: {df.shape}")
+        print(f"Columns: {list(df.columns)}")
+    else:
+        print("Synthetic CSV files not found. Using database export...")
+        export_csv()

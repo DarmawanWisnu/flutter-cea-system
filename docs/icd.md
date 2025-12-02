@@ -1,143 +1,326 @@
-============================================================
-INTERFACE CONTROL DOCUMENT (ICD)
-HYDROPONIC KIT ↔ APP (MQTT)
-============================================================
+# Interface Control Document (ICD)
 
-Dokumen ini menjelaskan kontrak komunikasi antara perangkat IoT (kit)
-dan aplikasi mobile menggunakan protokol MQTT.
-Tujuannya agar integrasi antara sistem IoT dan aplikasi dapat dilakukan
-secara konsisten, terstandarisasi, dan mudah diuji.
+## Hydroponic Kit ↔ App Communication (MQTT)
 
+This document defines the communication contract between IoT devices (kits) and the mobile application using the MQTT protocol. It ensures consistent, standardized, and testable integration between the IoT system and application.
 
-============================================================
-1) BROKER & IDENTITAS
-============================================================
-Broker           : HiveMQ Cloud (TLS port 8883)
-QoS Default      : 1
-Kit ID Format    : String tanpa spasi (contoh: devkit-01)
-ClientID (App)   : fountaine-app-{epoch}
-ClientID (Kit)   : fountaine-kit-{kitId}
-Authentication   : Username & Password (dari HiveMQ)
-Protocol Version : MQTT 3.1.1
-LWT (Last Will)  : Saat koneksi kit terputus tidak normal, broker mengirim
-                   retained message ke topic status:
-                   {"online": false, "ts": "2025-10-16T00:00:00Z"}
+---
 
+## 📡 **1. Broker & Identity**
 
-============================================================
-2) TOPICS
-============================================================
-| Topic                    | Arah       | QoS | Retained | Keterangan                      |
-|---------------------------|------------|-----|-----------|----------------------------------|
-| kit/{kitId}/telemetry     | Kit → App  | 1   | No        | Data sensor periodik (~5 detik) |
-| kit/{kitId}/status        | Kit ↔ App  | 1   | Yes       | Status online/offline (LWT)     |
-| kit/{kitId}/control       | App → Kit  | 1   | No        | Perintah kontrol dari aplikasi  |
+| Parameter | Value |
+|-----------|-------|
+| **Broker** | HiveMQ Cloud (TLS port 8883) |
+| **QoS Default** | 1 |
+| **Kit ID Format** | String without spaces (e.g., `CEA-01`, `CEA-02`) |
+| **ClientID (App)** | `fountaine-app-{epoch}` |
+| **ClientID (Kit)** | `fountaine-kit-{kitId}` |
+| **Authentication** | Username & Password (from HiveMQ) |
+| **Protocol Version** | MQTT 3.1.1 |
 
+### **Last Will Testament (LWT)**
+When a kit disconnects abnormally, the broker sends a retained message to the status topic:
+```json
+{
+  "online": false,
+  "ts": "2025-12-02T00:00:00Z"
+}
+```
 
-============================================================
-3) PAYLOAD SCHEMA
-============================================================
+---
 
-3.1 Telemetry (kit/{kitId}/telemetry)
--------------------------------------
-Contoh:
- ts = 2025-10-16T00:00:00Z
- ppm = 930.0
- ph = 6.03
- tempC = 27.1
- waterLevel = 72.0
+## 📬 **2. Topics**
 
-Keterangan:
- - ts          : Waktu pengambilan data (ISO 8601 UTC)
- - ppm         : Konsentrasi nutrisi (0–5000)
- - ph          : Tingkat keasaman (0–14)
- - tempC       : Suhu air (°C)
- - waterLevel  : Level air (%)
+| Topic | Direction | QoS | Retained | Description |
+|-------|-----------|-----|----------|-------------|
+| `kit/{kitId}/telemetry` | Kit → App | 1 | No | Periodic sensor data (~5 seconds) |
+| `kit/{kitId}/status` | Kit ↔ App | 1 | Yes | Online/offline status (LWT) |
+| `kit/{kitId}/control` | App → Kit | 1 | No | Control commands from app |
 
-3.2 Status (kit/{kitId}/status)
--------------------------------------
-Contoh:
- online = true
- ts = 2025-10-16T00:00:00Z
+---
 
-Catatan:
- - Retained: ON
- - Kit mengirim online:true saat berhasil connect.
- - Broker mengirim online:false saat kit terputus (LWT aktif).
+## 📦 **3. Payload Schemas**
 
-3.3 Control (kit/{kitId}/control)
--------------------------------------
-Contoh:
- cmd = pumpAB
- args = { ms: 500 }
- ts = 2025-10-16T00:00:00Z
- by = app
+### **3.1 Telemetry** (`kit/{kitId}/telemetry`)
 
-Daftar Command:
-| cmd       | args                        | Deskripsi                             |
-|------------|-----------------------------|----------------------------------------|
-| pumpAB    | { ms: number }              | Nyalakan pompa nutrisi A+B selama ms  |
-| waterAdd  | { ms: number }              | Tambahkan air                         |
-| phUp      | { ms: number }              | Tambah larutan pH Up                  |
-| phDown    | { ms: number }              | Tambah larutan pH Down                |
-| setMode   | { mode: manual / auto }     | Ganti mode operasi                    |
+**Example:**
+```json
+{
+  "ts": "2025-12-02T00:00:00Z",
+  "ppm": 930.0,
+  "ph": 6.03,
+  "tempC": 27.1,
+  "humidity": 65.0,
+  "waterLevel": 2.1,
+  "waterTemp": 22.5
+}
+```
 
+**Field Descriptions:**
 
-============================================================
-4) ATURAN SAFETY & HYSTERESIS
-============================================================
-- Hysteresis: ±5% dari batas ambang sensor.
-- Konsensus Data: Perubahan status valid jika terjadi minimal 2 sampel berturut-turut.
-- Cooldown (per sensor): 5 menit antar aksi otomatis.
-- Limiter: Maksimum 3 aksi otomatis per 30 menit per sensor.
-- Prioritas Manual: Saat mode manual aktif, semua aksi otomatis dinonaktifkan.
+| Field | Type | Range | Description |
+|-------|------|-------|-------------|
+| `ts` | string | ISO 8601 UTC | Data collection timestamp |
+| `ppm` | float | 0–2000 | Nutrient concentration (TDS) |
+| `ph` | float | 0–14 | Acidity level |
+| `tempC` | float | 0–50 | Air temperature (°C) |
+| `humidity` | float | 0–100 | Relative humidity (%) |
+| `waterLevel` | float | 0–3 | Water level (0=empty, 3=full) |
+| `waterTemp` | float | 0–40 | Water temperature (°C) |
 
+---
 
-============================================================
-5) CONTOH PAYLOAD
-============================================================
-Telemetry:
- ts = 2025-10-16T00:00:00Z
- ppm = 930
- ph = 6.03
- tempC = 27.1
- waterLevel = 72
+### **3.2 Status** (`kit/{kitId}/status`)
 
-Status (Online retained):
- online = true
- ts = 2025-10-16T01:23:45Z
+**Example:**
+```json
+{
+  "online": true,
+  "ts": "2025-12-02T00:00:00Z"
+}
+```
 
-Control (App → Kit):
- cmd = pumpAB
- args = { ms: 500 }
- ts = 2025-10-16T01:25:00Z
- by = app
+**Notes:**
+- **Retained:** ON
+- Kit sends `online: true` when successfully connected
+- Broker sends `online: false` when kit disconnects (LWT active)
 
+---
 
-============================================================
-6) VERSI & RIWAYAT PERUBAHAN
-============================================================
-| Versi | Tanggal     | Deskripsi                                      |
-|--------|--------------|------------------------------------------------|
-| v1.0  | 2025-10-16   | Draft awal integrasi skripsi (App ↔ Kit)      |
-| v1.1  | (nanti)      | Tambah format alert & threshold jika perlu    |
+### **3.3 Control** (`kit/{kitId}/control`)
 
+**Example:**
+```json
+{
+  "cmd": "phUp",
+  "args": {
+    "duration": 3
+  },
+  "ts": "2025-12-02T00:00:00Z",
+  "by": "app",
+  "mode": "manual"
+}
+```
 
-============================================================
-7) CATATAN IMPLEMENTASI
-============================================================
-- Semua payload dikirim dalam format JSON UTF-8.
-- Gunakan QoS 1 untuk memastikan keandalan.
-- Field "ts" menggunakan waktu real (UTC).
-- Semua nilai numerik disimpan sebagai float.
-- Field tambahan boleh ada selama struktur dasar tidak berubah.
-- Jika perangkat offline, aplikasi menampilkan status "Offline" (retained).
+**Command List:**
 
+| Command | Args | Description |
+|---------|------|-------------|
+| `phUp` | `{ duration: number }` | Add pH Up solution for N seconds |
+| `phDown` | `{ duration: number }` | Add pH Down solution for N seconds |
+| `nutrientAdd` | `{ duration: number }` | Add nutrient A+B for N seconds |
+| `refill` | `{ duration: number }` | Add water for N seconds |
+| `setMode` | `{ mode: "manual" \| "auto" }` | Change operation mode |
 
-============================================================
-DOKUMEN RESMI
-============================================================
-Dokumen ini menjadi acuan resmi bagi pengembangan, integrasi,
-dan pengujian sistem komunikasi antara aplikasi dan perangkat
-IoT Hydroponic Smart Kit.
-============================================================
+**Field Descriptions:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `cmd` | string | Command name |
+| `args` | object | Command arguments |
+| `ts` | string | Command timestamp (ISO 8601 UTC) |
+| `by` | string | Source: `"app"` or `"auto"` |
+| `mode` | string | Current mode: `"manual"` or `"auto"` |
+
+---
+
+## 🛡️ **4. Safety Rules & Control Logic**
+
+### **Priority-Based Control System**
+
+The system uses a **priority-based approach** to prevent conflicting actions:
+
+1. **Priority 1:** Critical water level (< 1.2) → Refill ONLY
+2. **Priority 2:** High PPM (> 840) → Dilute (if water < 2.5)
+3. **Priority 3:** pH out of range (< 5.5 or > 6.5) → Adjust pH
+4. **Priority 4:** Low PPM (< 560) → Add nutrient
+5. **Priority 5:** Micro-adjustments → Fine-tuning
+
+### **Safety Limits**
+
+| Parameter | Min | Max | Ideal Range |
+|-----------|-----|-----|-------------|
+| **pH** | 5.5 | 6.5 | 5.5 - 6.5 |
+| **PPM** | 560 | 840 | 560 - 840 |
+| **Temperature** | 18°C | 24°C | 18 - 24°C |
+| **Water Level** | 1.2 | 2.5 | 1.2 - 2.5 |
+
+### **Control Rules**
+
+- **Hysteresis:** ±5% from threshold to prevent oscillation
+- **Consensus:** Status change valid after 2 consecutive samples
+- **Cooldown:** 5 minutes between automatic actions per sensor
+- **Rate Limit:** Maximum 3 automatic actions per 30 minutes per sensor
+- **Manual Priority:** Manual mode disables all automatic actions
+
+---
+
+## 📋 **5. Example Payloads**
+
+### **Telemetry (Kit → App)**
+```json
+{
+  "ts": "2025-12-02T08:00:00Z",
+  "ppm": 750.0,
+  "ph": 6.1,
+  "tempC": 22.5,
+  "humidity": 68.0,
+  "waterLevel": 2.0,
+  "waterTemp": 21.0
+}
+```
+
+### **Status - Online (Kit → App, Retained)**
+```json
+{
+  "online": true,
+  "ts": "2025-12-02T08:00:00Z"
+}
+```
+
+### **Status - Offline (Broker → App, LWT)**
+```json
+{
+  "online": false,
+  "ts": "2025-12-02T08:05:00Z"
+}
+```
+
+### **Control - Manual (App → Kit)**
+```json
+{
+  "cmd": "phUp",
+  "args": {
+    "duration": 3
+  },
+  "ts": "2025-12-02T08:10:00Z",
+  "by": "app",
+  "mode": "manual"
+}
+```
+
+### **Control - Auto Mode (App → Kit)**
+```json
+{
+  "cmd": "setMode",
+  "args": {
+    "mode": "auto"
+  },
+  "ts": "2025-12-02T08:15:00Z",
+  "by": "app"
+}
+```
+
+---
+
+## 🔄 **6. Auto Mode Behavior**
+
+When `mode: "auto"` is active:
+
+1. **ML Prediction** (Primary)
+   - Backend uses Random Forest model
+   - Predicts actuator durations based on sensor readings
+   - Fallback to rule-based if ML unavailable
+
+2. **Rule-Based Logic** (Fallback)
+   - Priority-based system (see section 4)
+   - Prevents conflicting actions
+   - Ensures chemical efficiency
+
+3. **Actuator Events**
+   - Logged to database
+   - Includes source (`ml` or `rule`)
+   - Tracked for ML retraining
+
+---
+
+## 📊 **7. Data Flow**
+
+```
+┌─────────────┐
+│  IoT Kit    │
+│  (ESP32)    │
+└──────┬──────┘
+       │ Publish telemetry every 5s
+       ▼
+┌─────────────┐
+│ MQTT Broker │
+│  (HiveMQ)   │
+└──────┬──────┘
+       │ Subscribe
+       ▼
+┌─────────────┐
+│  Backend    │
+│  (FastAPI)  │
+│             │
+│  ┌────────┐ │
+│  │   ML   │ │ Auto Mode
+│  │ Model  │ │ Prediction
+│  └────────┘ │
+└──────┬──────┘
+       │ Publish control
+       ▼
+┌─────────────┐
+│  IoT Kit    │
+│  Execute    │
+└─────────────┘
+```
+
+---
+
+## 📝 **8. Implementation Notes**
+
+1. **Payload Format**
+   - All payloads sent in JSON UTF-8
+   - Use QoS 1 for reliability
+   - Field `ts` uses real UTC time
+
+2. **Data Types**
+   - All numeric values stored as `float`
+   - Timestamps in ISO 8601 format
+   - Boolean for status flags
+
+3. **Extensibility**
+   - Additional fields allowed if core structure unchanged
+   - Backward compatibility maintained
+
+4. **Offline Handling**
+   - App displays "Offline" status from retained message
+   - Last known telemetry cached locally
+   - Reconnection automatic
+
+---
+
+## 📚 **9. Version History**
+
+| Version | Date | Description |
+|---------|------|-------------|
+| **v1.0** | 2025-10-16 | Initial draft for thesis integration |
+| **v1.1** | 2025-11-23 | Added humidity and water temp sensors |
+| **v2.0** | 2025-12-02 | Added ML auto mode, priority-based logic |
+
+---
+
+## ✅ **10. Compliance Checklist**
+
+- [x] All topics follow naming convention
+- [x] QoS 1 for all critical messages
+- [x] Retained flag for status topic
+- [x] LWT configured for offline detection
+- [x] JSON schema validated
+- [x] Safety limits defined
+- [x] Priority system documented
+- [x] Example payloads provided
+
+---
+
+## 📞 **Contact**
+
+For questions or clarifications about this ICD:
+- **Project:** CEA Hydroponic System
+- **Author:** Wisnu Darmawan
+- **Last Updated:** 2025-12-02
+
+---
+
+**This document serves as the official reference for development, integration, and testing of communication between the application and IoT Hydroponic Smart Kit.**

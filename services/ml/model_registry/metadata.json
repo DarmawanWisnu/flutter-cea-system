@@ -1,0 +1,46 @@
+{
+  "version": "v20251202T011442Z",
+  "timestamp": "20251202T011442Z",
+  "training_samples": 20000,
+  "test_samples": 5000,
+  "features": [
+    "ppm",
+    "ph",
+    "tempC",
+    "humidity",
+    "waterTemp",
+    "waterLevel"
+  ],
+  "targets": [
+    "phUp",
+    "phDown",
+    "nutrientAdd",
+    "refill"
+  ],
+  "metrics": {
+    "phUp": {
+      "test_mae": 7.800000000000001e-05,
+      "test_rmse": 0.004456455991031439,
+      "test_r2": 0.9988384090063659
+    },
+    "phDown": {
+      "test_mae": 0.0,
+      "test_rmse": 0.0,
+      "test_r2": 1.0
+    },
+    "nutrientAdd": {
+      "test_mae": 4.000000000000002e-06,
+      "test_rmse": 0.0002000000000000001,
+      "test_r2": 0.9999817780936242
+    },
+    "refill": {
+      "test_mae": 0.0005160880952380951,
+      "test_rmse": 0.013058025932027277,
+      "test_r2": 0.9999960222463842
+    }
+  },
+  "overall_test_mae": 0.0001495220238095238,
+  "overall_test_rmse": 0.006899493482160427,
+  "logic_version": "priority_based_v1",
+  "conflicting_actions": 0
+}
