@@ -3,6 +3,17 @@ import joblib
 import numpy as np
 from threading import Lock
 import json
+import warnings
+
+# Suppress sklearn feature names warning
+warnings.filterwarnings('ignore', message='X does not have valid feature names')
+# Suppress joblib parallel processing verbose output
+os.environ['JOBLIB_TEMP_FOLDER'] = '/tmp'
+warnings.filterwarnings('ignore', category=UserWarning, module='joblib')
+
+# Set joblib to silent mode
+joblib.parallel.VERBOSE_LEVEL = 0
+os.environ['LOKY_MAX_CPU_COUNT'] = '12'  # Use all cores but silently
 
 # Use absolute path based on this file's location
 _CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -56,6 +67,13 @@ def _load_latest():
         meta_path = os.path.join(version_dir, "metadata.json")
 
         _model = joblib.load(model_path)
+        
+        # Suppress verbose output for all estimators
+        if hasattr(_model, 'estimators_'):
+            for estimator in _model.estimators_:
+                if hasattr(estimator, 'verbose'):
+                    estimator.verbose = 0
+        
         _scaler = joblib.load(scaler_path) if os.path.exists(scaler_path) else None
         _model_meta = json.load(open(meta_path)) if os.path.exists(meta_path) else {"version": version}
 
@@ -76,7 +94,12 @@ def predict_from_dict(payload: dict, clamp_limits=None):
     X = np.array(x).reshape(1, -1)
     Xs = _scaler.transform(X) if _scaler else X
 
-    y_pred = _model.predict(Xs).flatten().tolist()
+    # Suppress verbose output during prediction
+    import sys
+    from contextlib import redirect_stdout
+    with open(os.devnull, 'w') as devnull:
+        with redirect_stdout(devnull):
+            y_pred = _model.predict(Xs).flatten().tolist()
 
     out = {}
     for i, t in enumerate(_TARGETS):

@@ -90,10 +90,14 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
     // INITIALIZE MQTT CONNECTION
     Future.microtask(() async {
       try {
-        // Start MQTT connection
+        // Start MQTT connection (may fail in tests)
         await ref.read(mqttProvider.notifier).init();
+      } catch (e) {
+        print("[Monitor] MQTT init error (continuing without MQTT): $e");
+      }
 
-        // Then load kits
+      // Load kits regardless of MQTT status
+      try {
         final kits = await ref.read(apiKitsListProvider.future);
 
         if (kits.isEmpty) {
@@ -109,7 +113,7 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
           setState(() => kitId = initial);
         }
       } catch (e) {
-        print("[Monitor] Init error: $e");
+        print("[Monitor] Kit loading error: $e");
       }
     });
   }
@@ -198,7 +202,7 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
                   crossAxisCount: size.width >= 420 ? 3 : 2,
                   crossAxisSpacing: 14 * s,
                   mainAxisSpacing: 14 * s,
-                  childAspectRatio: 0.87,
+                  childAspectRatio: 0.75, // Reduced from 0.87 to make boxes taller
                 ),
                 children: [
                   _gaugeBox(
@@ -412,7 +416,7 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
       builder: (context, fr, _) {
         return AnimatedContainer(
           duration: const Duration(milliseconds: 260),
-          padding: EdgeInsets.all(14 * s),
+          padding: EdgeInsets.all(8 * s),
           decoration: BoxDecoration(
             color: const Color(0xFFF6FBF6).withOpacity(0.55),
             borderRadius: BorderRadius.circular(18 * s),
@@ -442,41 +446,41 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
                 children: [
                   Icon(
                     _iconFor(title),
-                    size: 22 * s,
-                    color: const Color(0xFF06B48A), // lebih kontras
+                    size: 16 * s,
+                    color: const Color(0xFF06B48A),
                   ),
 
-                  SizedBox(height: 8 * s),
+                  SizedBox(height: 3 * s),
 
                   Text(
                     title,
                     style: TextStyle(
-                      fontSize: 13 * s,
+                      fontSize: 10 * s,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black.withOpacity(0.7), // readable
+                      color: Colors.black.withOpacity(0.7),
                     ),
                   ),
 
-                  SizedBox(height: 10 * s),
+                  SizedBox(height: 4 * s),
 
                   SizedBox(
-                    width: 64 * s,
-                    height: 64 * s,
+                    width: 45 * s,
+                    height: 45 * s,
                     child: CustomPaint(
                       painter: _ArcPainter(
-                        color: const Color(0xFF06B48A), // lebih tegas
+                        color: const Color(0xFF06B48A),
                         fraction: fr,
                       ),
                     ),
                   ),
 
-                  SizedBox(height: 10 * s),
+                  SizedBox(height: 4 * s),
 
                   Text(
                     "$value $unit",
                     style: TextStyle(
-                      fontSize: 15 * s,
-                      fontWeight: FontWeight.w800, // VALUE lebih menonjol
+                      fontSize: 12 * s,
+                      fontWeight: FontWeight.w800,
                       color: Colors.black.withOpacity(0.85),
                     ),
                   ),

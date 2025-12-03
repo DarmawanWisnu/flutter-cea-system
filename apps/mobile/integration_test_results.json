@@ -1,0 +1,698 @@
+﻿{"protocolVersion":"0.1.1","runnerVersion":"1.26.3","pid":2352,"type":"start","time":0}
+{"suite":{"id":0,"platform":"vm","path":"C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/integration_test/app_test.dart"},"type":"suite","time":0}
+{"test":{"id":1,"name":"loading C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/integration_test/app_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":1}
+{"count":3,"time":5,"type":"allSuites"}
+Running Gradle task 'assembleDebug'...                             18.8s
+ÔêÜ Built build\app\outputs\flutter-apk\app-debug.apk
+Installing build\app\outputs\flutter-apk\app-debug.apk...        1,102ms
+{"testID":1,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":27320}
+{"group":{"id":2,"suiteID":0,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":2,"line":null,"column":null,"url":null},"type":"group","time":27323}
+{"group":{"id":3,"suiteID":0,"parentID":2,"name":"App Integration Tests","metadata":{"skip":false,"skipReason":null},"testCount":2,"line":12,"column":3,"url":"c:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/integration_test/app_test.dart"},"type":"group","time":27324}
+{"test":{"id":4,"name":"App Integration Tests app should launch successfully","suiteID":0,"groupIDs":[2,3],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart"},"type":"testStart","time":27324}
+{"testID":4,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":29009}
+{"test":{"id":5,"name":"App Integration Tests should navigate between screens","suiteID":0,"groupIDs":[2,3],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart"},"type":"testStart","time":29010}
+{"testID":5,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":30097}
+{"test":{"id":6,"name":"(tearDownAll)","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":50,"column":5,"url":"package:integration_test/integration_test.dart"},"type":"testStart","time":30097}
+{"testID":6,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":30115}
+{"suite":{"id":7,"platform":"vm","path":"C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/integration_test/auth_flow_test.dart"},"type":"suite","time":30507}
+{"test":{"id":8,"name":"loading C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/integration_test/auth_flow_test.dart","suiteID":7,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":30507}
+Running Gradle task 'assembleDebug'...                             20.7s
+ÔêÜ Built build\app\outputs\flutter-apk\app-debug.apk
+Installing build\app\outputs\flutter-apk\app-debug.apk...        1,145ms
+{"testID":8,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":58809}
+{"group":{"id":9,"suiteID":7,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":9,"line":null,"column":null,"url":null},"type":"group","time":58809}
+{"group":{"id":10,"suiteID":7,"parentID":9,"name":"Authentication Flow Integration Tests","metadata":{"skip":false,"skipReason":null},"testCount":9,"line":22,"column":3,"url":"c:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/integration_test/auth_flow_test.dart"},"type":"group","time":58809}
+{"test":{"id":11,"name":"Authentication Flow Integration Tests should display login screen with all elements","suiteID":7,"groupIDs":[9,10],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart"},"type":"testStart","time":58809}
+{"testID":11,"messageType":"print","message":"ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ","type":"print","time":61982}
+{"testID":11,"messageType":"print","message":"The following TestFailure was thrown running a test:","type":"print","time":61984}
+{"testID":11,"messageType":"print","message":"Expected: exactly one matching candidate","type":"print","time":61984}
+{"testID":11,"messageType":"print","message":"  Actual: _TextWidgetFinder:<Found 0 widgets with text \"Don't Have An Account? \": []>","type":"print","time":61984}
+{"testID":11,"messageType":"print","message":"   Which: means none were found but one was expected","type":"print","time":61984}
+{"testID":11,"messageType":"print","message":"","type":"print","time":61984}
+{"testID":11,"messageType":"print","message":"When the exception was thrown, this was the stack:","type":"print","time":61984}
+{"testID":11,"messageType":"print","message":"#4      main.<anonymous closure>.<anonymous closure> (file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/integration_test/auth_flow_test.dart:40:7)","type":"print","time":61984}
+{"testID":11,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":61984}
+{"testID":11,"messageType":"print","message":"#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)","type":"print","time":61984}
+{"testID":11,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":61984}
+{"testID":11,"messageType":"print","message":"#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)","type":"print","time":61984}
+{"testID":11,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":61984}
+{"testID":11,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":61984}
+{"testID":11,"messageType":"print","message":"(elided one frame from package:stack_trace)","type":"print","time":61985}
+{"testID":11,"messageType":"print","message":"","type":"print","time":61985}
+{"testID":11,"messageType":"print","message":"This was caught by the test expectation on the following line:","type":"print","time":61985}
+{"testID":11,"messageType":"print","message":"  file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/integration_test/auth_flow_test.dart line 40","type":"print","time":61985}
+{"testID":11,"messageType":"print","message":"The test description was:","type":"print","time":61985}
+{"testID":11,"messageType":"print","message":"  should display login screen with all elements","type":"print","time":61985}
+{"testID":11,"messageType":"print","message":"ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ","type":"print","time":61992}
+{"testID":11,"error":"Test failed. See exception logs above.\nThe test description was: should display login screen with all elements","stackTrace":"","isFailure":false,"type":"error","time":61997}
+{"testID":11,"result":"error","skipped":false,"hidden":false,"type":"testDone","time":62010}
+{"test":{"id":12,"name":"Authentication Flow Integration Tests should validate email field on login attempt","suiteID":7,"groupIDs":[9,10],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart"},"type":"testStart","time":62010}
+{"testID":12,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":62629}
+{"test":{"id":13,"name":"Authentication Flow Integration Tests should validate password field on login attempt","suiteID":7,"groupIDs":[9,10],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart"},"type":"testStart","time":62630}
+{"testID":13,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":63245}
+{"test":{"id":14,"name":"Authentication Flow Integration Tests should validate email format","suiteID":7,"groupIDs":[9,10],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart"},"type":"testStart","time":63245}
+{"testID":14,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":63763}
+{"test":{"id":15,"name":"Authentication Flow Integration Tests should toggle password visibility","suiteID":7,"groupIDs":[9,10],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart"},"type":"testStart","time":63764}
+{"testID":15,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":64894}
+{"test":{"id":16,"name":"Authentication Flow Integration Tests should navigate to registration screen","suiteID":7,"groupIDs":[9,10],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart"},"type":"testStart","time":64894}
+{"testID":16,"messageType":"print","message":"ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ","type":"print","time":65451}
+{"testID":16,"messageType":"print","message":"The following assertion was thrown running a test:","type":"print","time":65455}
+{"testID":16,"messageType":"print","message":"The finder \"Found 0 widgets with text \"Sign Up For Free\": []\" (used in a call to \"tap()\") could not","type":"print","time":65457}
+{"testID":16,"messageType":"print","message":"find any matching widgets.","type":"print","time":65464}
+{"testID":16,"messageType":"print","message":"","type":"print","time":65464}
+{"testID":16,"messageType":"print","message":"When the exception was thrown, this was the stack:","type":"print","time":65466}
+{"testID":16,"messageType":"print","message":"#0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2013:7)","type":"print","time":65468}
+{"testID":16,"messageType":"print","message":"#1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1865:12)","type":"print","time":65474}
+{"testID":16,"messageType":"print","message":"#2      WidgetController.tap (package:flutter_test/src/controller.dart:1045:7)","type":"print","time":65480}
+{"testID":16,"messageType":"print","message":"#3      main.<anonymous closure>.<anonymous closure> (file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/integration_test/auth_flow_test.dart:138:20)","type":"print","time":65480}
+{"testID":16,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":65482}
+{"testID":16,"messageType":"print","message":"#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)","type":"print","time":65484}
+{"testID":16,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":65490}
+{"testID":16,"messageType":"print","message":"#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)","type":"print","time":65494}
+{"testID":16,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":65495}
+{"testID":16,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":65495}
+{"testID":16,"messageType":"print","message":"(elided one frame from package:stack_trace)","type":"print","time":65495}
+{"testID":16,"messageType":"print","message":"","type":"print","time":65495}
+{"testID":16,"messageType":"print","message":"The test description was:","type":"print","time":65495}
+{"testID":16,"messageType":"print","message":"  should navigate to registration screen","type":"print","time":65495}
+{"testID":16,"messageType":"print","message":"ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ","type":"print","time":65495}
+{"testID":16,"error":"Test failed. See exception logs above.\nThe test description was: should navigate to registration screen","stackTrace":"","isFailure":false,"type":"error","time":65496}
+{"testID":16,"result":"error","skipped":false,"hidden":false,"type":"testDone","time":65496}
+{"test":{"id":17,"name":"Authentication Flow Integration Tests should navigate to forgot password screen","suiteID":7,"groupIDs":[9,10],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart"},"type":"testStart","time":65496}
+{"testID":17,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":66465}
+{"test":{"id":18,"name":"Authentication Flow Integration Tests should accept valid login credentials input","suiteID":7,"groupIDs":[9,10],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart"},"type":"testStart","time":66465}
+{"testID":18,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":67009}
+{"test":{"id":19,"name":"Authentication Flow Integration Tests should show loading indicator when signing in","suiteID":7,"groupIDs":[9,10],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart"},"type":"testStart","time":67009}
+{"testID":19,"messageType":"print","message":"ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ","type":"print","time":68043}
+{"testID":19,"messageType":"print","message":"The following TestFailure was thrown running a test:","type":"print","time":68044}
+{"testID":19,"messageType":"print","message":"Expected: at least one matching candidate","type":"print","time":68044}
+{"testID":19,"messageType":"print","message":"  Actual: _TypeWidgetFinder:<Found 0 widgets with type \"CircularProgressIndicator\": []>","type":"print","time":68048}
+{"testID":19,"messageType":"print","message":"   Which: means none were found but some were expected","type":"print","time":68053}
+{"testID":19,"messageType":"print","message":"","type":"print","time":68054}
+{"testID":19,"messageType":"print","message":"When the exception was thrown, this was the stack:","type":"print","time":68054}
+{"testID":19,"messageType":"print","message":"#4      main.<anonymous closure>.<anonymous closure> (file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/integration_test/auth_flow_test.dart:214:7)","type":"print","time":68056}
+{"testID":19,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":68056}
+{"testID":19,"messageType":"print","message":"#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)","type":"print","time":68056}
+{"testID":19,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":68056}
+{"testID":19,"messageType":"print","message":"#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)","type":"print","time":68056}
+{"testID":19,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":68057}
+{"testID":19,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":68057}
+{"testID":19,"messageType":"print","message":"(elided one frame from package:stack_trace)","type":"print","time":68057}
+{"testID":19,"messageType":"print","message":"","type":"print","time":68059}
+{"testID":19,"messageType":"print","message":"This was caught by the test expectation on the following line:","type":"print","time":68060}
+{"testID":19,"messageType":"print","message":"  file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/integration_test/auth_flow_test.dart line 214","type":"print","time":68062}
+{"testID":19,"messageType":"print","message":"The test description was:","type":"print","time":68064}
+{"testID":19,"messageType":"print","message":"  should show loading indicator when signing in","type":"print","time":68064}
+{"testID":19,"messageType":"print","message":"ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ","type":"print","time":68070}
+{"testID":19,"error":"Test failed. See exception logs above.\nThe test description was: should show loading indicator when signing in","stackTrace":"","isFailure":false,"type":"error","time":68071}
+{"testID":19,"result":"error","skipped":false,"hidden":false,"type":"testDone","time":68071}
+{"test":{"id":20,"name":"(tearDownAll)","suiteID":7,"groupIDs":[9],"metadata":{"skip":false,"skipReason":null},"line":50,"column":5,"url":"package:integration_test/integration_test.dart"},"type":"testStart","time":68071}
+{"testID":20,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":68106}
+{"suite":{"id":21,"platform":"vm","path":"C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/integration_test/monitor_flow_test.dart"},"type":"suite","time":68553}
+{"test":{"id":22,"name":"loading C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/integration_test/monitor_flow_test.dart","suiteID":21,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":68553}
+Running Gradle task 'assembleDebug'...                             20.5s
+ÔêÜ Built build\app\outputs\flutter-apk\app-debug.apk
+Installing build\app\outputs\flutter-apk\app-debug.apk...        1,102ms
+{"testID":22,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":96531}
+{"group":{"id":23,"suiteID":21,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":10,"line":null,"column":null,"url":null},"type":"group","time":96531}
+{"group":{"id":24,"suiteID":21,"parentID":23,"name":"Monitor Screen Flow Integration Tests","metadata":{"skip":false,"skipReason":null},"testCount":10,"line":22,"column":3,"url":"c:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/integration_test/monitor_flow_test.dart"},"type":"group","time":96531}
+{"test":{"id":25,"name":"Monitor Screen Flow Integration Tests should display all sensor gauges","suiteID":21,"groupIDs":[23,24],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart"},"type":"testStart","time":96531}
+{"testID":25,"messageType":"print","message":"[Monitor] MQTT init error (continuing without MQTT): Instance of 'NotInitializedError'","type":"print","time":98278}
+{"testID":25,"messageType":"print","message":"[Monitor] MQTT initialized","type":"print","time":98802}
+{"testID":25,"messageType":"print","message":"ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ","type":"print","time":99394}
+{"testID":25,"messageType":"print","message":"The following ProviderException was thrown running a test:","type":"print","time":99395}
+{"testID":25,"messageType":"print","message":"Tried to use a provider that is in error state.","type":"print","time":99395}
+{"testID":25,"messageType":"print","message":"","type":"print","time":99395}
+{"testID":25,"messageType":"print","message":"A provider threw the following exception:","type":"print","time":99398}
+{"testID":25,"messageType":"print","message":"Instance of 'NotInitializedError'","type":"print","time":99402}
+{"testID":25,"messageType":"print","message":"","type":"print","time":99402}
+{"testID":25,"messageType":"print","message":"The stack trace of the exception:","type":"print","time":99404}
+{"testID":25,"messageType":"print","message":"#0      DotEnv.env (package:flutter_dotenv/src/dotenv.dart:41:7)","type":"print","time":99404}
+{"testID":25,"messageType":"print","message":"#1      apiBaseUrlProvider.<anonymous closure>","type":"print","time":99407}
+{"testID":25,"messageType":"print","message":"(package:fountaine/providers/provider/api_provider.dart:9:17)","type":"print","time":99412}
+{"testID":25,"messageType":"print","message":"#2      Provider.create (package:riverpod/src/providers/provider.dart:59:36)","type":"print","time":99414}
+{"testID":25,"messageType":"print","message":"#3      $ProviderElement.create (package:riverpod/src/providers/provider.dart:343:32)","type":"print","time":99419}
+{"testID":25,"messageType":"print","message":"#4      ProviderElement.buildState (package:riverpod/src/core/element.dart:665:28)","type":"print","time":99419}
+{"testID":25,"messageType":"print","message":"#5      ProviderElement.mount (package:riverpod/src/core/element.dart:517:7)","type":"print","time":99420}
+{"testID":25,"messageType":"print","message":"#6      ProviderElement.flush (package:riverpod/src/core/element.dart:620:7)","type":"print","time":99420}
+{"testID":25,"messageType":"print","message":"#7      $ProviderBaseImpl._addListener (package:riverpod/src/core/provider/provider.dart:117:24)","type":"print","time":99420}
+{"testID":25,"messageType":"print","message":"#8      ProviderElement.listen (package:riverpod/src/core/element.dart:901:28)","type":"print","time":99420}
+{"testID":25,"messageType":"print","message":"#9      Ref.watch (package:riverpod/src/core/ref.dart:639:20)","type":"print","time":99420}
+{"testID":25,"messageType":"print","message":"#10     apiServiceProvider.<anonymous closure>","type":"print","time":99420}
+{"testID":25,"messageType":"print","message":"(package:fountaine/providers/provider/api_provider.dart:14:23)","type":"print","time":99420}
+{"testID":25,"messageType":"print","message":"#11     Provider.create (package:riverpod/src/providers/provider.dart:59:36)","type":"print","time":99421}
+{"testID":25,"messageType":"print","message":"#12     $ProviderElement.create (package:riverpod/src/providers/provider.dart:343:32)","type":"print","time":99421}
+{"testID":25,"messageType":"print","message":"#13     ProviderElement.buildState (package:riverpod/src/core/element.dart:665:28)","type":"print","time":99421}
+{"testID":25,"messageType":"print","message":"#14     ProviderElement.mount (package:riverpod/src/core/element.dart:517:7)","type":"print","time":99422}
+{"testID":25,"messageType":"print","message":"#15     ProviderElement.flush (package:riverpod/src/core/element.dart:620:7)","type":"print","time":99425}
+{"testID":25,"messageType":"print","message":"#16     $ProviderBaseImpl._addListener (package:riverpod/src/core/provider/provider.dart:117:24)","type":"print","time":99425}
+{"testID":25,"messageType":"print","message":"#17     ProviderContainer.listen (package:riverpod/src/core/provider_container.dart:954:26)","type":"print","time":99425}
+{"testID":25,"messageType":"print","message":"#18     ProviderContainer.read (package:riverpod/src/core/provider_container.dart:911:17)","type":"print","time":99425}
+{"testID":25,"messageType":"print","message":"#19     Ref.read (package:riverpod/src/core/ref.dart:524:30)","type":"print","time":99425}
+{"testID":25,"messageType":"print","message":"#20     MonitorNotifier._init (package:fountaine/providers/provider/monitor_provider.dart:66:21)","type":"print","time":99425}
+{"testID":25,"messageType":"print","message":"#21     new MonitorNotifier (package:fountaine/providers/provider/monitor_provider.dart:48:5)","type":"print","time":99425}
+{"testID":25,"messageType":"print","message":"#22     monitorTelemetryProvider.<anonymous closure>","type":"print","time":99426}
+{"testID":25,"messageType":"print","message":"(package:fountaine/providers/provider/monitor_provider.dart:35:14)","type":"print","time":99428}
+{"testID":25,"messageType":"print","message":"#23     FunctionalFamily.call.<anonymous closure> (package:riverpod/src/core/family.dart:155:25)","type":"print","time":99428}
+{"testID":25,"messageType":"print","message":"#24     StateNotifierProvider.create","type":"print","time":99429}
+{"testID":25,"messageType":"print","message":"(package:riverpod/src/providers/legacy/state_notifier_provider.dart:120:39)","type":"print","time":99429}
+{"testID":25,"messageType":"print","message":"#25     _StateNotifierProviderElement.create.<anonymous closure>","type":"print","time":99430}
+{"testID":25,"messageType":"print","message":"(package:riverpod/src/providers/legacy/state_notifier_provider.dart:170:65)","type":"print","time":99430}
+{"testID":25,"messageType":"print","message":"#26     $Result.guard (package:riverpod/src/common/result.dart:19:29)","type":"print","time":99430}
+{"testID":25,"messageType":"print","message":"#27     _StateNotifierProviderElement.create","type":"print","time":99431}
+{"testID":25,"messageType":"print","message":"(package:riverpod/src/providers/legacy/state_notifier_provider.dart:170:44)","type":"print","time":99434}
+{"testID":25,"messageType":"print","message":"#28     ProviderElement.buildState (package:riverpod/src/core/element.dart:665:28)","type":"print","time":99434}
+{"testID":25,"messageType":"print","message":"#29     ProviderElement.mount (package:riverpod/src/core/element.dart:517:7)","type":"print","time":99434}
+{"testID":25,"messageType":"print","message":"#30     ProviderElement.flush (package:riverpod/src/core/element.dart:620:7)","type":"print","time":99434}
+{"testID":25,"messageType":"print","message":"#31     $ProviderBaseImpl._addListener (package:riverpod/src/core/provider/provider.dart:117:24)","type":"print","time":99435}
+{"testID":25,"messageType":"print","message":"#32     ProviderContainer.listen (package:riverpod/src/core/provider_container.dart:954:26)","type":"print","time":99435}
+{"testID":25,"messageType":"print","message":"#33     ConsumerStatefulElement.watch.<anonymous closure>","type":"print","time":99435}
+{"testID":25,"messageType":"print","message":"(package:flutter_riverpod/src/core/consumer.dart:451:37)","type":"print","time":99435}
+{"testID":25,"messageType":"print","message":"#34     _LinkedHashMapMixin.putIfAbsent (dart:_compact_hash:675:23)","type":"print","time":99435}
+{"testID":25,"messageType":"print","message":"#35     ConsumerStatefulElement.watch (package:flutter_riverpod/src/core/consumer.dart:444:14)","type":"print","time":99436}
+{"testID":25,"messageType":"print","message":"#36     _MonitorScreenState.build (package:fountaine/features/monitor/monitor_screen.dart:149:23)","type":"print","time":99436}
+{"testID":25,"messageType":"print","message":"#37     StatefulElement.build (package:flutter/src/widgets/framework.dart:5934:27)","type":"print","time":99436}
+{"testID":25,"messageType":"print","message":"#38     ConsumerStatefulElement.build (package:flutter_riverpod/src/core/consumer.dart:421:20)","type":"print","time":99439}
+{"testID":25,"messageType":"print","message":"#39     ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5820:15)","type":"print","time":99439}
+{"testID":25,"messageType":"print","message":"#40     StatefulElement.performRebuild (package:flutter/src/widgets/framework.dart:5985:11)","type":"print","time":99439}
+{"testID":25,"messageType":"print","message":"#41     Element.rebuild (package:flutter/src/widgets/framework.dart:5532:7)","type":"print","time":99442}
+{"testID":25,"messageType":"print","message":"#42     BuildScope._tryRebuild (package:flutter/src/widgets/framework.dart:2750:15)","type":"print","time":99442}
+{"testID":25,"messageType":"print","message":"#43     BuildScope._flushDirtyElements (package:flutter/src/widgets/framework.dart:2807:11)","type":"print","time":99442}
+{"testID":25,"messageType":"print","message":"#44     BuildOwner.buildScope (package:flutter/src/widgets/framework.dart:3111:18)","type":"print","time":99445}
+{"testID":25,"messageType":"print","message":"#45     WidgetsBinding.drawFrame (package:flutter/src/widgets/binding.dart:1262:21)","type":"print","time":99445}
+{"testID":25,"messageType":"print","message":"#46     RendererBinding._handlePersistentFrameCallback","type":"print","time":99445}
+{"testID":25,"messageType":"print","message":"(package:flutter/src/rendering/binding.dart:495:5)","type":"print","time":99445}
+{"testID":25,"messageType":"print","message":"#47     SchedulerBinding._invokeFrameCallback (package:flutter/src/scheduler/binding.dart:1434:15)","type":"print","time":99449}
+{"testID":25,"messageType":"print","message":"#48     SchedulerBinding.handleDrawFrame (package:flutter/src/scheduler/binding.dart:1347:9)","type":"print","time":99452}
+{"testID":25,"messageType":"print","message":"#49     LiveTestWidgetsFlutterBinding.handleDrawFrame","type":"print","time":99452}
+{"testID":25,"messageType":"print","message":"(package:flutter_test/src/binding.dart:1886:13)","type":"print","time":99452}
+{"testID":25,"messageType":"print","message":"#50     SchedulerBinding._handleDrawFrame (package:flutter/src/scheduler/binding.dart:1200:5)","type":"print","time":99452}
+{"testID":25,"messageType":"print","message":"#51     _rootRun (dart:async/zone.dart:1525:13)","type":"print","time":99452}
+{"testID":25,"messageType":"print","message":"#52     _CustomZone.run (dart:async/zone.dart:1422:19)","type":"print","time":99454}
+{"testID":25,"messageType":"print","message":"#53     _CustomZone.runGuarded (dart:async/zone.dart:1321:7)","type":"print","time":99454}
+{"testID":25,"messageType":"print","message":"#54     _invoke (dart:ui/hooks.dart:358:10)","type":"print","time":99456}
+{"testID":25,"messageType":"print","message":"#55     PlatformDispatcher._drawFrame (dart:ui/platform_dispatcher.dart:444:5)","type":"print","time":99456}
+{"testID":25,"messageType":"print","message":"#56     _drawFrame (dart:ui/hooks.dart:328:31)","type":"print","time":99456}
+{"testID":25,"messageType":"print","message":"","type":"print","time":99459}
+{"testID":25,"messageType":"print","message":"","type":"print","time":99461}
+{"testID":25,"messageType":"print","message":"And rethrown at:","type":"print","time":99462}
+{"testID":25,"messageType":"print","message":"#0      throwProviderException (package:riverpod/src/common/stack_trace.dart:10:3)","type":"print","time":99464}
+{"testID":25,"messageType":"print","message":"#1      $ResultError.valueOrProviderException (package:riverpod/src/common/result.dart:108:7)","type":"print","time":99464}
+{"testID":25,"messageType":"print","message":"#2      Ref.watch (package:riverpod/src/core/ref.dart:646:27)","type":"print","time":99464}
+{"testID":25,"messageType":"print","message":"#3      apiServiceProvider.<anonymous closure>","type":"print","time":99464}
+{"testID":25,"messageType":"print","message":"(package:fountaine/providers/provider/api_provider.dart:14:23)","type":"print","time":99464}
+{"testID":25,"messageType":"print","message":"#4      Provider.create (package:riverpod/src/providers/provider.dart:59:36)","type":"print","time":99467}
+{"testID":25,"messageType":"print","message":"#5      $ProviderElement.create (package:riverpod/src/providers/provider.dart:343:32)","type":"print","time":99467}
+{"testID":25,"messageType":"print","message":"#6      ProviderElement.buildState (package:riverpod/src/core/element.dart:665:28)","type":"print","time":99467}
+{"testID":25,"messageType":"print","message":"#7      ProviderElement.mount (package:riverpod/src/core/element.dart:517:7)","type":"print","time":99467}
+{"testID":25,"messageType":"print","message":"#8      ProviderElement.flush (package:riverpod/src/core/element.dart:620:7)","type":"print","time":99467}
+{"testID":25,"messageType":"print","message":"#9      $ProviderBaseImpl._addListener (package:riverpod/src/core/provider/provider.dart:117:24)","type":"print","time":99469}
+{"testID":25,"messageType":"print","message":"#10     ProviderContainer.listen (package:riverpod/src/core/provider_container.dart:954:26)","type":"print","time":99469}
+{"testID":25,"messageType":"print","message":"#11     ProviderContainer.read (package:riverpod/src/core/provider_container.dart:911:17)","type":"print","time":99471}
+{"testID":25,"messageType":"print","message":"#12     Ref.read (package:riverpod/src/core/ref.dart:524:30)","type":"print","time":99471}
+{"testID":25,"messageType":"print","message":"#13     MonitorNotifier._init (package:fountaine/providers/provider/monitor_provider.dart:66:21)","type":"print","time":99472}
+{"testID":25,"messageType":"print","message":"#14     new MonitorNotifier (package:fountaine/providers/provider/monitor_provider.dart:48:5)","type":"print","time":99472}
+{"testID":25,"messageType":"print","message":"#15     monitorTelemetryProvider.<anonymous closure>","type":"print","time":99474}
+{"testID":25,"messageType":"print","message":"(package:fountaine/providers/provider/monitor_provider.dart:35:14)","type":"print","time":99474}
+{"testID":25,"messageType":"print","message":"#16     FunctionalFamily.call.<anonymous closure> (package:riverpod/src/core/family.dart:155:25)","type":"print","time":99474}
+{"testID":25,"messageType":"print","message":"#17     StateNotifierProvider.create","type":"print","time":99477}
+{"testID":25,"messageType":"print","message":"(package:riverpod/src/providers/legacy/state_notifier_provider.dart:120:39)","type":"print","time":99477}
+{"testID":25,"messageType":"print","message":"#18     _StateNotifierProviderElement.create.<anonymous closure>","type":"print","time":99477}
+{"testID":25,"messageType":"print","message":"(package:riverpod/src/providers/legacy/state_notifier_provider.dart:170:65)","type":"print","time":99477}
+{"testID":25,"messageType":"print","message":"#19     $Result.guard (package:riverpod/src/common/result.dart:19:29)","type":"print","time":99477}
+{"testID":25,"messageType":"print","message":"#20     _StateNotifierProviderElement.create","type":"print","time":99479}
+{"testID":25,"messageType":"print","message":"(package:riverpod/src/providers/legacy/state_notifier_provider.dart:170:44)","type":"print","time":99480}
+{"testID":25,"messageType":"print","message":"#21     ProviderElement.buildState (package:riverpod/src/core/element.dart:665:28)","type":"print","time":99480}
+{"testID":25,"messageType":"print","message":"#22     ProviderElement.mount (package:riverpod/src/core/element.dart:517:7)","type":"print","time":99480}
+{"testID":25,"messageType":"print","message":"#23     ProviderElement.flush (package:riverpod/src/core/element.dart:620:7)","type":"print","time":99482}
+{"testID":25,"messageType":"print","message":"#24     $ProviderBaseImpl._addListener (package:riverpod/src/core/provider/provider.dart:117:24)","type":"print","time":99482}
+{"testID":25,"messageType":"print","message":"#25     ProviderContainer.listen (package:riverpod/src/core/provider_container.dart:954:26)","type":"print","time":99482}
+{"testID":25,"messageType":"print","message":"#26     ConsumerStatefulElement.watch.<anonymous closure>","type":"print","time":99482}
+{"testID":25,"messageType":"print","message":"(package:flutter_riverpod/src/core/consumer.dart:451:37)","type":"print","time":99485}
+{"testID":25,"messageType":"print","message":"#27     _LinkedHashMapMixin.putIfAbsent (dart:_compact_hash:675:23)","type":"print","time":99485}
+{"testID":25,"messageType":"print","message":"#28     ConsumerStatefulElement.watch (package:flutter_riverpod/src/core/consumer.dart:444:14)","type":"print","time":99485}
+{"testID":25,"messageType":"print","message":"#29     _MonitorScreenState.build (package:fountaine/features/monitor/monitor_screen.dart:149:23)","type":"print","time":99485}
+{"testID":25,"messageType":"print","message":"#30     StatefulElement.build (package:flutter/src/widgets/framework.dart:5934:27)","type":"print","time":99487}
+{"testID":25,"messageType":"print","message":"#31     ConsumerStatefulElement.build (package:flutter_riverpod/src/core/consumer.dart:421:20)","type":"print","time":99488}
+{"testID":25,"messageType":"print","message":"#32     ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5820:15)","type":"print","time":99488}
+{"testID":25,"messageType":"print","message":"#33     StatefulElement.performRebuild (package:flutter/src/widgets/framework.dart:5985:11)","type":"print","time":99488}
+{"testID":25,"messageType":"print","message":"#34     Element.rebuild (package:flutter/src/widgets/framework.dart:5532:7)","type":"print","time":99488}
+{"testID":25,"messageType":"print","message":"#35     BuildScope._tryRebuild (package:flutter/src/widgets/framework.dart:2750:15)","type":"print","time":99488}
+{"testID":25,"messageType":"print","message":"#36     BuildScope._flushDirtyElements (package:flutter/src/widgets/framework.dart:2807:11)","type":"print","time":99490}
+{"testID":25,"messageType":"print","message":"#37     BuildOwner.buildScope (package:flutter/src/widgets/framework.dart:3111:18)","type":"print","time":99490}
+{"testID":25,"messageType":"print","message":"#38     WidgetsBinding.drawFrame (package:flutter/src/widgets/binding.dart:1262:21)","type":"print","time":99492}
+{"testID":25,"messageType":"print","message":"#39     RendererBinding._handlePersistentFrameCallback","type":"print","time":99492}
+{"testID":25,"messageType":"print","message":"(package:flutter/src/rendering/binding.dart:495:5)","type":"print","time":99492}
+{"testID":25,"messageType":"print","message":"#40     SchedulerBinding._invokeFrameCallback (package:flutter/src/scheduler/binding.dart:1434:15)","type":"print","time":99494}
+{"testID":25,"messageType":"print","message":"#41     SchedulerBinding.handleDrawFrame (package:flutter/src/scheduler/binding.dart:1347:9)","type":"print","time":99495}
+{"testID":25,"messageType":"print","message":"#42     LiveTestWidgetsFlutterBinding.handleDrawFrame","type":"print","time":99497}
+{"testID":25,"messageType":"print","message":"(package:flutter_test/src/binding.dart:1886:13)","type":"print","time":99497}
+{"testID":25,"messageType":"print","message":"#43     SchedulerBinding._handleDrawFrame (package:flutter/src/scheduler/binding.dart:1200:5)","type":"print","time":99497}
+{"testID":25,"messageType":"print","message":"#44     _rootRun (dart:async/zone.dart:1525:13)","type":"print","time":99497}
+{"testID":25,"messageType":"print","message":"#45     _CustomZone.run (dart:async/zone.dart:1422:19)","type":"print","time":99497}
+{"testID":25,"messageType":"print","message":"#46     _CustomZone.runGuarded (dart:async/zone.dart:1321:7)","type":"print","time":99497}
+{"testID":25,"messageType":"print","message":"#47     _invoke (dart:ui/hooks.dart:358:10)","type":"print","time":99501}
+{"testID":25,"messageType":"print","message":"#48     PlatformDispatcher._drawFrame (dart:ui/platform_dispatcher.dart:444:5)","type":"print","time":99502}
+{"testID":25,"messageType":"print","message":"#49     _drawFrame (dart:ui/hooks.dart:328:31)","type":"print","time":99504}
+{"testID":25,"messageType":"print","message":"","type":"print","time":99504}
+{"testID":25,"messageType":"print","message":"When the exception was thrown, this was the stack:","type":"print","time":99504}
+{"testID":25,"messageType":"print","message":"#0      throwProviderException (package:riverpod/src/common/stack_trace.dart:10:3)","type":"print","time":99504}
+{"testID":25,"messageType":"print","message":"#1      $ResultError.valueOrProviderException (package:riverpod/src/common/result.dart:108:7)","type":"print","time":99506}
+{"testID":25,"messageType":"print","message":"#2      ProviderContainer.read (package:riverpod/src/core/provider_container.dart:914:29)","type":"print","time":99506}
+{"testID":25,"messageType":"print","message":"#3      Ref.read (package:riverpod/src/core/ref.dart:524:30)","type":"print","time":99506}
+{"testID":25,"messageType":"print","message":"#4      MonitorNotifier._init (package:fountaine/providers/provider/monitor_provider.dart:66:21)","type":"print","time":99508}
+{"testID":25,"messageType":"print","message":"#5      new MonitorNotifier (package:fountaine/providers/provider/monitor_provider.dart:48:5)","type":"print","time":99509}
+{"testID":25,"messageType":"print","message":"#6      monitorTelemetryProvider.<anonymous closure> (package:fountaine/providers/provider/monitor_provider.dart:35:14)","type":"print","time":99509}
+{"testID":25,"messageType":"print","message":"#7      FunctionalFamily.call.<anonymous closure> (package:riverpod/src/core/family.dart:155:25)","type":"print","time":99511}
+{"testID":25,"messageType":"print","message":"#8      StateNotifierProvider.create (package:riverpod/src/providers/legacy/state_notifier_provider.dart:120:39)","type":"print","time":99515}
+{"testID":25,"messageType":"print","message":"#9      _StateNotifierProviderElement.create.<anonymous closure> (package:riverpod/src/providers/legacy/state_notifier_provider.dart:170:65)","type":"print","time":99515}
+{"testID":25,"messageType":"print","message":"#10     $Result.guard (package:riverpod/src/common/result.dart:19:29)","type":"print","time":99515}
+{"testID":25,"messageType":"print","message":"#11     _StateNotifierProviderElement.create (package:riverpod/src/providers/legacy/state_notifier_provider.dart:170:44)","type":"print","time":99515}
+{"testID":25,"messageType":"print","message":"#12     ProviderElement.buildState (package:riverpod/src/core/element.dart:665:28)","type":"print","time":99515}
+{"testID":25,"messageType":"print","message":"#13     ProviderElement.mount (package:riverpod/src/core/element.dart:517:7)","type":"print","time":99515}
+{"testID":25,"messageType":"print","message":"#14     ProviderElement.flush (package:riverpod/src/core/element.dart:620:7)","type":"print","time":99515}
+{"testID":25,"messageType":"print","message":"#15     $ProviderBaseImpl._addListener (package:riverpod/src/core/provider/provider.dart:117:24)","type":"print","time":99517}
+{"testID":25,"messageType":"print","message":"#16     ProviderContainer.listen (package:riverpod/src/core/provider_container.dart:954:26)","type":"print","time":99517}
+{"testID":25,"messageType":"print","message":"#17     ConsumerStatefulElement.watch.<anonymous closure> (package:flutter_riverpod/src/core/consumer.dart:451:37)","type":"print","time":99517}
+{"testID":25,"messageType":"print","message":"#18     _LinkedHashMapMixin.putIfAbsent (dart:_compact_hash:675:23)","type":"print","time":99517}
+{"testID":25,"messageType":"print","message":"#19     ConsumerStatefulElement.watch (package:flutter_riverpod/src/core/consumer.dart:444:14)","type":"print","time":99518}
+{"testID":25,"messageType":"print","message":"#20     _MonitorScreenState.build (package:fountaine/features/monitor/monitor_screen.dart:149:23)","type":"print","time":99518}
+{"testID":25,"messageType":"print","message":"#21     StatefulElement.build (package:flutter/src/widgets/framework.dart:5934:27)","type":"print","time":99528}
+{"testID":25,"messageType":"print","message":"#22     ConsumerStatefulElement.build (package:flutter_riverpod/src/core/consumer.dart:421:20)","type":"print","time":99530}
+{"testID":25,"messageType":"print","message":"#23     ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5820:15)","type":"print","time":99530}
+{"testID":25,"messageType":"print","message":"#24     StatefulElement.performRebuild (package:flutter/src/widgets/framework.dart:5985:11)","type":"print","time":99532}
+{"testID":25,"messageType":"print","message":"#25     Element.rebuild (package:flutter/src/widgets/framework.dart:5532:7)","type":"print","time":99535}
+{"testID":25,"messageType":"print","message":"#26     BuildScope._tryRebuild (package:flutter/src/widgets/framework.dart:2750:15)","type":"print","time":99535}
+{"testID":25,"messageType":"print","message":"#27     BuildScope._flushDirtyElements (package:flutter/src/widgets/framework.dart:2807:11)","type":"print","time":99537}
+{"testID":25,"messageType":"print","message":"#28     BuildOwner.buildScope (package:flutter/src/widgets/framework.dart:3111:18)","type":"print","time":99538}
+{"testID":25,"messageType":"print","message":"#29     WidgetsBinding.drawFrame (package:flutter/src/widgets/binding.dart:1262:21)","type":"print","time":99538}
+{"testID":25,"messageType":"print","message":"#30     RendererBinding._handlePersistentFrameCallback (package:flutter/src/rendering/binding.dart:495:5)","type":"print","time":99538}
+{"testID":25,"error":"Test failed. See exception logs above.\nThe test description was: should display all sensor gauges","stackTrace":"","isFailure":false,"type":"error","time":99538}
+{"testID":25,"error":"Test failed. See exception logs above.\nThe test description was: should display all sensor gauges","stackTrace":"","isFailure":false,"type":"error","time":99552}
+{"testID":25,"result":"error","skipped":false,"hidden":false,"type":"testDone","time":99552}
+{"test":{"id":26,"name":"Monitor Screen Flow Integration Tests should display sensor values with units","suiteID":21,"groupIDs":[23,24],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart"},"type":"testStart","time":99552}
+{"testID":26,"error":"Test failed. See exception logs above.\nThe test description was: should display sensor values with units","stackTrace":"","isFailure":false,"type":"error","time":99822}
+{"testID":26,"result":"error","skipped":false,"hidden":false,"type":"testDone","time":99826}
+{"test":{"id":27,"name":"Monitor Screen Flow Integration Tests should display Your Kit section with kit selector","suiteID":21,"groupIDs":[23,24],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart"},"type":"testStart","time":99826}
+{"testID":27,"error":"Test failed. See exception logs above.\nThe test description was: should display Your Kit section with kit selector","stackTrace":"","isFailure":false,"type":"error","time":100084}
+{"testID":27,"result":"error","skipped":false,"hidden":false,"type":"testDone","time":100085}
+{"test":{"id":28,"name":"Monitor Screen Flow Integration Tests should display Mode & Control section","suiteID":21,"groupIDs":[23,24],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart"},"type":"testStart","time":100085}
+{"testID":28,"error":"Test failed. See exception logs above.\nThe test description was: should display Mode & Control section","stackTrace":"","isFailure":false,"type":"error","time":100298}
+{"testID":28,"result":"error","skipped":false,"hidden":false,"type":"testDone","time":100299}
+{"test":{"id":29,"name":"Monitor Screen Flow Integration Tests should switch from auto to manual mode","suiteID":21,"groupIDs":[23,24],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart"},"type":"testStart","time":100299}
+{"testID":29,"error":"Test failed. See exception logs above.\nThe test description was: should switch from auto to manual mode","stackTrace":"","isFailure":false,"type":"error","time":100531}
+{"testID":29,"result":"error","skipped":false,"hidden":false,"type":"testDone","time":100531}
+{"test":{"id":30,"name":"Monitor Screen Flow Integration Tests should switch from manual to auto mode","suiteID":21,"groupIDs":[23,24],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart"},"type":"testStart","time":100532}
+{"testID":25,"messageType":"print","message":"#31     SchedulerBinding._invokeFrameCallback (package:flutter/src/scheduler/binding.dart:1434:15)","type":"print","time":100576}
+{"testID":25,"messageType":"print","message":"#32     SchedulerBinding.handleDrawFrame (package:flutter/src/scheduler/binding.dart:1347:9)","type":"print","time":100577}
+{"testID":25,"messageType":"print","message":"#33     LiveTestWidgetsFlutterBinding.handleDrawFrame (package:flutter_test/src/binding.dart:1886:13)","type":"print","time":100577}
+{"testID":25,"messageType":"print","message":"#34     SchedulerBinding._handleDrawFrame (package:flutter/src/scheduler/binding.dart:1200:5)","type":"print","time":100577}
+{"testID":25,"messageType":"print","message":"#38     _invoke (dart:ui/hooks.dart:358:10)","type":"print","time":100577}
+{"testID":25,"messageType":"print","message":"#39     PlatformDispatcher._drawFrame (dart:ui/platform_dispatcher.dart:444:5)","type":"print","time":100577}
+{"testID":25,"messageType":"print","message":"#40     _drawFrame (dart:ui/hooks.dart:328:31)","type":"print","time":100577}
+{"testID":25,"messageType":"print","message":"(elided 3 frames from dart:async)","type":"print","time":100577}
+{"testID":25,"messageType":"print","message":"","type":"print","time":100577}
+{"testID":25,"messageType":"print","message":"The test description was:","type":"print","time":100577}
+{"testID":25,"messageType":"print","message":"  should display all sensor gauges","type":"print","time":100577}
+{"testID":25,"messageType":"print","message":"ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ","type":"print","time":100577}
+{"testID":25,"messageType":"print","message":"ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ","type":"print","time":100578}
+{"testID":25,"messageType":"print","message":"The following assertion was thrown running a test (but after the test had completed):","type":"print","time":100578}
+{"testID":25,"messageType":"print","message":"'package:flutter_test/src/binding.dart': Failed assertion: line 2071 pos 12: 'inTest': is not true.","type":"print","time":100578}
+{"testID":25,"messageType":"print","message":"","type":"print","time":100578}
+{"testID":25,"messageType":"print","message":"When the exception was thrown, this was the stack:","type":"print","time":100578}
+{"testID":25,"messageType":"print","message":"#2      LiveTestWidgetsFlutterBinding.pump (package:flutter_test/src/binding.dart:2071:12)","type":"print","time":100578}
+{"testID":25,"messageType":"print","message":"#3      WidgetTester.pump.<anonymous closure> (package:flutter_test/src/widget_tester.dart:652:53)","type":"print","time":100578}
+{"testID":25,"messageType":"print","message":"#6      TestAsyncUtils.guard (package:flutter_test/src/test_async_utils.dart:74:41)","type":"print","time":100578}
+{"testID":25,"messageType":"print","message":"#7      WidgetTester.pump (package:flutter_test/src/widget_tester.dart:652:27)","type":"print","time":100578}
+{"testID":25,"messageType":"print","message":"#8      main.<anonymous closure>.<anonymous closure> (file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/integration_test/monitor_flow_test.dart:43:20)","type":"print","time":100579}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":100579}
+{"testID":25,"messageType":"print","message":"#9      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)","type":"print","time":100579}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":100579}
+{"testID":25,"messageType":"print","message":"#10     TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)","type":"print","time":100579}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":100579}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":100579}
+{"testID":25,"messageType":"print","message":"(elided 5 frames from class _AssertionError, dart:async, and package:stack_trace)","type":"print","time":100579}
+{"testID":25,"messageType":"print","message":"ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ","type":"print","time":100580}
+{"testID":25,"messageType":"print","message":"ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ","type":"print","time":100580}
+{"testID":25,"messageType":"print","message":"The following assertion was thrown running a test:","type":"print","time":100580}
+{"testID":25,"messageType":"print","message":"Guarded function conflict.","type":"print","time":100580}
+{"testID":25,"messageType":"print","message":"You must use \"await\" with all Future-returning test APIs.","type":"print","time":100580}
+{"testID":25,"messageType":"print","message":"The guarded method \"pump\" from class WidgetTester was called from","type":"print","time":100580}
+{"testID":25,"messageType":"print","message":"file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/integration_test/monitor_flow_test.dart","type":"print","time":100580}
+{"testID":25,"messageType":"print","message":"on line 43.","type":"print","time":100580}
+{"testID":25,"messageType":"print","message":"Then, the \"pump\" method from class LiveTestWidgetsFlutterBinding was called from","type":"print","time":100584}
+{"testID":25,"messageType":"print","message":"package:flutter_test/src/binding.dart on line 1048.","type":"print","time":100584}
+{"testID":25,"messageType":"print","message":"The first method (WidgetTester.pump) had not yet finished executing at the time that the second","type":"print","time":100584}
+{"testID":25,"messageType":"print","message":"method (LiveTestWidgetsFlutterBinding.pump) was called. Since both are guarded, and the second was","type":"print","time":100587}
+{"testID":25,"messageType":"print","message":"not a nested call inside the first, the first must complete its execution before the second can be","type":"print","time":100587}
+{"testID":25,"messageType":"print","message":"called. Typically, this is achieved by putting an \"await\" statement in front of the call to the","type":"print","time":100591}
+{"testID":25,"messageType":"print","message":"first.","type":"print","time":100594}
+{"testID":25,"messageType":"print","message":"","type":"print","time":100595}
+{"testID":25,"messageType":"print","message":"When the first method (WidgetTester.pump) was called, this was the stack:","type":"print","time":100595}
+{"testID":25,"messageType":"print","message":"#0      TestAsyncUtils.guard (package:flutter_test/src/test_async_utils.dart:72:54)","type":"print","time":100595}
+{"testID":25,"messageType":"print","message":"#1      WidgetTester.pump (package:flutter_test/src/widget_tester.dart:652:27)","type":"print","time":100595}
+{"testID":25,"messageType":"print","message":"#2      main.<anonymous closure>.<anonymous closure> (file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/integration_test/monitor_flow_test.dart:43:20)","type":"print","time":100597}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":100598}
+{"testID":25,"messageType":"print","message":"#3      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)","type":"print","time":100600}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":100601}
+{"testID":25,"messageType":"print","message":"#4      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)","type":"print","time":100601}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":100601}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":100601}
+{"testID":25,"messageType":"print","message":"(elided one frame from package:stack_trace)","type":"print","time":100601}
+{"testID":25,"messageType":"print","message":"","type":"print","time":100607}
+{"testID":25,"messageType":"print","message":"When the exception was thrown, this was the stack:","type":"print","time":100607}
+{"testID":25,"messageType":"print","message":"#0      TestAsyncUtils.guardSync (package:flutter_test/src/test_async_utils.dart:312:5)","type":"print","time":100607}
+{"testID":25,"messageType":"print","message":"#1      TestAsyncUtils.guard (package:flutter_test/src/test_async_utils.dart:66:5)","type":"print","time":100607}
+{"testID":25,"messageType":"print","message":"#2      LiveTestWidgetsFlutterBinding.pump (package:flutter_test/src/binding.dart:2078:27)","type":"print","time":100607}
+{"testID":25,"messageType":"print","message":"#3      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1048:11)","type":"print","time":100607}
+{"testID":25,"messageType":"print","message":"#6      TestWidgetsFlutterBinding._runTest (package:flutter_test/src/binding.dart:1033:10)","type":"print","time":100607}
+{"testID":25,"messageType":"print","message":"#7      LiveTestWidgetsFlutterBinding.runTest (package:flutter_test/src/binding.dart:2134:12)","type":"print","time":100608}
+{"testID":25,"messageType":"print","message":"#8      IntegrationTestWidgetsFlutterBinding.runTest (package:integration_test/integration_test.dart:237:17)","type":"print","time":100608}
+{"testID":25,"messageType":"print","message":"#9      testWidgets.<anonymous closure> (package:flutter_test/src/widget_tester.dart:184:24)","type":"print","time":100608}
+{"testID":25,"messageType":"print","message":"#10     Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:242:19)","type":"print","time":100608}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":100608}
+{"testID":25,"messageType":"print","message":"#11     Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:240:7)","type":"print","time":100608}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":100608}
+{"testID":25,"messageType":"print","message":"#12     Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:282:9)","type":"print","time":100608}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":100608}
+{"testID":25,"messageType":"print","message":"(elided 2 frames from dart:async)","type":"print","time":100608}
+{"testID":25,"messageType":"print","message":"","type":"print","time":100608}
+{"testID":25,"messageType":"print","message":"The test description was:","type":"print","time":100608}
+{"testID":25,"messageType":"print","message":"  should display sensor values with units","type":"print","time":100609}
+{"testID":25,"messageType":"print","message":"ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ","type":"print","time":100609}
+{"testID":25,"messageType":"print","message":"ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ","type":"print","time":100609}
+{"testID":25,"messageType":"print","message":"The following assertion was thrown running a test:","type":"print","time":100609}
+{"testID":25,"messageType":"print","message":"Guarded function conflict.","type":"print","time":100609}
+{"testID":25,"messageType":"print","message":"You must use \"await\" with all Future-returning test APIs.","type":"print","time":100609}
+{"testID":25,"messageType":"print","message":"The guarded method \"pump\" from class WidgetTester was called from","type":"print","time":100609}
+{"testID":25,"messageType":"print","message":"file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/integration_test/monitor_flow_test.dart","type":"print","time":100610}
+{"testID":25,"messageType":"print","message":"on line 43.","type":"print","time":100610}
+{"testID":25,"messageType":"print","message":"Then, the \"pump\" method from class LiveTestWidgetsFlutterBinding was called from","type":"print","time":100610}
+{"testID":25,"messageType":"print","message":"package:flutter_test/src/binding.dart on line 1048.","type":"print","time":100617}
+{"testID":25,"messageType":"print","message":"The first method (WidgetTester.pump) had not yet finished executing at the time that the second","type":"print","time":100621}
+{"testID":25,"messageType":"print","message":"method (LiveTestWidgetsFlutterBinding.pump) was called. Since both are guarded, and the second was","type":"print","time":100622}
+{"testID":25,"messageType":"print","message":"not a nested call inside the first, the first must complete its execution before the second can be","type":"print","time":100622}
+{"testID":25,"messageType":"print","message":"called. Typically, this is achieved by putting an \"await\" statement in front of the call to the","type":"print","time":100622}
+{"testID":25,"messageType":"print","message":"first.","type":"print","time":100622}
+{"testID":25,"messageType":"print","message":"","type":"print","time":100622}
+{"testID":25,"messageType":"print","message":"When the first method (WidgetTester.pump) was called, this was the stack:","type":"print","time":100622}
+{"testID":25,"messageType":"print","message":"#0      TestAsyncUtils.guard (package:flutter_test/src/test_async_utils.dart:72:54)","type":"print","time":100622}
+{"testID":25,"messageType":"print","message":"#1      WidgetTester.pump (package:flutter_test/src/widget_tester.dart:652:27)","type":"print","time":100622}
+{"testID":25,"messageType":"print","message":"#2      main.<anonymous closure>.<anonymous closure> (file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/integration_test/monitor_flow_test.dart:43:20)","type":"print","time":100622}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":100622}
+{"testID":25,"messageType":"print","message":"#3      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)","type":"print","time":100622}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":100622}
+{"testID":25,"messageType":"print","message":"#4      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)","type":"print","time":100623}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":100623}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":100623}
+{"testID":25,"messageType":"print","message":"(elided one frame from package:stack_trace)","type":"print","time":100623}
+{"testID":25,"messageType":"print","message":"","type":"print","time":100623}
+{"testID":25,"messageType":"print","message":"When the exception was thrown, this was the stack:","type":"print","time":100624}
+{"testID":25,"messageType":"print","message":"#0      TestAsyncUtils.guardSync (package:flutter_test/src/test_async_utils.dart:312:5)","type":"print","time":100624}
+{"testID":25,"messageType":"print","message":"#1      TestAsyncUtils.guard (package:flutter_test/src/test_async_utils.dart:66:5)","type":"print","time":100624}
+{"testID":25,"messageType":"print","message":"#2      LiveTestWidgetsFlutterBinding.pump (package:flutter_test/src/binding.dart:2078:27)","type":"print","time":100624}
+{"testID":25,"messageType":"print","message":"#3      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1048:11)","type":"print","time":100624}
+{"testID":25,"messageType":"print","message":"#6      TestWidgetsFlutterBinding._runTest (package:flutter_test/src/binding.dart:1033:10)","type":"print","time":100624}
+{"testID":25,"messageType":"print","message":"#7      LiveTestWidgetsFlutterBinding.runTest (package:flutter_test/src/binding.dart:2134:12)","type":"print","time":100626}
+{"testID":25,"messageType":"print","message":"#8      IntegrationTestWidgetsFlutterBinding.runTest (package:integration_test/integration_test.dart:237:17)","type":"print","time":100627}
+{"testID":25,"messageType":"print","message":"#9      testWidgets.<anonymous closure> (package:flutter_test/src/widget_tester.dart:184:24)","type":"print","time":100627}
+{"testID":25,"messageType":"print","message":"#10     Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:242:19)","type":"print","time":100629}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":100629}
+{"testID":25,"messageType":"print","message":"#11     Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:240:7)","type":"print","time":100629}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":100631}
+{"testID":25,"messageType":"print","message":"#12     Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:282:9)","type":"print","time":100634}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":100635}
+{"testID":25,"messageType":"print","message":"(elided 2 frames from dart:async)","type":"print","time":100635}
+{"testID":25,"messageType":"print","message":"","type":"print","time":100635}
+{"testID":25,"messageType":"print","message":"The test description was:","type":"print","time":100640}
+{"testID":25,"messageType":"print","message":"  should display Your Kit section with kit selector","type":"print","time":100640}
+{"testID":25,"messageType":"print","message":"ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ","type":"print","time":100640}
+{"testID":25,"messageType":"print","message":"ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ","type":"print","time":100641}
+{"testID":25,"messageType":"print","message":"The following assertion was thrown running a test:","type":"print","time":100641}
+{"testID":25,"messageType":"print","message":"Guarded function conflict.","type":"print","time":100641}
+{"testID":25,"messageType":"print","message":"You must use \"await\" with all Future-returning test APIs.","type":"print","time":100641}
+{"testID":25,"messageType":"print","message":"The guarded method \"pump\" from class WidgetTester was called from","type":"print","time":100641}
+{"testID":25,"messageType":"print","message":"file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/integration_test/monitor_flow_test.dart","type":"print","time":100641}
+{"testID":25,"messageType":"print","message":"on line 43.","type":"print","time":100641}
+{"testID":25,"messageType":"print","message":"Then, the \"pump\" method from class LiveTestWidgetsFlutterBinding was called from","type":"print","time":100641}
+{"testID":25,"messageType":"print","message":"package:flutter_test/src/binding.dart on line 1048.","type":"print","time":100641}
+{"testID":25,"messageType":"print","message":"The first method (WidgetTester.pump) had not yet finished executing at the time that the second","type":"print","time":100641}
+{"testID":25,"messageType":"print","message":"method (LiveTestWidgetsFlutterBinding.pump) was called. Since both are guarded, and the second was","type":"print","time":100641}
+{"testID":25,"messageType":"print","message":"not a nested call inside the first, the first must complete its execution before the second can be","type":"print","time":100641}
+{"testID":25,"messageType":"print","message":"called. Typically, this is achieved by putting an \"await\" statement in front of the call to the","type":"print","time":100641}
+{"testID":25,"messageType":"print","message":"first.","type":"print","time":100641}
+{"testID":25,"messageType":"print","message":"","type":"print","time":100642}
+{"testID":25,"messageType":"print","message":"When the first method (WidgetTester.pump) was called, this was the stack:","type":"print","time":100642}
+{"testID":25,"messageType":"print","message":"#0      TestAsyncUtils.guard (package:flutter_test/src/test_async_utils.dart:72:54)","type":"print","time":100642}
+{"testID":25,"messageType":"print","message":"#1      WidgetTester.pump (package:flutter_test/src/widget_tester.dart:652:27)","type":"print","time":100642}
+{"testID":25,"messageType":"print","message":"#2      main.<anonymous closure>.<anonymous closure> (file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/integration_test/monitor_flow_test.dart:43:20)","type":"print","time":100649}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":100650}
+{"testID":25,"messageType":"print","message":"#3      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)","type":"print","time":100650}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":100650}
+{"testID":25,"messageType":"print","message":"#4      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)","type":"print","time":100650}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":100650}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":100650}
+{"testID":25,"messageType":"print","message":"(elided one frame from package:stack_trace)","type":"print","time":100650}
+{"testID":25,"messageType":"print","message":"","type":"print","time":100650}
+{"testID":25,"messageType":"print","message":"When the exception was thrown, this was the stack:","type":"print","time":100650}
+{"testID":25,"messageType":"print","message":"#0      TestAsyncUtils.guardSync (package:flutter_test/src/test_async_utils.dart:312:5)","type":"print","time":100650}
+{"testID":25,"messageType":"print","message":"#1      TestAsyncUtils.guard (package:flutter_test/src/test_async_utils.dart:66:5)","type":"print","time":100651}
+{"testID":25,"messageType":"print","message":"#2      LiveTestWidgetsFlutterBinding.pump (package:flutter_test/src/binding.dart:2078:27)","type":"print","time":100651}
+{"testID":25,"messageType":"print","message":"#3      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1048:11)","type":"print","time":100651}
+{"testID":25,"messageType":"print","message":"#6      TestWidgetsFlutterBinding._runTest (package:flutter_test/src/binding.dart:1033:10)","type":"print","time":100651}
+{"testID":25,"messageType":"print","message":"#7      LiveTestWidgetsFlutterBinding.runTest (package:flutter_test/src/binding.dart:2134:12)","type":"print","time":100651}
+{"testID":25,"messageType":"print","message":"#8      IntegrationTestWidgetsFlutterBinding.runTest (package:integration_test/integration_test.dart:237:17)","type":"print","time":100651}
+{"testID":25,"messageType":"print","message":"#9      testWidgets.<anonymous closure> (package:flutter_test/src/widget_tester.dart:184:24)","type":"print","time":100651}
+{"testID":25,"messageType":"print","message":"#10     Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:242:19)","type":"print","time":100651}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":100651}
+{"testID":25,"messageType":"print","message":"#11     Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:240:7)","type":"print","time":100651}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":100653}
+{"testID":25,"messageType":"print","message":"#12     Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:282:9)","type":"print","time":100653}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":100653}
+{"testID":25,"messageType":"print","message":"(elided 2 frames from dart:async)","type":"print","time":100653}
+{"testID":25,"messageType":"print","message":"","type":"print","time":100653}
+{"testID":25,"messageType":"print","message":"The test description was:","type":"print","time":100653}
+{"testID":25,"messageType":"print","message":"  should display Mode & Control section","type":"print","time":100654}
+{"testID":25,"messageType":"print","message":"ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ","type":"print","time":100654}
+{"testID":25,"messageType":"print","message":"ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ","type":"print","time":100654}
+{"testID":25,"messageType":"print","message":"The following assertion was thrown running a test:","type":"print","time":100654}
+{"testID":25,"messageType":"print","message":"Guarded function conflict.","type":"print","time":100656}
+{"testID":25,"messageType":"print","message":"You must use \"await\" with all Future-returning test APIs.","type":"print","time":100656}
+{"testID":25,"messageType":"print","message":"The guarded method \"pump\" from class WidgetTester was called from","type":"print","time":100656}
+{"testID":25,"messageType":"print","message":"file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/integration_test/monitor_flow_test.dart","type":"print","time":100656}
+{"testID":25,"messageType":"print","message":"on line 43.","type":"print","time":100656}
+{"testID":25,"messageType":"print","message":"Then, the \"pump\" method from class LiveTestWidgetsFlutterBinding was called from","type":"print","time":100660}
+{"testID":25,"messageType":"print","message":"package:flutter_test/src/binding.dart on line 1048.","type":"print","time":100660}
+{"testID":25,"messageType":"print","message":"The first method (WidgetTester.pump) had not yet finished executing at the time that the second","type":"print","time":100660}
+{"testID":25,"messageType":"print","message":"method (LiveTestWidgetsFlutterBinding.pump) was called. Since both are guarded, and the second was","type":"print","time":100660}
+{"testID":25,"messageType":"print","message":"not a nested call inside the first, the first must complete its execution before the second can be","type":"print","time":100661}
+{"testID":25,"messageType":"print","message":"called. Typically, this is achieved by putting an \"await\" statement in front of the call to the","type":"print","time":100661}
+{"testID":25,"messageType":"print","message":"first.","type":"print","time":100661}
+{"testID":25,"messageType":"print","message":"","type":"print","time":100661}
+{"testID":25,"messageType":"print","message":"When the first method (WidgetTester.pump) was called, this was the stack:","type":"print","time":100661}
+{"testID":30,"error":"Test failed. See exception logs above.\nThe test description was: should switch from manual to auto mode","stackTrace":"","isFailure":false,"type":"error","time":100861}
+{"testID":30,"result":"error","skipped":false,"hidden":false,"type":"testDone","time":100862}
+{"test":{"id":31,"name":"Monitor Screen Flow Integration Tests should tap manual control buttons","suiteID":21,"groupIDs":[23,24],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart"},"type":"testStart","time":100862}
+{"testID":31,"error":"Test failed. See exception logs above.\nThe test description was: should tap manual control buttons","stackTrace":"","isFailure":false,"type":"error","time":101092}
+{"testID":31,"result":"error","skipped":false,"hidden":false,"type":"testDone","time":101109}
+{"test":{"id":32,"name":"Monitor Screen Flow Integration Tests should display kit status indicator","suiteID":21,"groupIDs":[23,24],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart"},"type":"testStart","time":101110}
+{"testID":32,"error":"Test failed. See exception logs above.\nThe test description was: should display kit status indicator","stackTrace":"","isFailure":false,"type":"error","time":101436}
+{"testID":32,"result":"error","skipped":false,"hidden":false,"type":"testDone","time":101438}
+{"test":{"id":33,"name":"Monitor Screen Flow Integration Tests should display last update timestamp","suiteID":21,"groupIDs":[23,24],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart"},"type":"testStart","time":101439}
+{"testID":33,"error":"Test failed. See exception logs above.\nThe test description was: should display last update timestamp","stackTrace":"","isFailure":false,"type":"error","time":101633}
+{"testID":33,"result":"error","skipped":false,"hidden":false,"type":"testDone","time":101634}
+{"test":{"id":34,"name":"Monitor Screen Flow Integration Tests complete user flow: view data, switch mode, use controls","suiteID":21,"groupIDs":[23,24],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart"},"type":"testStart","time":101634}
+{"testID":34,"error":"Test failed. See exception logs above.\nThe test description was: complete user flow: view data, switch mode, use controls","stackTrace":"","isFailure":false,"type":"error","time":101835}
+{"testID":34,"result":"error","skipped":false,"hidden":false,"type":"testDone","time":101836}
+{"test":{"id":35,"name":"(tearDownAll)","suiteID":21,"groupIDs":[23],"metadata":{"skip":false,"skipReason":null},"line":50,"column":5,"url":"package:integration_test/integration_test.dart"},"type":"testStart","time":101836}
+{"testID":25,"messageType":"print","message":"#0      TestAsyncUtils.guard (package:flutter_test/src/test_async_utils.dart:72:54)","type":"print","time":101855}
+{"testID":25,"messageType":"print","message":"#1      WidgetTester.pump (package:flutter_test/src/widget_tester.dart:652:27)","type":"print","time":101856}
+{"testID":25,"messageType":"print","message":"#2      main.<anonymous closure>.<anonymous closure> (file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/integration_test/monitor_flow_test.dart:43:20)","type":"print","time":101856}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":101858}
+{"testID":25,"messageType":"print","message":"#3      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)","type":"print","time":101861}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":101861}
+{"testID":25,"messageType":"print","message":"#4      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)","type":"print","time":101865}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":101867}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":101867}
+{"testID":25,"messageType":"print","message":"(elided one frame from package:stack_trace)","type":"print","time":101867}
+{"testID":25,"messageType":"print","message":"","type":"print","time":101869}
+{"testID":25,"messageType":"print","message":"When the exception was thrown, this was the stack:","type":"print","time":101870}
+{"testID":25,"messageType":"print","message":"#0      TestAsyncUtils.guardSync (package:flutter_test/src/test_async_utils.dart:312:5)","type":"print","time":101870}
+{"testID":25,"messageType":"print","message":"#1      TestAsyncUtils.guard (package:flutter_test/src/test_async_utils.dart:66:5)","type":"print","time":101870}
+{"testID":25,"messageType":"print","message":"#2      LiveTestWidgetsFlutterBinding.pump (package:flutter_test/src/binding.dart:2078:27)","type":"print","time":101871}
+{"testID":25,"messageType":"print","message":"#3      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1048:11)","type":"print","time":101872}
+{"testID":25,"messageType":"print","message":"#6      TestWidgetsFlutterBinding._runTest (package:flutter_test/src/binding.dart:1033:10)","type":"print","time":101874}
+{"testID":25,"messageType":"print","message":"#7      LiveTestWidgetsFlutterBinding.runTest (package:flutter_test/src/binding.dart:2134:12)","type":"print","time":101874}
+{"testID":25,"messageType":"print","message":"#8      IntegrationTestWidgetsFlutterBinding.runTest (package:integration_test/integration_test.dart:237:17)","type":"print","time":101877}
+{"testID":25,"messageType":"print","message":"#9      testWidgets.<anonymous closure> (package:flutter_test/src/widget_tester.dart:184:24)","type":"print","time":101877}
+{"testID":25,"messageType":"print","message":"#10     Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:242:19)","type":"print","time":101877}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":101877}
+{"testID":25,"messageType":"print","message":"#11     Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:240:7)","type":"print","time":101878}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":101878}
+{"testID":25,"messageType":"print","message":"#12     Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:282:9)","type":"print","time":101881}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":101882}
+{"testID":25,"messageType":"print","message":"(elided 2 frames from dart:async)","type":"print","time":101882}
+{"testID":25,"messageType":"print","message":"","type":"print","time":101882}
+{"testID":25,"messageType":"print","message":"The test description was:","type":"print","time":101884}
+{"testID":25,"messageType":"print","message":"  should switch from auto to manual mode","type":"print","time":101884}
+{"testID":25,"messageType":"print","message":"ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ","type":"print","time":101884}
+{"testID":25,"messageType":"print","message":"ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ","type":"print","time":101886}
+{"testID":25,"messageType":"print","message":"The following assertion was thrown running a test:","type":"print","time":101886}
+{"testID":25,"messageType":"print","message":"Guarded function conflict.","type":"print","time":101887}
+{"testID":25,"messageType":"print","message":"You must use \"await\" with all Future-returning test APIs.","type":"print","time":101887}
+{"testID":25,"messageType":"print","message":"The guarded method \"pump\" from class WidgetTester was called from","type":"print","time":101890}
+{"testID":25,"messageType":"print","message":"file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/integration_test/monitor_flow_test.dart","type":"print","time":101891}
+{"testID":25,"messageType":"print","message":"on line 43.","type":"print","time":101891}
+{"testID":25,"messageType":"print","message":"Then, the \"pump\" method from class LiveTestWidgetsFlutterBinding was called from","type":"print","time":101891}
+{"testID":25,"messageType":"print","message":"package:flutter_test/src/binding.dart on line 1048.","type":"print","time":101891}
+{"testID":25,"messageType":"print","message":"The first method (WidgetTester.pump) had not yet finished executing at the time that the second","type":"print","time":101891}
+{"testID":25,"messageType":"print","message":"method (LiveTestWidgetsFlutterBinding.pump) was called. Since both are guarded, and the second was","type":"print","time":101891}
+{"testID":25,"messageType":"print","message":"not a nested call inside the first, the first must complete its execution before the second can be","type":"print","time":101891}
+{"testID":25,"messageType":"print","message":"called. Typically, this is achieved by putting an \"await\" statement in front of the call to the","type":"print","time":101892}
+{"testID":25,"messageType":"print","message":"first.","type":"print","time":101896}
+{"testID":25,"messageType":"print","message":"","type":"print","time":101896}
+{"testID":25,"messageType":"print","message":"When the first method (WidgetTester.pump) was called, this was the stack:","type":"print","time":101898}
+{"testID":25,"messageType":"print","message":"#0      TestAsyncUtils.guard (package:flutter_test/src/test_async_utils.dart:72:54)","type":"print","time":101900}
+{"testID":25,"messageType":"print","message":"#1      WidgetTester.pump (package:flutter_test/src/widget_tester.dart:652:27)","type":"print","time":101900}
+{"testID":25,"messageType":"print","message":"#2      main.<anonymous closure>.<anonymous closure> (file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/integration_test/monitor_flow_test.dart:43:20)","type":"print","time":101901}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":101908}
+{"testID":25,"messageType":"print","message":"#3      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)","type":"print","time":101909}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":101909}
+{"testID":25,"messageType":"print","message":"#4      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)","type":"print","time":101909}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":101909}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":101909}
+{"testID":25,"messageType":"print","message":"(elided one frame from package:stack_trace)","type":"print","time":101909}
+{"testID":25,"messageType":"print","message":"","type":"print","time":101910}
+{"testID":25,"messageType":"print","message":"When the exception was thrown, this was the stack:","type":"print","time":101912}
+{"testID":25,"messageType":"print","message":"#0      TestAsyncUtils.guardSync (package:flutter_test/src/test_async_utils.dart:312:5)","type":"print","time":101922}
+{"testID":25,"messageType":"print","message":"#1      TestAsyncUtils.guard (package:flutter_test/src/test_async_utils.dart:66:5)","type":"print","time":101927}
+{"testID":25,"messageType":"print","message":"#2      LiveTestWidgetsFlutterBinding.pump (package:flutter_test/src/binding.dart:2078:27)","type":"print","time":101928}
+{"testID":25,"messageType":"print","message":"#3      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1048:11)","type":"print","time":101928}
+{"testID":25,"messageType":"print","message":"#6      TestWidgetsFlutterBinding._runTest (package:flutter_test/src/binding.dart:1033:10)","type":"print","time":101928}
+{"testID":25,"messageType":"print","message":"#7      LiveTestWidgetsFlutterBinding.runTest (package:flutter_test/src/binding.dart:2134:12)","type":"print","time":101928}
+{"testID":25,"messageType":"print","message":"#8      IntegrationTestWidgetsFlutterBinding.runTest (package:integration_test/integration_test.dart:237:17)","type":"print","time":101928}
+{"testID":25,"messageType":"print","message":"#9      testWidgets.<anonymous closure> (package:flutter_test/src/widget_tester.dart:184:24)","type":"print","time":101928}
+{"testID":25,"messageType":"print","message":"#10     Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:242:19)","type":"print","time":101928}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":101928}
+{"testID":25,"messageType":"print","message":"#11     Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:240:7)","type":"print","time":101928}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":101928}
+{"testID":25,"messageType":"print","message":"#12     Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:282:9)","type":"print","time":101928}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":101930}
+{"testID":25,"messageType":"print","message":"(elided 2 frames from dart:async)","type":"print","time":101931}
+{"testID":25,"messageType":"print","message":"","type":"print","time":101931}
+{"testID":25,"messageType":"print","message":"The test description was:","type":"print","time":101935}
+{"testID":25,"messageType":"print","message":"  should switch from manual to auto mode","type":"print","time":101937}
+{"testID":25,"messageType":"print","message":"ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ","type":"print","time":101937}
+{"testID":25,"messageType":"print","message":"ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ","type":"print","time":101937}
+{"testID":25,"messageType":"print","message":"The following assertion was thrown running a test:","type":"print","time":101940}
+{"testID":25,"messageType":"print","message":"Guarded function conflict.","type":"print","time":101943}
+{"testID":25,"messageType":"print","message":"You must use \"await\" with all Future-returning test APIs.","type":"print","time":101951}
+{"testID":25,"messageType":"print","message":"The guarded method \"pump\" from class WidgetTester was called from","type":"print","time":101951}
+{"testID":25,"messageType":"print","message":"file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/integration_test/monitor_flow_test.dart","type":"print","time":101951}
+{"testID":25,"messageType":"print","message":"on line 43.","type":"print","time":101951}
+{"testID":25,"messageType":"print","message":"Then, the \"pump\" method from class LiveTestWidgetsFlutterBinding was called from","type":"print","time":101951}
+{"testID":25,"messageType":"print","message":"package:flutter_test/src/binding.dart on line 1048.","type":"print","time":101953}
+{"testID":25,"messageType":"print","message":"The first method (WidgetTester.pump) had not yet finished executing at the time that the second","type":"print","time":101953}
+{"testID":25,"messageType":"print","message":"method (LiveTestWidgetsFlutterBinding.pump) was called. Since both are guarded, and the second was","type":"print","time":101953}
+{"testID":25,"messageType":"print","message":"not a nested call inside the first, the first must complete its execution before the second can be","type":"print","time":101955}
+{"testID":25,"messageType":"print","message":"called. Typically, this is achieved by putting an \"await\" statement in front of the call to the","type":"print","time":101955}
+{"testID":25,"messageType":"print","message":"first.","type":"print","time":101955}
+{"testID":25,"messageType":"print","message":"","type":"print","time":101957}
+{"testID":25,"messageType":"print","message":"When the first method (WidgetTester.pump) was called, this was the stack:","type":"print","time":101957}
+{"testID":25,"messageType":"print","message":"#0      TestAsyncUtils.guard (package:flutter_test/src/test_async_utils.dart:72:54)","type":"print","time":101957}
+{"testID":25,"messageType":"print","message":"#1      WidgetTester.pump (package:flutter_test/src/widget_tester.dart:652:27)","type":"print","time":101960}
+{"testID":25,"messageType":"print","message":"#2      main.<anonymous closure>.<anonymous closure> (file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/integration_test/monitor_flow_test.dart:43:20)","type":"print","time":101960}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":101964}
+{"testID":25,"messageType":"print","message":"#3      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)","type":"print","time":101964}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":101969}
+{"testID":25,"messageType":"print","message":"#4      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)","type":"print","time":101969}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":101969}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":101969}
+{"testID":25,"messageType":"print","message":"(elided one frame from package:stack_trace)","type":"print","time":101970}
+{"testID":25,"messageType":"print","message":"","type":"print","time":101970}
+{"testID":25,"messageType":"print","message":"When the exception was thrown, this was the stack:","type":"print","time":101970}
+{"testID":25,"messageType":"print","message":"#0      TestAsyncUtils.guardSync (package:flutter_test/src/test_async_utils.dart:312:5)","type":"print","time":101970}
+{"testID":25,"messageType":"print","message":"#1      TestAsyncUtils.guard (package:flutter_test/src/test_async_utils.dart:66:5)","type":"print","time":101970}
+{"testID":25,"messageType":"print","message":"#2      LiveTestWidgetsFlutterBinding.pump (package:flutter_test/src/binding.dart:2078:27)","type":"print","time":101970}
+{"testID":25,"messageType":"print","message":"#3      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1048:11)","type":"print","time":101972}
+{"testID":25,"messageType":"print","message":"#6      TestWidgetsFlutterBinding._runTest (package:flutter_test/src/binding.dart:1033:10)","type":"print","time":101972}
+{"testID":25,"messageType":"print","message":"#7      LiveTestWidgetsFlutterBinding.runTest (package:flutter_test/src/binding.dart:2134:12)","type":"print","time":101972}
+{"testID":25,"messageType":"print","message":"#8      IntegrationTestWidgetsFlutterBinding.runTest (package:integration_test/integration_test.dart:237:17)","type":"print","time":101972}
+{"testID":25,"messageType":"print","message":"#9      testWidgets.<anonymous closure> (package:flutter_test/src/widget_tester.dart:184:24)","type":"print","time":101972}
+{"testID":25,"messageType":"print","message":"#10     Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:242:19)","type":"print","time":101976}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":101976}
+{"testID":25,"messageType":"print","message":"#11     Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:240:7)","type":"print","time":101976}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":101979}
+{"testID":25,"messageType":"print","message":"#12     Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:282:9)","type":"print","time":101980}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":101980}
+{"testID":25,"messageType":"print","message":"(elided 2 frames from dart:async)","type":"print","time":101980}
+{"testID":25,"messageType":"print","message":"","type":"print","time":101980}
+{"testID":25,"messageType":"print","message":"The test description was:","type":"print","time":101980}
+{"testID":25,"messageType":"print","message":"  should tap manual control buttons","type":"print","time":101980}
+{"testID":25,"messageType":"print","message":"ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ","type":"print","time":101981}
+{"testID":25,"messageType":"print","message":"ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ","type":"print","time":101981}
+{"testID":25,"messageType":"print","message":"The following assertion was thrown running a test:","type":"print","time":101983}
+{"testID":25,"messageType":"print","message":"Guarded function conflict.","type":"print","time":101984}
+{"testID":25,"messageType":"print","message":"You must use \"await\" with all Future-returning test APIs.","type":"print","time":101984}
+{"testID":25,"messageType":"print","message":"The guarded method \"pump\" from class WidgetTester was called from","type":"print","time":101984}
+{"testID":25,"messageType":"print","message":"file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/integration_test/monitor_flow_test.dart","type":"print","time":101984}
+{"testID":25,"messageType":"print","message":"on line 43.","type":"print","time":101984}
+{"testID":25,"messageType":"print","message":"Then, the \"pump\" method from class LiveTestWidgetsFlutterBinding was called from","type":"print","time":101984}
+{"testID":25,"messageType":"print","message":"package:flutter_test/src/binding.dart on line 1048.","type":"print","time":101984}
+{"testID":25,"messageType":"print","message":"The first method (WidgetTester.pump) had not yet finished executing at the time that the second","type":"print","time":101984}
+{"testID":25,"messageType":"print","message":"method (LiveTestWidgetsFlutterBinding.pump) was called. Since both are guarded, and the second was","type":"print","time":101989}
+{"testID":25,"messageType":"print","message":"not a nested call inside the first, the first must complete its execution before the second can be","type":"print","time":101989}
+{"testID":25,"messageType":"print","message":"called. Typically, this is achieved by putting an \"await\" statement in front of the call to the","type":"print","time":101989}
+{"testID":25,"messageType":"print","message":"first.","type":"print","time":101989}
+{"testID":25,"messageType":"print","message":"","type":"print","time":101989}
+{"testID":25,"messageType":"print","message":"When the first method (WidgetTester.pump) was called, this was the stack:","type":"print","time":101990}
+{"testID":25,"messageType":"print","message":"#0      TestAsyncUtils.guard (package:flutter_test/src/test_async_utils.dart:72:54)","type":"print","time":101990}
+{"testID":25,"messageType":"print","message":"#1      WidgetTester.pump (package:flutter_test/src/widget_tester.dart:652:27)","type":"print","time":101990}
+{"testID":25,"messageType":"print","message":"#2      main.<anonymous closure>.<anonymous closure> (file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/integration_test/monitor_flow_test.dart:43:20)","type":"print","time":101990}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":101990}
+{"testID":25,"messageType":"print","message":"#3      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)","type":"print","time":101990}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":101992}
+{"testID":25,"messageType":"print","message":"#4      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)","type":"print","time":101993}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":101993}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":101995}
+{"testID":25,"messageType":"print","message":"(elided one frame from package:stack_trace)","type":"print","time":101995}
+{"testID":25,"messageType":"print","message":"","type":"print","time":101998}
+{"testID":25,"messageType":"print","message":"When the exception was thrown, this was the stack:","type":"print","time":101998}
+{"testID":25,"messageType":"print","message":"#0      TestAsyncUtils.guardSync (package:flutter_test/src/test_async_utils.dart:312:5)","type":"print","time":101998}
+{"testID":25,"messageType":"print","message":"#1      TestAsyncUtils.guard (package:flutter_test/src/test_async_utils.dart:66:5)","type":"print","time":102000}
+{"testID":25,"messageType":"print","message":"#2      LiveTestWidgetsFlutterBinding.pump (package:flutter_test/src/binding.dart:2078:27)","type":"print","time":102000}
+{"testID":25,"messageType":"print","message":"#3      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1048:11)","type":"print","time":102001}
+{"testID":25,"messageType":"print","message":"#6      TestWidgetsFlutterBinding._runTest (package:flutter_test/src/binding.dart:1033:10)","type":"print","time":102001}
+{"testID":25,"messageType":"print","message":"#7      LiveTestWidgetsFlutterBinding.runTest (package:flutter_test/src/binding.dart:2134:12)","type":"print","time":102001}
+{"testID":25,"messageType":"print","message":"#8      IntegrationTestWidgetsFlutterBinding.runTest (package:integration_test/integration_test.dart:237:17)","type":"print","time":102001}
+{"testID":25,"messageType":"print","message":"#9      testWidgets.<anonymous closure> (package:flutter_test/src/widget_tester.dart:184:24)","type":"print","time":102002}
+{"testID":25,"messageType":"print","message":"#10     Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:242:19)","type":"print","time":102004}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":102004}
+{"testID":25,"messageType":"print","message":"#11     Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:240:7)","type":"print","time":102008}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":102008}
+{"testID":25,"messageType":"print","message":"#12     Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:282:9)","type":"print","time":102008}
+{"testID":25,"messageType":"print","message":"<asynchronous suspension>","type":"print","time":102008}
+{"testID":25,"messageType":"print","message":"(elided 2 frames from dart:async)","type":"print","time":102009}
+{"testID":25,"messageType":"print","message":"","type":"print","time":102009}
+{"testID":25,"messageType":"print","message":"The test description was:","type":"print","time":102009}
+{"testID":25,"messageType":"print","message":"  should display kit status indicator","type":"print","time":102009}
+{"testID":25,"messageType":"print","message":"ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ","type":"print","time":102009}
+{"testID":25,"messageType":"print","message":"ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ","type":"print","time":102009}
+{"testID":25,"messageType":"print","message":"The following assertion was thrown running a test:","type":"print","time":102015}
+{"testID":25,"messageType":"print","message":"Guarded function conflict.","type":"print","time":102016}
+{"testID":25,"messageType":"print","message":"You must use \"await\" with all Future-returning test APIs.","type":"print","time":102016}
+{"testID":25,"messageType":"print","message":"The guarded method \"pump\" from class WidgetTester was called from","type":"print","time":102016}
+{"testID":25,"messageType":"print","message":"file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/integration_test/monitor_flow_test.dart","type":"print","time":102016}
+{"testID":25,"messageType":"print","message":"on line 43.","type":"print","time":102016}
+{"testID":25,"messageType":"print","message":"Then, the \"pump\" method from class LiveTestWidgetsFlutterBinding was called from","type":"print","time":102016}
+{"testID":25,"messageType":"print","message":"package:flutter_test/src/binding.dart on line 1048.","type":"print","time":102022}
+{"testID":25,"messageType":"print","message":"The first method (WidgetTester.pump) had not yet finished executing at the time that the second","type":"print","time":102022}
+{"testID":25,"messageType":"print","message":"method (LiveTestWidgetsFlutterBinding.pump) was called. Since both are guarded, and the second was","type":"print","time":102025}
+{"testID":25,"messageType":"print","message":"not a nested call inside the first, the first must complete its execution before the second can be","type":"print","time":102025}
+{"testID":25,"messageType":"print","message":"called. Typically, this is achieved by putting an \"await\" statement in front of the call to the","type":"print","time":102026}
+{"testID":25,"messageType":"print","message":"first.","type":"print","time":102026}
+{"testID":25,"messageType":"print","message":"","type":"print","time":102026}
+{"testID":25,"messageType":"print","message":"When the first method (WidgetTester.pump) was called, this was the stack:","type":"print","time":102026}
+{"testID":25,"messageType":"print","message":"#0      TestAsyncUtils.guard (package:flutter_test/src/test_async_utils.dart:72:54)","type":"print","time":102026}
+{"testID":35,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":102026}
+{"success":false,"type":"done","time":102452}

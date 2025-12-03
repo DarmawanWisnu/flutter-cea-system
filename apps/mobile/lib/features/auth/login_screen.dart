@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fountaine/app/routes.dart';
 import 'package:fountaine/providers/provider/auth_provider.dart';
 import 'package:fountaine/utils/validators.dart';
+import 'package:fountaine/utils/firebase_error_handler.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -39,9 +40,40 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (!mounted) return;
       Navigator.pushReplacementNamed(context, Routes.home);
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
+      if (!mounted) return;
+      
+      // Use FirebaseErrorHandler for user-friendly error messages
+      final (title, message) = FirebaseErrorHandler.handleAuthException(e);
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(message),
+            ],
+          ),
+          backgroundColor: FirebaseErrorHandler.isNetworkError(e)
+              ? Colors.orange.shade700
+              : Colors.red.shade700,
+          duration: const Duration(seconds: 5),
+          behavior: SnackBarBehavior.floating,
+          action: SnackBarAction(
+            label: 'OK',
+            textColor: Colors.white,
+            onPressed: () {},
+          ),
+        ),
+      );
     } finally {
       if (mounted) setState(() => _loading = false);
     }

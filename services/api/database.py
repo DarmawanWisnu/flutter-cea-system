@@ -2,6 +2,11 @@ import psycopg2
 import psycopg2.pool
 import os
 from dotenv import load_dotenv
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Load .env
 env_path = os.path.join(os.path.dirname(__file__), ".env")
@@ -28,7 +33,8 @@ def init_pool():
             password=DB_PASSWORD,
             port=DB_PORT,
         )
-        print(f"[DB] Pool → {DB_HOST}:{DB_PORT}/{DB_NAME} (max connections: 50)")
+        
+        logger.info(f"[DB] Pool → {DB_HOST}:{DB_PORT}/{DB_NAME} (max connections: 50)")
 
 
 def get_connection():
@@ -42,7 +48,7 @@ def release_connection(conn):
         try:
             _pool.putconn(conn)
         except Exception as e:
-            print(f"[DB] Warning: Failed to release connection: {e}")
+            logger.warning(f"[DB] Warning: Failed to release connection: {e}")
 
 
 def run_migrations():
@@ -51,6 +57,8 @@ def run_migrations():
       - kits
       - telemetry (camelCase)
       - actuator_event (camelCase)
+      - actuator_cooldown (for cooldown tracking)
+      - ml_prediction_log (for ML predictions)
     """
     conn = get_connection()
     cur = conn.cursor()
@@ -97,8 +105,31 @@ def run_migrations():
         );
     """)
 
+    # ACTUATOR COOLDOWN TABLE
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS actuator_cooldown (
+            id SERIAL PRIMARY KEY,
+            "deviceId" TEXT NOT NULL,
+            "actionType" TEXT NOT NULL,
+            "lastTime" BIGINT NOT NULL,
+            "lastValue" FLOAT DEFAULT 0,
+            UNIQUE ("deviceId", "actionType")
+        );
+    """)
+
+    # ML PREDICTION LOG TABLE
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS ml_prediction_log (
+            id SERIAL PRIMARY KEY,
+            "deviceId" TEXT NOT NULL,
+            "predictTime" BIGINT NOT NULL,
+            "payloadJson" JSONB NOT NULL,
+            "predictJson" JSONB NOT NULL
+        );
+    """)
+
     conn.commit()
     cur.close()
     release_connection(conn)
 
-    print("[DB] Migrations executed.")
+    logger.info("[DB] Migrations executed.")

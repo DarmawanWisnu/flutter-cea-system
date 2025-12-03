@@ -5,31 +5,27 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fountaine/features/auth/login_screen.dart';
 import 'package:fountaine/features/auth/register_screen.dart';
 import 'package:fountaine/features/auth/forgot_password_screen.dart';
-import 'package:fountaine/features/home/home_screen.dart';
 
 /// Integration Test for Authentication Flow
-/// 
+///
 /// This test suite covers the complete authentication user journey:
 /// - Login with valid/invalid credentials
 /// - Navigation to registration
 /// - Navigation to forgot password
 /// - Form validation
-/// 
+///
 /// These are BLACK BOX tests - they test from the user's perspective
 /// without knowledge of internal implementation details.
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('Authentication Flow Integration Tests', () {
-    testWidgets('should display login screen with all elements',
-        (WidgetTester tester) async {
+    testWidgets('should display login screen with all elements', (
+      WidgetTester tester,
+    ) async {
       // Arrange & Act
       await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: const LoginScreen(),
-          ),
-        ),
+        ProviderScope(child: MaterialApp(home: const LoginScreen())),
       );
       await tester.pumpAndSettle();
 
@@ -44,15 +40,12 @@ void main() {
       expect(find.text("Don't Have An Account? "), findsOneWidget);
     });
 
-    testWidgets('should validate email field on login attempt',
-        (WidgetTester tester) async {
+    testWidgets('should validate email field on login attempt', (
+      WidgetTester tester,
+    ) async {
       // Arrange
       await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: const LoginScreen(),
-          ),
-        ),
+        ProviderScope(child: MaterialApp(home: const LoginScreen())),
       );
       await tester.pumpAndSettle();
 
@@ -62,73 +55,62 @@ void main() {
       await tester.pump();
 
       // Assert - Should show validation error
-      expect(find.text('Email is required'), findsOneWidget);
+      expect(find.text('Email cannot be empty'), findsOneWidget);
     });
 
-    testWidgets('should validate password field on login attempt',
-        (WidgetTester tester) async {
+    testWidgets('should validate password field on login attempt', (
+      WidgetTester tester,
+    ) async {
       // Arrange
       await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: const LoginScreen(),
-          ),
-        ),
+        ProviderScope(child: MaterialApp(home: const LoginScreen())),
       );
       await tester.pumpAndSettle();
 
       // Act - Enter email but no password
       final emailField = find.byType(TextFormField).first;
       await tester.enterText(emailField, 'test@example.com');
-      
+
       final signInButton = find.text('Sign In');
       await tester.tap(signInButton);
       await tester.pump();
 
       // Assert - Should show password validation error
-      expect(find.text('Password is required'), findsOneWidget);
+      expect(find.text('Password cannot be empty'), findsOneWidget);
     });
 
-    testWidgets('should validate email format',
-        (WidgetTester tester) async {
+    testWidgets('should validate email format', (WidgetTester tester) async {
       // Arrange
       await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: const LoginScreen(),
-          ),
-        ),
+        ProviderScope(child: MaterialApp(home: const LoginScreen())),
       );
       await tester.pumpAndSettle();
 
       // Act - Enter invalid email format
       final emailField = find.byType(TextFormField).first;
       await tester.enterText(emailField, 'invalid-email');
-      
+
       final signInButton = find.text('Sign In');
       await tester.tap(signInButton);
       await tester.pump();
 
       // Assert - Should show email format error
-      expect(find.text('Enter a valid email'), findsOneWidget);
+      expect(find.text('Invalid email format'), findsOneWidget);
     });
 
-    testWidgets('should toggle password visibility',
-        (WidgetTester tester) async {
+    testWidgets('should toggle password visibility', (
+      WidgetTester tester,
+    ) async {
       // Arrange
       await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: const LoginScreen(),
-          ),
-        ),
+        ProviderScope(child: MaterialApp(home: const LoginScreen())),
       );
       await tester.pumpAndSettle();
 
       // Act - Find and tap the visibility toggle icon
       final visibilityOffIcon = find.byIcon(Icons.visibility_off);
       expect(visibilityOffIcon, findsOneWidget);
-      
+
       await tester.tap(visibilityOffIcon);
       await tester.pumpAndSettle();
 
@@ -137,16 +119,15 @@ void main() {
       expect(find.byIcon(Icons.visibility_off), findsNothing);
     });
 
-    testWidgets('should navigate to registration screen',
-        (WidgetTester tester) async {
+    testWidgets('should navigate to registration screen', (
+      WidgetTester tester,
+    ) async {
       // Arrange
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
             home: const LoginScreen(),
-            routes: {
-              '/register': (context) => const RegisterScreen(),
-            },
+            routes: {'/register': (context) => const RegisterScreen()},
           ),
         ),
       );
@@ -161,8 +142,9 @@ void main() {
       expect(find.text('Create Account'), findsOneWidget);
     });
 
-    testWidgets('should navigate to forgot password screen',
-        (WidgetTester tester) async {
+    testWidgets('should navigate to forgot password screen', (
+      WidgetTester tester,
+    ) async {
       // Arrange
       await tester.pumpWidget(
         ProviderScope(
@@ -185,22 +167,19 @@ void main() {
       expect(find.text('Forgot Password'), findsOneWidget);
     });
 
-    testWidgets('should accept valid login credentials input',
-        (WidgetTester tester) async {
+    testWidgets('should accept valid login credentials input', (
+      WidgetTester tester,
+    ) async {
       // Arrange
       await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: const LoginScreen(),
-          ),
-        ),
+        ProviderScope(child: MaterialApp(home: const LoginScreen())),
       );
       await tester.pumpAndSettle();
 
       // Act - Enter valid email and password
       final emailField = find.byType(TextFormField).first;
       final passwordField = find.byType(TextFormField).at(1);
-      
+
       await tester.enterText(emailField, 'user@example.com');
       await tester.enterText(passwordField, 'SecurePassword123');
       await tester.pump();
@@ -210,25 +189,22 @@ void main() {
       expect(find.text('SecurePassword123'), findsOneWidget);
     });
 
-    testWidgets('should show loading indicator when signing in',
-        (WidgetTester tester) async {
+    testWidgets('should show loading indicator when signing in', (
+      WidgetTester tester,
+    ) async {
       // Arrange
       await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: const LoginScreen(),
-          ),
-        ),
+        ProviderScope(child: MaterialApp(home: const LoginScreen())),
       );
       await tester.pumpAndSettle();
 
       // Act - Enter valid credentials and tap sign in
       final emailField = find.byType(TextFormField).first;
       final passwordField = find.byType(TextFormField).at(1);
-      
+
       await tester.enterText(emailField, 'test@example.com');
       await tester.enterText(passwordField, 'password123');
-      
+
       final signInButton = find.text('Sign In');
       await tester.tap(signInButton);
       await tester.pump();

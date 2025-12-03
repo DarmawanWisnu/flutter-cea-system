@@ -4,6 +4,7 @@ import 'package:integration_test/integration_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fountaine/features/monitor/monitor_screen.dart';
 import 'package:fountaine/providers/provider/api_provider.dart';
+import 'package:fountaine/providers/provider/mqtt_provider.dart';
 
 /// Integration Test for Monitor Screen Flow
 /// 
@@ -30,13 +31,16 @@ void main() {
                 {'id': 'test-kit-001', 'name': 'Test Kit 1'},
               ];
             }),
+            
           ],
           child: const MaterialApp(
             home: MonitorScreen(selectedKit: 'test-kit-001'),
           ),
         ),
       );
-      await tester.pumpAndSettle();
+      // Use pump instead of pumpAndSettle to avoid timeout
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
 
       // Assert - All sensor types should be displayed
       expect(find.text('pH'), findsOneWidget);

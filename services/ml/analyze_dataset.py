@@ -1,7 +1,7 @@
 import csv
 
 # Read the actuator event data
-with open('services/ml/synthetic_actuator_event.csv', 'r') as f:
+with open('services/ml/training_actuator_event.csv', 'r') as f:
     data = list(csv.DictReader(f))
 
 total = len(data)

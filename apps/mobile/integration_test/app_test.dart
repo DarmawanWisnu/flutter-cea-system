@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:fountaine/main.dart' as app;
 
 /// Integration Test for the Flutter CEA System App
-/// 
+///
 /// This test verifies the basic app initialization and navigation.
 /// It serves as a foundation for more complex integration tests.
 void main() {
@@ -15,14 +14,10 @@ void main() {
       // Note: This is a basic test structure
       // In a real scenario, you would initialize the app properly
       // For now, we'll test basic widget functionality
-      
+
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: Text('CEA System'),
-            ),
-          ),
+          home: Scaffold(body: Center(child: Text('CEA System'))),
         ),
       );
 
@@ -35,9 +30,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: const HomeScreen(),
-          routes: {
-            '/second': (context) => const SecondScreen(),
-          },
+          routes: {'/second': (context) => const SecondScreen()},
         ),
       );
 
@@ -74,10 +67,6 @@ class SecondScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text('Second Screen'),
-      ),
-    );
+    return const Scaffold(body: Center(child: Text('Second Screen')));
   }
 }

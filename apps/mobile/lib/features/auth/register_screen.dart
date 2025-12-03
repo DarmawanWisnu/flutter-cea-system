@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fountaine/app/routes.dart';
 import 'package:fountaine/utils/validators.dart';
 import 'package:fountaine/providers/provider/auth_provider.dart';
+import 'package:fountaine/utils/firebase_error_handler.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -43,10 +44,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Future<void> _doRegister() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final name = _nameCtrl.text.trim();
     final email = _emailCtrl.text.trim();
     final pw = _pwCtrl.text;
-    final location = _locationCtrl.text.trim();
 
     setState(() => _loading = true);
     try {
@@ -54,8 +53,41 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       await auth.register(email: email, password: pw);
       if (!mounted) return;
       Navigator.pushReplacementNamed(context, Routes.verify);
-    } on Exception catch (e) {
-      _show('Gagal', e.toString());
+    } catch (e) {
+      if (!mounted) return;
+      
+      // Use FirebaseErrorHandler for user-friendly error messages
+      final (title, message) = FirebaseErrorHandler.handleAuthException(e);
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(message),
+            ],
+          ),
+          backgroundColor: FirebaseErrorHandler.isNetworkError(e)
+              ? Colors.orange.shade700
+              : Colors.red.shade700,
+          duration: const Duration(seconds: 5),
+          behavior: SnackBarBehavior.floating,
+          action: SnackBarAction(
+            label: 'OK',
+            textColor: Colors.white,
+            onPressed: () {},
+          ),
+        ),
+      );
     } finally {
       if (mounted) setState(() => _loading = false);
     }

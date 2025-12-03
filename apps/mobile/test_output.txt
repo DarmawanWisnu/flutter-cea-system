@@ -1,0 +1,1134 @@
+﻿00:00 +0: loading C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/test/widgets/monitor_widget_test.dart
+00:00 +0: Monitor Screen Widget Tests should display monitor screen title
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY RENDERING LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 268 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/lib/features/monitor/monitor_screen.dart:444:22
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#a3329 OVERFLOWING:
+  creator: Column ÔåÉ BackdropFilter ÔåÉ ClipRRect ÔåÉ Padding ÔåÉ DecoratedBox ÔåÉ Container ÔåÉ
+    AnimatedContainer ÔåÉ TweenAnimationBuilder<double> ÔåÉ RepaintBoundary ÔåÉ IndexedSemantics ÔåÉ
+    _SelectionKeepAlive ÔåÉ NotificationListener<KeepAliveNotification> ÔåÉ Ôï»
+  parentData: <none> (can use size)
+  constraints: BoxConstraints(w=243.6, h=293.8)
+  size: Size(243.6, 293.8)
+  direction: vertical
+  mainAxisAlignment: center
+  mainAxisSize: max
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+ÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñ
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY RENDERING LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 268 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/lib/features/monitor/monitor_screen.dart:444:22
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#3f752 OVERFLOWING:
+  creator: Column ÔåÉ BackdropFilter ÔåÉ ClipRRect ÔåÉ Padding ÔåÉ DecoratedBox ÔåÉ Container ÔåÉ
+    AnimatedContainer ÔåÉ TweenAnimationBuilder<double> ÔåÉ RepaintBoundary ÔåÉ IndexedSemantics ÔåÉ
+    _SelectionKeepAlive ÔåÉ NotificationListener<KeepAliveNotification> ÔåÉ Ôï»
+  parentData: <none> (can use size)
+  constraints: BoxConstraints(w=243.6, h=293.8)
+  size: Size(243.6, 293.8)
+  direction: vertical
+  mainAxisAlignment: center
+  mainAxisSize: max
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+ÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñ
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY RENDERING LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 258 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/lib/features/monitor/monitor_screen.dart:444:22
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#4b56b OVERFLOWING:
+  creator: Column ÔåÉ BackdropFilter ÔåÉ ClipRRect ÔåÉ Padding ÔåÉ DecoratedBox ÔåÉ Container ÔåÉ
+    AnimatedContainer ÔåÉ TweenAnimationBuilder<double> ÔåÉ RepaintBoundary ÔåÉ IndexedSemantics ÔåÉ
+    _SelectionKeepAlive ÔåÉ NotificationListener<KeepAliveNotification> ÔåÉ Ôï»
+  parentData: <none> (can use size)
+  constraints: BoxConstraints(w=243.6, h=293.8)
+  size: Size(243.6, 293.8)
+  direction: vertical
+  mainAxisAlignment: center
+  mainAxisSize: max
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+ÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñ
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY RENDERING LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 386 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/lib/features/monitor/monitor_screen.dart:444:22
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#ec922 OVERFLOWING:
+  creator: Column ÔåÉ BackdropFilter ÔåÉ ClipRRect ÔåÉ Padding ÔåÉ DecoratedBox ÔåÉ Container ÔåÉ
+    AnimatedContainer ÔåÉ TweenAnimationBuilder<double> ÔåÉ RepaintBoundary ÔåÉ IndexedSemantics ÔåÉ
+    _SelectionKeepAlive ÔåÉ NotificationListener<KeepAliveNotification> ÔåÉ Ôï»
+  parentData: <none> (can use size)
+  constraints: BoxConstraints(w=243.6, h=293.8)
+  size: Size(243.6, 293.8)
+  direction: vertical
+  mainAxisAlignment: center
+  mainAxisSize: max
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+ÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñ
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+[Monitor] MQTT initialized
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following message was thrown:
+Multiple exceptions (4) were detected during the running of the current test, and at least one was
+unexpected.
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+00:01 +0 -1: Monitor Screen Widget Tests should display monitor screen title [E]
+  Test failed. See exception logs above.
+  The test description was: should display monitor screen title
+  
+00:01 +0 -1: Monitor Screen Widget Tests should display all sensor gauges
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY RENDERING LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 268 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/lib/features/monitor/monitor_screen.dart:444:22
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#ef30a OVERFLOWING:
+  creator: Column ÔåÉ BackdropFilter ÔåÉ ClipRRect ÔåÉ Padding ÔåÉ DecoratedBox ÔåÉ Container ÔåÉ
+    AnimatedContainer ÔåÉ TweenAnimationBuilder<double> ÔåÉ RepaintBoundary ÔåÉ IndexedSemantics ÔåÉ
+    _SelectionKeepAlive ÔåÉ NotificationListener<KeepAliveNotification> ÔåÉ Ôï»
+  parentData: <none> (can use size)
+  constraints: BoxConstraints(w=243.6, h=293.8)
+  size: Size(243.6, 293.8)
+  direction: vertical
+  mainAxisAlignment: center
+  mainAxisSize: max
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+ÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñ
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY RENDERING LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 268 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/lib/features/monitor/monitor_screen.dart:444:22
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#cf3f8 OVERFLOWING:
+  creator: Column ÔåÉ BackdropFilter ÔåÉ ClipRRect ÔåÉ Padding ÔåÉ DecoratedBox ÔåÉ Container ÔåÉ
+    AnimatedContainer ÔåÉ TweenAnimationBuilder<double> ÔåÉ RepaintBoundary ÔåÉ IndexedSemantics ÔåÉ
+    _SelectionKeepAlive ÔåÉ NotificationListener<KeepAliveNotification> ÔåÉ Ôï»
+  parentData: <none> (can use size)
+  constraints: BoxConstraints(w=243.6, h=293.8)
+  size: Size(243.6, 293.8)
+  direction: vertical
+  mainAxisAlignment: center
+  mainAxisSize: max
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+ÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñ
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY RENDERING LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 258 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/lib/features/monitor/monitor_screen.dart:444:22
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#07230 OVERFLOWING:
+  creator: Column ÔåÉ BackdropFilter ÔåÉ ClipRRect ÔåÉ Padding ÔåÉ DecoratedBox ÔåÉ Container ÔåÉ
+    AnimatedContainer ÔåÉ TweenAnimationBuilder<double> ÔåÉ RepaintBoundary ÔåÉ IndexedSemantics ÔåÉ
+    _SelectionKeepAlive ÔåÉ NotificationListener<KeepAliveNotification> ÔåÉ Ôï»
+  parentData: <none> (can use size)
+  constraints: BoxConstraints(w=243.6, h=293.8)
+  size: Size(243.6, 293.8)
+  direction: vertical
+  mainAxisAlignment: center
+  mainAxisSize: max
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+ÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñ
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY RENDERING LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 386 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/lib/features/monitor/monitor_screen.dart:444:22
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#4ff03 OVERFLOWING:
+  creator: Column ÔåÉ BackdropFilter ÔåÉ ClipRRect ÔåÉ Padding ÔåÉ DecoratedBox ÔåÉ Container ÔåÉ
+    AnimatedContainer ÔåÉ TweenAnimationBuilder<double> ÔåÉ RepaintBoundary ÔåÉ IndexedSemantics ÔåÉ
+    _SelectionKeepAlive ÔåÉ NotificationListener<KeepAliveNotification> ÔåÉ Ôï»
+  parentData: <none> (can use size)
+  constraints: BoxConstraints(w=243.6, h=293.8)
+  size: Size(243.6, 293.8)
+  direction: vertical
+  mainAxisAlignment: center
+  mainAxisSize: max
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+ÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñ
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+[Monitor] MQTT initialized
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following message was thrown:
+Multiple exceptions (4) were detected during the running of the current test, and at least one was
+unexpected.
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+00:01 +0 -2: Monitor Screen Widget Tests should display all sensor gauges [E]
+  Test failed. See exception logs above.
+  The test description was: should display all sensor gauges
+  
+00:01 +0 -2: Monitor Screen Widget Tests should display Your Kit section
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY RENDERING LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 268 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/lib/features/monitor/monitor_screen.dart:444:22
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#448db OVERFLOWING:
+  creator: Column ÔåÉ BackdropFilter ÔåÉ ClipRRect ÔåÉ Padding ÔåÉ DecoratedBox ÔåÉ Container ÔåÉ
+    AnimatedContainer ÔåÉ TweenAnimationBuilder<double> ÔåÉ RepaintBoundary ÔåÉ IndexedSemantics ÔåÉ
+    _SelectionKeepAlive ÔåÉ NotificationListener<KeepAliveNotification> ÔåÉ Ôï»
+  parentData: <none> (can use size)
+  constraints: BoxConstraints(w=243.6, h=293.8)
+  size: Size(243.6, 293.8)
+  direction: vertical
+  mainAxisAlignment: center
+  mainAxisSize: max
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+ÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñ
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY RENDERING LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 268 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/lib/features/monitor/monitor_screen.dart:444:22
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#4eb82 OVERFLOWING:
+  creator: Column ÔåÉ BackdropFilter ÔåÉ ClipRRect ÔåÉ Padding ÔåÉ DecoratedBox ÔåÉ Container ÔåÉ
+    AnimatedContainer ÔåÉ TweenAnimationBuilder<double> ÔåÉ RepaintBoundary ÔåÉ IndexedSemantics ÔåÉ
+    _SelectionKeepAlive ÔåÉ NotificationListener<KeepAliveNotification> ÔåÉ Ôï»
+  parentData: <none> (can use size)
+  constraints: BoxConstraints(w=243.6, h=293.8)
+  size: Size(243.6, 293.8)
+  direction: vertical
+  mainAxisAlignment: center
+  mainAxisSize: max
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+ÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñ
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY RENDERING LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 258 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/lib/features/monitor/monitor_screen.dart:444:22
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#c14bf OVERFLOWING:
+  creator: Column ÔåÉ BackdropFilter ÔåÉ ClipRRect ÔåÉ Padding ÔåÉ DecoratedBox ÔåÉ Container ÔåÉ
+    AnimatedContainer ÔåÉ TweenAnimationBuilder<double> ÔåÉ RepaintBoundary ÔåÉ IndexedSemantics ÔåÉ
+    _SelectionKeepAlive ÔåÉ NotificationListener<KeepAliveNotification> ÔåÉ Ôï»
+  parentData: <none> (can use size)
+  constraints: BoxConstraints(w=243.6, h=293.8)
+  size: Size(243.6, 293.8)
+  direction: vertical
+  mainAxisAlignment: center
+  mainAxisSize: max
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+ÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñ
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY RENDERING LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 386 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/lib/features/monitor/monitor_screen.dart:444:22
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#452d4 OVERFLOWING:
+  creator: Column ÔåÉ BackdropFilter ÔåÉ ClipRRect ÔåÉ Padding ÔåÉ DecoratedBox ÔåÉ Container ÔåÉ
+    AnimatedContainer ÔåÉ TweenAnimationBuilder<double> ÔåÉ RepaintBoundary ÔåÉ IndexedSemantics ÔåÉ
+    _SelectionKeepAlive ÔåÉ NotificationListener<KeepAliveNotification> ÔåÉ Ôï»
+  parentData: <none> (can use size)
+  constraints: BoxConstraints(w=243.6, h=293.8)
+  size: Size(243.6, 293.8)
+  direction: vertical
+  mainAxisAlignment: center
+  mainAxisSize: max
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+ÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñ
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+[Monitor] MQTT initialized
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following message was thrown:
+Multiple exceptions (4) were detected during the running of the current test, and at least one was
+unexpected.
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+00:01 +0 -3: Monitor Screen Widget Tests should display Your Kit section [E]
+  Test failed. See exception logs above.
+  The test description was: should display Your Kit section
+  
+00:01 +0 -3: Monitor Screen Widget Tests should display Mode & Control section
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY RENDERING LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 268 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/lib/features/monitor/monitor_screen.dart:444:22
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#2c2d5 OVERFLOWING:
+  creator: Column ÔåÉ BackdropFilter ÔåÉ ClipRRect ÔåÉ Padding ÔåÉ DecoratedBox ÔåÉ Container ÔåÉ
+    AnimatedContainer ÔåÉ TweenAnimationBuilder<double> ÔåÉ RepaintBoundary ÔåÉ IndexedSemantics ÔåÉ
+    _SelectionKeepAlive ÔåÉ NotificationListener<KeepAliveNotification> ÔåÉ Ôï»
+  parentData: <none> (can use size)
+  constraints: BoxConstraints(w=243.6, h=293.8)
+  size: Size(243.6, 293.8)
+  direction: vertical
+  mainAxisAlignment: center
+  mainAxisSize: max
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+ÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñ
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY RENDERING LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 268 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/lib/features/monitor/monitor_screen.dart:444:22
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#616c9 OVERFLOWING:
+  creator: Column ÔåÉ BackdropFilter ÔåÉ ClipRRect ÔåÉ Padding ÔåÉ DecoratedBox ÔåÉ Container ÔåÉ
+    AnimatedContainer ÔåÉ TweenAnimationBuilder<double> ÔåÉ RepaintBoundary ÔåÉ IndexedSemantics ÔåÉ
+    _SelectionKeepAlive ÔåÉ NotificationListener<KeepAliveNotification> ÔåÉ Ôï»
+  parentData: <none> (can use size)
+  constraints: BoxConstraints(w=243.6, h=293.8)
+  size: Size(243.6, 293.8)
+  direction: vertical
+  mainAxisAlignment: center
+  mainAxisSize: max
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+ÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñ
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY RENDERING LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 258 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/lib/features/monitor/monitor_screen.dart:444:22
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#f8de6 OVERFLOWING:
+  creator: Column ÔåÉ BackdropFilter ÔåÉ ClipRRect ÔåÉ Padding ÔåÉ DecoratedBox ÔåÉ Container ÔåÉ
+    AnimatedContainer ÔåÉ TweenAnimationBuilder<double> ÔåÉ RepaintBoundary ÔåÉ IndexedSemantics ÔåÉ
+    _SelectionKeepAlive ÔåÉ NotificationListener<KeepAliveNotification> ÔåÉ Ôï»
+  parentData: <none> (can use size)
+  constraints: BoxConstraints(w=243.6, h=293.8)
+  size: Size(243.6, 293.8)
+  direction: vertical
+  mainAxisAlignment: center
+  mainAxisSize: max
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+ÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñ
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY RENDERING LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 386 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/lib/features/monitor/monitor_screen.dart:444:22
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#aad07 OVERFLOWING:
+  creator: Column ÔåÉ BackdropFilter ÔåÉ ClipRRect ÔåÉ Padding ÔåÉ DecoratedBox ÔåÉ Container ÔåÉ
+    AnimatedContainer ÔåÉ TweenAnimationBuilder<double> ÔåÉ RepaintBoundary ÔåÉ IndexedSemantics ÔåÉ
+    _SelectionKeepAlive ÔåÉ NotificationListener<KeepAliveNotification> ÔåÉ Ôï»
+  parentData: <none> (can use size)
+  constraints: BoxConstraints(w=243.6, h=293.8)
+  size: Size(243.6, 293.8)
+  direction: vertical
+  mainAxisAlignment: center
+  mainAxisSize: max
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+ÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñ
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+[Monitor] MQTT initialized
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following message was thrown:
+Multiple exceptions (4) were detected during the running of the current test, and at least one was
+unexpected.
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+00:01 +0 -4: Monitor Screen Widget Tests should display Mode & Control section [E]
+  Test failed. See exception logs above.
+  The test description was: should display Mode & Control section
+  
+00:01 +0 -4: Monitor Screen Widget Tests should display manual control buttons when in manual mode
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY RENDERING LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 268 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/lib/features/monitor/monitor_screen.dart:444:22
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#781eb OVERFLOWING:
+  creator: Column ÔåÉ BackdropFilter ÔåÉ ClipRRect ÔåÉ Padding ÔåÉ DecoratedBox ÔåÉ Container ÔåÉ
+    AnimatedContainer ÔåÉ TweenAnimationBuilder<double> ÔåÉ RepaintBoundary ÔåÉ IndexedSemantics ÔåÉ
+    _SelectionKeepAlive ÔåÉ NotificationListener<KeepAliveNotification> ÔåÉ Ôï»
+  parentData: <none> (can use size)
+  constraints: BoxConstraints(w=243.6, h=293.8)
+  size: Size(243.6, 293.8)
+  direction: vertical
+  mainAxisAlignment: center
+  mainAxisSize: max
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+ÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñ
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY RENDERING LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 268 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/lib/features/monitor/monitor_screen.dart:444:22
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#9e78e OVERFLOWING:
+  creator: Column ÔåÉ BackdropFilter ÔåÉ ClipRRect ÔåÉ Padding ÔåÉ DecoratedBox ÔåÉ Container ÔåÉ
+    AnimatedContainer ÔåÉ TweenAnimationBuilder<double> ÔåÉ RepaintBoundary ÔåÉ IndexedSemantics ÔåÉ
+    _SelectionKeepAlive ÔåÉ NotificationListener<KeepAliveNotification> ÔåÉ Ôï»
+  parentData: <none> (can use size)
+  constraints: BoxConstraints(w=243.6, h=293.8)
+  size: Size(243.6, 293.8)
+  direction: vertical
+  mainAxisAlignment: center
+  mainAxisSize: max
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+ÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñ
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY RENDERING LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 258 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/lib/features/monitor/monitor_screen.dart:444:22
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#909a0 OVERFLOWING:
+  creator: Column ÔåÉ BackdropFilter ÔåÉ ClipRRect ÔåÉ Padding ÔåÉ DecoratedBox ÔåÉ Container ÔåÉ
+    AnimatedContainer ÔåÉ TweenAnimationBuilder<double> ÔåÉ RepaintBoundary ÔåÉ IndexedSemantics ÔåÉ
+    _SelectionKeepAlive ÔåÉ NotificationListener<KeepAliveNotification> ÔåÉ Ôï»
+  parentData: <none> (can use size)
+  constraints: BoxConstraints(w=243.6, h=293.8)
+  size: Size(243.6, 293.8)
+  direction: vertical
+  mainAxisAlignment: center
+  mainAxisSize: max
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+ÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñ
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY RENDERING LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 386 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/lib/features/monitor/monitor_screen.dart:444:22
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#8b4f9 OVERFLOWING:
+  creator: Column ÔåÉ BackdropFilter ÔåÉ ClipRRect ÔåÉ Padding ÔåÉ DecoratedBox ÔåÉ Container ÔåÉ
+    AnimatedContainer ÔåÉ TweenAnimationBuilder<double> ÔåÉ RepaintBoundary ÔåÉ IndexedSemantics ÔåÉ
+    _SelectionKeepAlive ÔåÉ NotificationListener<KeepAliveNotification> ÔåÉ Ôï»
+  parentData: <none> (can use size)
+  constraints: BoxConstraints(w=243.6, h=293.8)
+  size: Size(243.6, 293.8)
+  direction: vertical
+  mainAxisAlignment: center
+  mainAxisSize: max
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+ÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñ
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+[Monitor] MQTT initialized
+[Flutter] _actuatorEvent called with field: manual
+[Flutter] Sending to /actuator/event?deviceId=test-kit-001 with body: {phUp: 0, phDown: 0, nutrientAdd: 0, valueS: 0, manual: 1, auto: 0, refill: 0}
+[Flutter] Response received: {data: {phUp: 0, phDown: 0, nutrientAdd: 0, valueS: 0, manual: 1, auto: 0, refill: 0}}
+[Flutter] Response data: {phUp: 0, phDown: 0, nutrientAdd: 0, valueS: 0, manual: 1, auto: 0, refill: 0}
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following message was thrown:
+Multiple exceptions (4) were detected during the running of the current test, and at least one was
+unexpected.
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+00:01 +0 -5: Monitor Screen Widget Tests should display manual control buttons when in manual mode [E]
+  Test failed. See exception logs above.
+  The test description was: should display manual control buttons when in manual mode
+  
+00:01 +0 -5: Monitor Screen Widget Tests should hide manual control buttons when in auto mode
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY RENDERING LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 268 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/lib/features/monitor/monitor_screen.dart:444:22
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#dfe9e OVERFLOWING:
+  creator: Column ÔåÉ BackdropFilter ÔåÉ ClipRRect ÔåÉ Padding ÔåÉ DecoratedBox ÔåÉ Container ÔåÉ
+    AnimatedContainer ÔåÉ TweenAnimationBuilder<double> ÔåÉ RepaintBoundary ÔåÉ IndexedSemantics ÔåÉ
+    _SelectionKeepAlive ÔåÉ NotificationListener<KeepAliveNotification> ÔåÉ Ôï»
+  parentData: <none> (can use size)
+  constraints: BoxConstraints(w=243.6, h=293.8)
+  size: Size(243.6, 293.8)
+  direction: vertical
+  mainAxisAlignment: center
+  mainAxisSize: max
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+ÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñ
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY RENDERING LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 268 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/lib/features/monitor/monitor_screen.dart:444:22
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#9f09c OVERFLOWING:
+  creator: Column ÔåÉ BackdropFilter ÔåÉ ClipRRect ÔåÉ Padding ÔåÉ DecoratedBox ÔåÉ Container ÔåÉ
+    AnimatedContainer ÔåÉ TweenAnimationBuilder<double> ÔåÉ RepaintBoundary ÔåÉ IndexedSemantics ÔåÉ
+    _SelectionKeepAlive ÔåÉ NotificationListener<KeepAliveNotification> ÔåÉ Ôï»
+  parentData: <none> (can use size)
+  constraints: BoxConstraints(w=243.6, h=293.8)
+  size: Size(243.6, 293.8)
+  direction: vertical
+  mainAxisAlignment: center
+  mainAxisSize: max
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+ÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñ
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY RENDERING LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 258 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/lib/features/monitor/monitor_screen.dart:444:22
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#af03e OVERFLOWING:
+  creator: Column ÔåÉ BackdropFilter ÔåÉ ClipRRect ÔåÉ Padding ÔåÉ DecoratedBox ÔåÉ Container ÔåÉ
+    AnimatedContainer ÔåÉ TweenAnimationBuilder<double> ÔåÉ RepaintBoundary ÔåÉ IndexedSemantics ÔåÉ
+    _SelectionKeepAlive ÔåÉ NotificationListener<KeepAliveNotification> ÔåÉ Ôï»
+  parentData: <none> (can use size)
+  constraints: BoxConstraints(w=243.6, h=293.8)
+  size: Size(243.6, 293.8)
+  direction: vertical
+  mainAxisAlignment: center
+  mainAxisSize: max
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+ÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñ
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY RENDERING LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 386 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/lib/features/monitor/monitor_screen.dart:444:22
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#5b633 OVERFLOWING:
+  creator: Column ÔåÉ BackdropFilter ÔåÉ ClipRRect ÔåÉ Padding ÔåÉ DecoratedBox ÔåÉ Container ÔåÉ
+    AnimatedContainer ÔåÉ TweenAnimationBuilder<double> ÔåÉ RepaintBoundary ÔåÉ IndexedSemantics ÔåÉ
+    _SelectionKeepAlive ÔåÉ NotificationListener<KeepAliveNotification> ÔåÉ Ôï»
+  parentData: <none> (can use size)
+  constraints: BoxConstraints(w=243.6, h=293.8)
+  size: Size(243.6, 293.8)
+  direction: vertical
+  mainAxisAlignment: center
+  mainAxisSize: max
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+ÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñ
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+[Monitor] MQTT initialized
+[Flutter] _actuatorEvent called with field: manual
+[Flutter] Sending to /actuator/event?deviceId=test-kit-001 with body: {phUp: 0, phDown: 0, nutrientAdd: 0, valueS: 0, manual: 1, auto: 0, refill: 0}
+[Flutter] Response received: {data: {phUp: 0, phDown: 0, nutrientAdd: 0, valueS: 0, manual: 1, auto: 0, refill: 0}}
+[Flutter] Response data: {phUp: 0, phDown: 0, nutrientAdd: 0, valueS: 0, manual: 1, auto: 0, refill: 0}
+[Flutter] _actuatorEvent called with field: auto
+[Flutter] Sending to /actuator/event?deviceId=test-kit-001 with body: {phUp: 0, phDown: 0, nutrientAdd: 0, valueS: 0, manual: 0, auto: 1, refill: 0}
+[Flutter] Response received: {data: {phUp: 0, phDown: 0, nutrientAdd: 0, valueS: 0, manual: 0, auto: 1, refill: 0}}
+[Flutter] Response data: {phUp: 0, phDown: 0, nutrientAdd: 0, valueS: 0, manual: 0, auto: 1, refill: 0}
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following message was thrown:
+Multiple exceptions (4) were detected during the running of the current test, and at least one was
+unexpected.
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+00:01 +0 -6: Monitor Screen Widget Tests should hide manual control buttons when in auto mode [E]
+  Test failed. See exception logs above.
+  The test description was: should hide manual control buttons when in auto mode
+  
+00:01 +0 -6: Monitor Screen Widget Tests should toggle between auto and manual modes
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY RENDERING LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 268 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/lib/features/monitor/monitor_screen.dart:444:22
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#44222 OVERFLOWING:
+  creator: Column ÔåÉ BackdropFilter ÔåÉ ClipRRect ÔåÉ Padding ÔåÉ DecoratedBox ÔåÉ Container ÔåÉ
+    AnimatedContainer ÔåÉ TweenAnimationBuilder<double> ÔåÉ RepaintBoundary ÔåÉ IndexedSemantics ÔåÉ
+    _SelectionKeepAlive ÔåÉ NotificationListener<KeepAliveNotification> ÔåÉ Ôï»
+  parentData: <none> (can use size)
+  constraints: BoxConstraints(w=243.6, h=293.8)
+  size: Size(243.6, 293.8)
+  direction: vertical
+  mainAxisAlignment: center
+  mainAxisSize: max
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+ÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñ
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY RENDERING LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 268 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/lib/features/monitor/monitor_screen.dart:444:22
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#33095 OVERFLOWING:
+  creator: Column ÔåÉ BackdropFilter ÔåÉ ClipRRect ÔåÉ Padding ÔåÉ DecoratedBox ÔåÉ Container ÔåÉ
+    AnimatedContainer ÔåÉ TweenAnimationBuilder<double> ÔåÉ RepaintBoundary ÔåÉ IndexedSemantics ÔåÉ
+    _SelectionKeepAlive ÔåÉ NotificationListener<KeepAliveNotification> ÔåÉ Ôï»
+  parentData: <none> (can use size)
+  constraints: BoxConstraints(w=243.6, h=293.8)
+  size: Size(243.6, 293.8)
+  direction: vertical
+  mainAxisAlignment: center
+  mainAxisSize: max
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+ÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñ
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY RENDERING LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 258 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/lib/features/monitor/monitor_screen.dart:444:22
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#37fc0 OVERFLOWING:
+  creator: Column ÔåÉ BackdropFilter ÔåÉ ClipRRect ÔåÉ Padding ÔåÉ DecoratedBox ÔåÉ Container ÔåÉ
+    AnimatedContainer ÔåÉ TweenAnimationBuilder<double> ÔåÉ RepaintBoundary ÔåÉ IndexedSemantics ÔåÉ
+    _SelectionKeepAlive ÔåÉ NotificationListener<KeepAliveNotification> ÔåÉ Ôï»
+  parentData: <none> (can use size)
+  constraints: BoxConstraints(w=243.6, h=293.8)
+  size: Size(243.6, 293.8)
+  direction: vertical
+  mainAxisAlignment: center
+  mainAxisSize: max
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+ÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñ
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY RENDERING LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 386 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/lib/features/monitor/monitor_screen.dart:444:22
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#0161e OVERFLOWING:
+  creator: Column ÔåÉ BackdropFilter ÔåÉ ClipRRect ÔåÉ Padding ÔåÉ DecoratedBox ÔåÉ Container ÔåÉ
+    AnimatedContainer ÔåÉ TweenAnimationBuilder<double> ÔåÉ RepaintBoundary ÔåÉ IndexedSemantics ÔåÉ
+    _SelectionKeepAlive ÔåÉ NotificationListener<KeepAliveNotification> ÔåÉ Ôï»
+  parentData: <none> (can use size)
+  constraints: BoxConstraints(w=243.6, h=293.8)
+  size: Size(243.6, 293.8)
+  direction: vertical
+  mainAxisAlignment: center
+  mainAxisSize: max
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+ÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñ
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+[Monitor] MQTT initialized
+[Flutter] _actuatorEvent called with field: manual
+[Flutter] Sending to /actuator/event?deviceId=test-kit-001 with body: {phUp: 0, phDown: 0, nutrientAdd: 0, valueS: 0, manual: 1, auto: 0, refill: 0}
+[Flutter] Response received: {data: {phUp: 0, phDown: 0, nutrientAdd: 0, valueS: 0, manual: 1, auto: 0, refill: 0}}
+[Flutter] Response data: {phUp: 0, phDown: 0, nutrientAdd: 0, valueS: 0, manual: 1, auto: 0, refill: 0}
+[Flutter] _actuatorEvent called with field: auto
+[Flutter] Sending to /actuator/event?deviceId=test-kit-001 with body: {phUp: 0, phDown: 0, nutrientAdd: 0, valueS: 0, manual: 0, auto: 1, refill: 0}
+[Flutter] Response received: {data: {phUp: 0, phDown: 0, nutrientAdd: 0, valueS: 0, manual: 0, auto: 1, refill: 0}}
+[Flutter] Response data: {phUp: 0, phDown: 0, nutrientAdd: 0, valueS: 0, manual: 0, auto: 1, refill: 0}
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following message was thrown:
+Multiple exceptions (4) were detected during the running of the current test, and at least one was
+unexpected.
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+00:02 +0 -7: Monitor Screen Widget Tests should toggle between auto and manual modes [E]
+  Test failed. See exception logs above.
+  The test description was: should toggle between auto and manual modes
+  
+00:02 +0 -7: Monitor Screen Widget Tests should display kit dropdown
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY RENDERING LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 268 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/lib/features/monitor/monitor_screen.dart:444:22
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#5f2f2 OVERFLOWING:
+  creator: Column ÔåÉ BackdropFilter ÔåÉ ClipRRect ÔåÉ Padding ÔåÉ DecoratedBox ÔåÉ Container ÔåÉ
+    AnimatedContainer ÔåÉ TweenAnimationBuilder<double> ÔåÉ RepaintBoundary ÔåÉ IndexedSemantics ÔåÉ
+    _SelectionKeepAlive ÔåÉ NotificationListener<KeepAliveNotification> ÔåÉ Ôï»
+  parentData: <none> (can use size)
+  constraints: BoxConstraints(w=243.6, h=293.8)
+  size: Size(243.6, 293.8)
+  direction: vertical
+  mainAxisAlignment: center
+  mainAxisSize: max
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+ÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñ
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY RENDERING LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 268 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/lib/features/monitor/monitor_screen.dart:444:22
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#a61eb OVERFLOWING:
+  creator: Column ÔåÉ BackdropFilter ÔåÉ ClipRRect ÔåÉ Padding ÔåÉ DecoratedBox ÔåÉ Container ÔåÉ
+    AnimatedContainer ÔåÉ TweenAnimationBuilder<double> ÔåÉ RepaintBoundary ÔåÉ IndexedSemantics ÔåÉ
+    _SelectionKeepAlive ÔåÉ NotificationListener<KeepAliveNotification> ÔåÉ Ôï»
+  parentData: <none> (can use size)
+  constraints: BoxConstraints(w=243.6, h=293.8)
+  size: Size(243.6, 293.8)
+  direction: vertical
+  mainAxisAlignment: center
+  mainAxisSize: max
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+ÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñ
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY RENDERING LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 258 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/lib/features/monitor/monitor_screen.dart:444:22
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#c125c OVERFLOWING:
+  creator: Column ÔåÉ BackdropFilter ÔåÉ ClipRRect ÔåÉ Padding ÔåÉ DecoratedBox ÔåÉ Container ÔåÉ
+    AnimatedContainer ÔåÉ TweenAnimationBuilder<double> ÔåÉ RepaintBoundary ÔåÉ IndexedSemantics ÔåÉ
+    _SelectionKeepAlive ÔåÉ NotificationListener<KeepAliveNotification> ÔåÉ Ôï»
+  parentData: <none> (can use size)
+  constraints: BoxConstraints(w=243.6, h=293.8)
+  size: Size(243.6, 293.8)
+  direction: vertical
+  mainAxisAlignment: center
+  mainAxisSize: max
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+ÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñ
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY RENDERING LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 386 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///C:/WisnuDarmawan/Coding/Project/flutter-cea-system/apps/mobile/lib/features/monitor/monitor_screen.dart:444:22
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#3a0fc OVERFLOWING:
+  creator: Column ÔåÉ BackdropFilter ÔåÉ ClipRRect ÔåÉ Padding ÔåÉ DecoratedBox ÔåÉ Container ÔåÉ
+    AnimatedContainer ÔåÉ TweenAnimationBuilder<double> ÔåÉ RepaintBoundary ÔåÉ IndexedSemantics ÔåÉ
+    _SelectionKeepAlive ÔåÉ NotificationListener<KeepAliveNotification> ÔåÉ Ôï»
+  parentData: <none> (can use size)
+  constraints: BoxConstraints(w=243.6, h=293.8)
+  size: Size(243.6, 293.8)
+  direction: vertical
+  mainAxisAlignment: center
+  mainAxisSize: max
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+ÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñÔùóÔùñ
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+[Monitor] MQTT initialized
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following message was thrown:
+Multiple exceptions (4) were detected during the running of the current test, and at least one was
+unexpected.
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+00:02 +0 -8: Monitor Screen Widget Tests should display kit dropdown [E]
+  Test failed. See exception logs above.
+  The test description was: should display kit dropdown
+  
+00:02 +0 -8: Some tests failed.

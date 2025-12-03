@@ -4,9 +4,23 @@ from pydantic import BaseModel, Field
 from services.api.database import get_connection, release_connection
 import time
 import httpx
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 AUTO_MODE_SOURCE = "rule"
+
+# COOLDOWN SETTINGS
+COOLDOWN_SECONDS = 180  # 3 minutes
+
+CRITICAL_THRESHOLDS = {
+    "ph": {"min": 5.0, "max": 7.0},      # Bypass if pH < 5.0 or > 7.0
+    "ppm": {"min": 400, "max": 1200},    # Bypass if PPM < 400 or > 1200
+    "waterLevel": {"min": 1.0}           # Bypass if water < 1.0
+}
 
 # MIGRATION
 def run_actuator_migration():
@@ -32,10 +46,11 @@ def run_actuator_migration():
             );
         """)
         conn.commit()
-        print("[DB] actuator_event migration executed (from actuator.py).")
+        conn.commit()
+        logger.info("[DB] actuator_event migration executed (from actuator.py).")
     except Exception as e:
         conn.rollback()
-        print("[DB] actuator_event migration error (from actuator.py):", e)
+        logger.error(f"[DB] actuator_event migration error (from actuator.py): {e}")
     finally:
         cur.close()
         release_connection(conn)
@@ -49,6 +64,106 @@ def is_valid_device(device_id: str):
         cur.execute("SELECT 1 FROM kits WHERE id = %s;", (device_id,))
         found = cur.fetchone()
         return found is not None
+    finally:
+        cur.close()
+        release_connection(conn)
+
+
+def is_critical(ph, ppm, water_level):
+    """Check if telemetry values are in critical range (bypass cooldown)."""
+    critical = False
+    
+    if ph < CRITICAL_THRESHOLDS["ph"]["min"] or ph > CRITICAL_THRESHOLDS["ph"]["max"]:
+        critical = True
+        logger.warning(f"[COOLDOWN] ⚠️ Critical pH detected: {ph} - Bypassing cooldown")
+    
+    if ppm < CRITICAL_THRESHOLDS["ppm"]["min"] or ppm > CRITICAL_THRESHOLDS["ppm"]["max"]:
+        critical = True
+        logger.warning(f"[COOLDOWN] ⚠️ Critical PPM detected: {ppm} - Bypassing cooldown")
+    
+    if water_level < CRITICAL_THRESHOLDS["waterLevel"]["min"]:
+        critical = True
+        logger.warning(f"[COOLDOWN] ⚠️ Critical water level detected: {water_level} - Bypassing cooldown")
+    
+    return critical
+
+
+def check_cooldown(device_id, predictions):
+    """
+    Check if any actions are blocked by cooldown.
+    Returns dict with blocked actions set to 0.
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    current_time = int(time.time() * 1000)
+    result = predictions.copy()
+    cooldown_active = False
+    
+    try:
+        for action_type in ["phUp", "phDown", "nutrientAdd", "refill"]:
+            # Only check if action was going to be executed
+            if predictions.get(action_type, 0) > 0:
+                cur.execute("""
+                    SELECT "lastTime" FROM actuator_cooldown
+                    WHERE "deviceId" = %s AND "actionType" = %s;
+                """, (device_id, action_type))
+                
+                row = cur.fetchone()
+                if row:
+                    last_time = row[0]
+                    time_diff_sec = (current_time - last_time) / 1000.0
+                    
+                    if time_diff_sec < COOLDOWN_SECONDS:
+                        # Cooldown still active - block this action
+                        result[action_type] = 0
+                        cooldown_active = True
+                        remaining = int(COOLDOWN_SECONDS - time_diff_sec)
+                        logger.info(f"[COOLDOWN] 🚫 {action_type} blocked - {remaining}s remaining")
+    
+    except Exception as e:
+        logger.error(f"[COOLDOWN] Error checking cooldown: {e}")
+    finally:
+        cur.close()
+        release_connection(conn)
+    
+    if cooldown_active:
+        # Recalculate valueS based on remaining actions
+        result["valueS"] = float(max(
+            result.get("phUp", 0),
+            result.get("phDown", 0),
+            result.get("nutrientAdd", 0),
+            result.get("refill", 0)
+        ))
+    
+    return result
+
+
+def update_cooldown(device_id, predictions):
+    """Update cooldown timestamps for executed actions."""
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    current_time = int(time.time() * 1000)
+    
+    try:
+        for action_type in ["phUp", "phDown", "nutrientAdd", "refill"]:
+            action_value = predictions.get(action_type, 0)
+            
+            # Only update if action was executed (non-zero)
+            if action_value > 0:
+                cur.execute("""
+                    INSERT INTO actuator_cooldown ("deviceId", "actionType", "lastTime", "lastValue")
+                    VALUES (%s, %s, %s, %s)
+                    ON CONFLICT ("deviceId", "actionType")
+                    DO UPDATE SET "lastTime" = EXCLUDED."lastTime", "lastValue" = EXCLUDED."lastValue";
+                """, (device_id, action_type, current_time, float(action_value)))
+        
+        conn.commit()
+    
+    except Exception as e:
+        conn.rollback()
+        logger.error(f"[COOLDOWN] Error updating cooldown: {e}")
     finally:
         cur.close()
         release_connection(conn)
@@ -91,7 +206,7 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
     try:
         # AUTO MODE
         if data.auto == 1:
-            print(f"\n[AUTO MODE] Triggered for device: {deviceId}")
+            logger.info(f"\n[AUTO MODE] Triggered for device: {deviceId}")
 
             # Ambil telemetry terbaru
             cur.execute("""
@@ -105,10 +220,10 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
 
             if t:
                 ppm, ph, tempC, humidity, wl = t
-                print(f"[AUTO MODE] Telemetry - pH:{ph}, PPM:{ppm}, Temp:{tempC}°C, Humidity:{humidity}%, WaterLevel:{wl} (0-3 scale)")
+                logger.info(f"[AUTO MODE] Telemetry - pH:{ph}, PPM:{ppm}, Temp:{tempC}°C, Humidity:{humidity}%, WaterLevel:{wl} (0-3 scale)")
             else:
                 ppm, ph, tempC, humidity, wl = (0, 0, 0, 0, 0)
-                print("[AUTO MODE] WARNING: No telemetry found, using zeros")
+                logger.warning("[AUTO MODE] WARNING: No telemetry found, using zeros")
 
             # ==== TRY MACHINE LEARNING FIRST (SYNCHRONOUS WITH TIMEOUT) ====
             ml_success = False
@@ -122,7 +237,7 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
                     "waterLevel": wl
                 }
                 
-                print("[AUTO MODE] Attempting ML prediction...")
+                logger.info("[AUTO MODE] Attempting ML prediction...")
                 async with httpx.AsyncClient(timeout=2.0) as client:
                     r = await client.post("http://127.0.0.1:8000/ml/predict", json=ml_payload)
                 
@@ -136,128 +251,202 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
                     
                     AUTO_MODE_SOURCE = "ml"
                     ml_success = True
-                    print(f"[AUTO MODE] ✓ ML SUCCESS → phUp:{data.phUp}, phDown:{data.phDown}, nutrient:{data.nutrientAdd}, refill:{data.refill}, model:{ml.get('model_version', 'unknown')}")
+                    logger.info(f"[AUTO MODE] ✓ ML SUCCESS → phUp:{data.phUp}, phDown:{data.phDown}, nutrient:{data.nutrientAdd}, refill:{data.refill}, model:{ml.get('model_version', 'unknown')}")
                 else:
-                    print(f"[AUTO MODE] ML service returned status {r.status_code}")
+                    logger.warning(f"[AUTO MODE] ML service returned status {r.status_code}")
                     
             except (httpx.TimeoutException, httpx.ConnectError) as e:
-                print(f"[AUTO MODE] ML timeout/connection error: {e}")
+                logger.warning(f"[AUTO MODE] ML timeout/connection error: {e}")
             except Exception as e:
-                print(f"[AUTO MODE] ML prediction failed: {e}")
+                logger.error(f"[AUTO MODE] ML prediction failed: {e}")
 
             # ==== FALLBACK TO RULE-BASED IF ML FAILS ====
             if not ml_success:
-            print("[AUTO MODE] Using rule-based logic with priority system...")
-            AUTO_MODE_SOURCE = "rule"
+                logger.info("[AUTO MODE] Using rule-based logic with priority system...")
+                AUTO_MODE_SOURCE = "rule"
 
-            # Initialize all actions to 0
-            phUpSec = 0
-            phDownSec = 0
-            nutrientSec = 0
-            refillSec = 0
+                # Initialize all actions to 0
+                phUpSec = 0
+                phDownSec = 0
+                nutrientSec = 0
+                refillSec = 0
 
-            # ========================================
-            # PRIORITY SYSTEM (prevents conflicts)
-            # ========================================
-            
-            # PRIORITY 1: Critical Water Level (Safety First)
-            # If water is critically low, ONLY refill (skip other actions)
-            if wl < 1.2:
-                refillSec = max(0, min(25, (1.2 - wl) * 20))
-                print(f"[AUTO MODE] Priority 1: Critical water level → Refill only")
-            
-            # PRIORITY 2: High PPM Dilution
-            # If PPM is high AND water level allows, dilute (skip pH/nutrient)
-            elif ppm > 840 and wl < 2.5:
-                refillSec = max(0, min(15, (ppm - 840) / 20))
-                print(f"[AUTO MODE] Priority 2: High PPM → Dilute (skip pH/nutrient)")
-            
-            # PRIORITY 3: pH Adjustment
-            # Only adjust pH if water is stable and PPM is not critical
-            elif ph < 5.5 or ph > 6.5:
-                if ph < 5.5:
-                    phUpSec = max(0, min(12, (5.5 - ph) * 8))
-                    print(f"[AUTO MODE] Priority 3: Low pH → pH Up")
-                elif ph > 6.5:
-                    phDownSec = max(0, min(12, (ph - 6.5) * 8))
-                    print(f"[AUTO MODE] Priority 3: High pH → pH Down")
-            
-            # PRIORITY 4: Nutrient Addition
-            # Only add nutrients if pH is stable (5.5-6.5) and PPM is low
-            elif ppm < 560:
-                nutrientSec = max(0, min(20, (560 - ppm) / 20))
-                print(f"[AUTO MODE] Priority 4: Low PPM → Add Nutrient")
-            
-            # PRIORITY 5: Micro-adjustments (fine-tuning)
-            # Only apply if no major action was taken
-            else:
-                # Micro pH adjustments (when pH is slightly off but within range)
-                if 5.5 <= ph < 5.7:
-                    phUpSec = 1
-                    print(f"[AUTO MODE] Priority 5: Micro pH Up")
-                elif 6.3 < ph <= 6.5:
-                    phDownSec = 1
-                    print(f"[AUTO MODE] Priority 5: Micro pH Down")
+                # ========================================
+                # PRIORITY SYSTEM (prevents conflicts)
+                # ========================================
                 
-                # Micro nutrient (when PPM is slightly low but within range)
-                elif 560 <= ppm < 650:
-                    nutrientSec = 1
-                    print(f"[AUTO MODE] Priority 5: Micro Nutrient")
+                # PRIORITY 1: Critical Water Level (Safety First)
+                # If water is critically low, ONLY refill (skip other actions)
+                if wl < 1.2:
+                    refillSec = max(0, min(25, (1.2 - wl) * 20))
+                    logger.info(f"[AUTO MODE] Priority 1: Critical water level → Refill only")
                 
-                # Micro refill (when water is slightly low but not critical)
-                elif 1.2 <= wl < 1.5:
-                    refillSec = 1
-                    print(f"[AUTO MODE] Priority 5: Micro Refill")
+                # PRIORITY 2: High PPM Dilution
+                # If PPM is high AND water level allows, dilute (skip pH/nutrient)
+                elif ppm > 840 and wl < 2.5:
+                    refillSec = max(0, min(15, (ppm - 840) / 20))
+                    logger.info(f"[AUTO MODE] Priority 2: High PPM → Dilute (skip pH/nutrient)")
                 
+                # PRIORITY 3: pH Adjustment
+                # Only adjust pH if water is stable and PPM is not critical
+                elif ph < 5.5 or ph > 6.5:
+                    if ph < 5.5:
+                        phUpSec = max(0, min(12, (5.5 - ph) * 8))
+                        logger.info(f"[AUTO MODE] Priority 3: Low pH → pH Up")
+                    elif ph > 6.5:
+                        phDownSec = max(0, min(12, (ph - 6.5) * 8))
+                        logger.info(f"[AUTO MODE] Priority 3: High pH → pH Down")
+                
+                # PRIORITY 4: Nutrient Addition
+                # Only add nutrients if pH is stable (5.5-6.5) and PPM is low
+                elif ppm < 560:
+                    nutrientSec = max(0, min(20, (560 - ppm) / 20))
+                    logger.info(f"[AUTO MODE] Priority 4: Low PPM → Add Nutrient")
+                
+                # PRIORITY 5: Micro-adjustments (fine-tuning)
+                # Only apply if no major action was taken
                 else:
-                    print(f"[AUTO MODE] All parameters stable → No action")
+                    # Micro pH adjustments (when pH is slightly off but within range)
+                    if 5.5 <= ph < 5.7:
+                        phUpSec = 1
+                        logger.info(f"[AUTO MODE] Priority 5: Micro pH Up")
+                    elif 6.3 < ph <= 6.5:
+                        phDownSec = 1
+                        logger.info(f"[AUTO MODE] Priority 5: Micro pH Down")
+                    
+                    # Micro nutrient (when PPM is slightly low but within range)
+                    elif 560 <= ppm < 650:
+                        nutrientSec = 1
+                        logger.info(f"[AUTO MODE] Priority 5: Micro Nutrient")
+                    
+                    # Micro refill (when water is slightly low but not critical)
+                    elif 1.2 <= wl < 1.5:
+                        refillSec = 1
+                        logger.info(f"[AUTO MODE] Priority 5: Micro Refill")
+                    
+                    else:
+                        logger.info(f"[AUTO MODE] All parameters stable → No action")
 
-            # Set final values
-            data.phUp = int(phUpSec)
-            data.phDown = int(phDownSec)
-            data.nutrientAdd = int(nutrientSec)
-            data.refill = int(refillSec)
-            data.valueS = float(max(phUpSec, phDownSec, nutrientSec, refillSec))
+                # Set final values
+                data.phUp = int(phUpSec)
+                data.phDown = int(phDownSec)
+                data.nutrientAdd = int(nutrientSec)
+                data.refill = int(refillSec)
+                data.valueS = float(max(phUpSec, phDownSec, nutrientSec, refillSec))
+                
+                logger.info(f"[AUTO MODE] Final → phUp:{data.phUp}, phDown:{data.phDown}, nutrient:{data.nutrientAdd}, refill:{data.refill}, valueS:{data.valueS}")
+
+            # ==== APPLY COOLDOWN (BOTH ML AND RULE-BASED) ====
+            # Check if telemetry is in critical range
+            bypass_cooldown = is_critical(ph, ppm, wl)
             
-            print(f"[AUTO MODE] Final → phUp:{data.phUp}, phDown:{data.phDown}, nutrient:{data.nutrientAdd}, refill:{data.refill}, valueS:{data.valueS}")
+            if not bypass_cooldown:
+                # Package predictions for cooldown check
+                predictions = {
+                    "phUp": data.phUp,
+                    "phDown": data.phDown,
+                    "nutrientAdd": data.nutrientAdd,
+                    "refill": data.refill,
+                    "valueS": data.valueS
+                }
+                
+                # Check cooldown and get filtered predictions
+                filtered = check_cooldown(deviceId, predictions)
+                
+                # Update data with filtered values
+                data.phUp = int(filtered["phUp"])
+                data.phDown = int(filtered["phDown"])
+                data.nutrientAdd = int(filtered["nutrientAdd"])
+                data.refill = int(filtered["refill"])
+                data.valueS = float(filtered["valueS"])
+            else:
+                logger.info(f"[COOLDOWN] ⚡ Bypassing cooldown due to critical conditions")
+
+            # Update cooldown timestamps for executed actions
+            cooldown_updates = {
+                "phUp": data.phUp,
+                "phDown": data.phDown,
+                "nutrientAdd": data.nutrientAdd,
+                "refill": data.refill
+            }
+            update_cooldown(deviceId, cooldown_updates)
 
 
         # INSERT FINAL ACTUATOR EVENT
-        print(f"[ACTUATOR] Inserting to DB - auto:{data.auto}, manual:{data.manual}")
-        cur.execute("""
-            INSERT INTO actuator_event
-                ("deviceId", "ingestTime",
-                 "phUp", "phDown", "nutrientAdd", "valueS",
-                 "manual", "auto", "refill")
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-            RETURNING id;
-        """, (
-            deviceId, ingestTime,
-            int(data.phUp), int(data.phDown), int(data.nutrientAdd), float(data.valueS),
-            int(data.manual), int(data.auto), int(data.refill)
-        ))
+        logger.info(f"[ACTUATOR] Inserting to DB - auto:{data.auto}, manual:{data.manual}")
+        
+        # Retry logic for sequence issues
+        max_retries = 2
+        for attempt in range(max_retries):
+            try:
+                cur.execute("""
+                    INSERT INTO actuator_event
+                        ("deviceId", "ingestTime",
+                         "phUp", "phDown", "nutrientAdd", "valueS",
+                         "manual", "auto", "refill")
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    RETURNING id;
+                """, (
+                    deviceId, ingestTime,
+                    int(data.phUp), int(data.phDown), int(data.nutrientAdd), float(data.valueS),
+                    int(data.manual), int(data.auto), int(data.refill)
+                ))
 
-        new_id = cur.fetchone()[0]
-        conn.commit()
-        print(f"[ACTUATOR] ✓ Inserted successfully with ID: {new_id}")
-
-        return {
-            "status": "ok", 
-            "id": new_id,
-            "data": {
-                "phUp": int(data.phUp),
-                "phDown": int(data.phDown),
-                "nutrientAdd": int(data.nutrientAdd),
-                "refill": int(data.refill),
-                "valueS": float(data.valueS),
-                "auto": int(data.auto),
-                "manual": int(data.manual)
-            }
-        }
+                new_id = cur.fetchone()[0]
+                conn.commit()
+                logger.info(f"[ACTUATOR] ✓ Inserted successfully with ID: {new_id}")
+                
+                return {
+                    "status": "ok", 
+                    "id": new_id,
+                    "data": {
+                        "phUp": int(data.phUp),
+                        "phDown": int(data.phDown),
+                        "nutrientAdd": int(data.nutrientAdd),
+                        "refill": int(data.refill),
+                        "valueS": float(data.valueS),
+                        "auto": int(data.auto),
+                        "manual": int(data.manual)
+                    }
+                }
+                
+            except Exception as insert_error:
+                # Check if it's a unique violation (sequence issue)
+                if "UniqueViolation" in str(type(insert_error).__name__) or "duplicate key" in str(insert_error):
+                    if attempt < max_retries - 1:
+                        logger.warning(f"[ACTUATOR] Sequence issue detected, fixing and retrying... (attempt {attempt + 1}/{max_retries})")
+                        conn.rollback()
+                        
+                        # Fix the sequence
+                        try:
+                            cur.execute("""
+                                SELECT setval(
+                                    pg_get_serial_sequence('actuator_event', 'id'),
+                                    COALESCE((SELECT MAX(id) FROM actuator_event), 0) + 1,
+                                    false
+                                );
+                            """)
+                            conn.commit()
+                            logger.info(f"[ACTUATOR] ✓ Sequence reset successfully")
+                        except Exception as seq_error:
+                            logger.error(f"[ACTUATOR] Failed to reset sequence: {seq_error}")
+                            conn.rollback()
+                        
+                        # Retry the insert
+                        continue
+                    else:
+                        # Max retries reached
+                        raise insert_error
+                else:
+                    # Not a sequence issue, raise immediately
+                    raise insert_error
 
     except Exception as e:
         conn.rollback()
-        raise HTTPException(500, str(e))
+        logger.error(f"[ACTUATOR ERROR] Database insert failed: {type(e).__name__}: {str(e)}")
+        import traceback
+        logger.error(f"[ACTUATOR ERROR] Traceback:\n{traceback.format_exc()}")
+        raise HTTPException(500, f"Database error: {str(e)}")
 
     finally:
         cur.close()
@@ -314,19 +503,19 @@ async def try_ml_prediction_and_update(deviceId: str, ppm: float, ph: float,
                 conn.commit()
                 
                 AUTO_MODE_SOURCE = "ml"
-                print(f"[ML] Successfully updated actuator event for {deviceId} with ML predictions")
+                logger.info(f"[ML] Successfully updated actuator event for {deviceId} with ML predictions")
                 
             except Exception as e:
                 conn.rollback()
-                print(f"[ML] Failed to update actuator event: {e}")
+                logger.error(f"[ML] Failed to update actuator event: {e}")
             finally:
                 cur.close()
                 release_connection(conn)
 
     except (httpx.TimeoutException, httpx.ConnectError) as e:
-        print(f"[ML Background] Timeout/Connection error: {e}")
+        logger.warning(f"[ML Background] Timeout/Connection error: {e}")
     except Exception as e:
-        print(f"[ML Background] Unexpected error: {e}")
+        logger.error(f"[ML Background] Unexpected error: {e}")
 
 # GET LATEST ACTUATOR EVENT
 @router.get("/latest")
