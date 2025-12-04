@@ -53,7 +53,7 @@ def _load_latest():
                 version_dir = sorted(candidates, key=os.path.getmtime)[-1]
                 version = os.path.basename(version_dir)
             else:
-                # No versioned directories, check if model files are directly in MODEL_REGISTRY
+                # Fallback to direct model files
                 direct_model = os.path.join(MODEL_REGISTRY, "model.pkl")
                 if os.path.exists(direct_model):
                     version_dir = MODEL_REGISTRY

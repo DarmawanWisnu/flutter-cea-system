@@ -3,16 +3,14 @@ import os
 import time
 import random
 
-# Define paths
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 INPUT_CSV = os.path.join(BASE_DIR, "mqtt", "data.csv")
 OUTPUT_TELEMETRY = os.path.join(os.path.dirname(__file__), "training_telemetry.csv")
 OUTPUT_ACTUATOR = os.path.join(os.path.dirname(__file__), "training_actuator_event.csv")
 
-# Device IDs
 DEVICES = ["CEA-01", "CEA-02"]
-TARGET_ROWS_PER_DEVICE = 25000  # 25k rows per device
-TOTAL_ROWS = 50000              # 50k total rows
+TARGET_ROWS_PER_DEVICE = 25000
+TOTAL_ROWS = 50000
 
 def parse_telemetry(row):
     """Extract telemetry values from CSV row."""

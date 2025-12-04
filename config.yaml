@@ -1,4 +1,3 @@
-# config.yaml (put to project root)
 model_registry: services/ml/model_registry
 retrain:
   schedule: "weekly"

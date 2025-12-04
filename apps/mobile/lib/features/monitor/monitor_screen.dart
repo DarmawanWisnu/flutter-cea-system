@@ -202,7 +202,7 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
                   crossAxisCount: size.width >= 420 ? 3 : 2,
                   crossAxisSpacing: 14 * s,
                   mainAxisSpacing: 14 * s,
-                  childAspectRatio: 0.75, // Reduced from 0.87 to make boxes taller
+                  childAspectRatio: 0.75,
                 ),
                 children: [
                   _gaugeBox(
@@ -303,7 +303,7 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // DROPDOWN FUTURISTIK
+                                // DROPDOWN
                                 _kitSelectorInsideCard(s),
 
                                 SizedBox(height: 8 * s),
@@ -494,7 +494,6 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
   }
 
   // FUTURISTIC MODE SECTION
-  // ===== FUTURISTIC MODE SECTION =====
   Widget _modeSection(BuildContext context, double s, String currentKitId) {
     const primary = Color(0xFF154B2E);
     const muted = Color(0xFF7A7A7A);

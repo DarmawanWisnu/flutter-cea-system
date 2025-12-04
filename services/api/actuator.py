@@ -14,12 +14,12 @@ router = APIRouter()
 AUTO_MODE_SOURCE = "rule"
 
 # COOLDOWN SETTINGS
-COOLDOWN_SECONDS = 180  # 3 minutes
+COOLDOWN_SECONDS = 180
 
 CRITICAL_THRESHOLDS = {
-    "ph": {"min": 5.0, "max": 7.0},      # Bypass if pH < 5.0 or > 7.0
-    "ppm": {"min": 400, "max": 1200},    # Bypass if PPM < 400 or > 1200
-    "waterLevel": {"min": 1.0}           # Bypass if water < 1.0
+    "ph": {"min": 5.0, "max": 7.0},
+    "ppm": {"min": 400, "max": 1200},
+    "waterLevel": {"min": 1.0}
 }
 
 # MIGRATION
@@ -225,7 +225,7 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
                 ppm, ph, tempC, humidity, wl = (0, 0, 0, 0, 0)
                 logger.warning("[AUTO MODE] WARNING: No telemetry found, using zeros")
 
-            # ==== TRY MACHINE LEARNING FIRST (SYNCHRONOUS WITH TIMEOUT) ====
+            # TRY MACHINE LEARNING FIRST (SYNCHRONOUS WITH TIMEOUT)
             ml_success = False
             try:
                 ml_payload = {
@@ -260,7 +260,7 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
             except Exception as e:
                 logger.error(f"[AUTO MODE] ML prediction failed: {e}")
 
-            # ==== FALLBACK TO RULE-BASED IF ML FAILS ====
+            # FALLBACK TO RULE-BASED IF ML FAILS
             if not ml_success:
                 logger.info("[AUTO MODE] Using rule-based logic with priority system...")
                 AUTO_MODE_SOURCE = "rule"
@@ -271,9 +271,7 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
                 nutrientSec = 0
                 refillSec = 0
 
-                # ========================================
                 # PRIORITY SYSTEM (prevents conflicts)
-                # ========================================
                 
                 # PRIORITY 1: Critical Water Level (Safety First)
                 # If water is critically low, ONLY refill (skip other actions)
@@ -336,8 +334,7 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
                 
                 logger.info(f"[AUTO MODE] Final → phUp:{data.phUp}, phDown:{data.phDown}, nutrient:{data.nutrientAdd}, refill:{data.refill}, valueS:{data.valueS}")
 
-            # ==== APPLY COOLDOWN (BOTH ML AND RULE-BASED) ====
-            # Check if telemetry is in critical range
+            # APPLY COOLDOWN
             bypass_cooldown = is_critical(ph, ppm, wl)
             
             if not bypass_cooldown:

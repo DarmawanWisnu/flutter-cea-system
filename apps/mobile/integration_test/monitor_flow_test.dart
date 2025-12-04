@@ -5,34 +5,104 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fountaine/features/monitor/monitor_screen.dart';
 import 'package:fountaine/providers/provider/api_provider.dart';
 import 'package:fountaine/providers/provider/mqtt_provider.dart';
+import 'package:fountaine/services/api_service.dart';
+import 'package:fountaine/domain/telemetry.dart';
 
-/// Integration Test for Monitor Screen Flow
-/// 
+// Mock API Service to avoid real network calls
+class MockApiService extends ApiService {
+  MockApiService() : super(baseUrl: 'http://localhost:8000');
+
+  @override
+  Future<Telemetry?> getLatestTelemetry(String deviceId) async {
+    return const Telemetry(
+      ph: 7.0,
+      ppm: 1200.0,
+      tempC: 25.0,
+      humidity: 65.0,
+      waterTemp: 24.0,
+      waterLevel: 80.0,
+    );
+  }
+
+  @override
+  Future<dynamic> postJson(String path, Map<String, dynamic> data) async {
+    return {'data': data};
+  }
+
+  @override
+  Future<dynamic> getJson(String path) async {
+    return {'data': []};
+  }
+}
+
+// Mock MQTT ViewModel to avoid real MQTT connections
+class MockMqttVM extends MqttVM {
+  MockMqttVM(super.ref);
+
+  @override
+  Future<void> init() async {
+    print('[Monitor] MQTT initialized');
+  }
+
+  @override
+  Future<void> publishActuator(
+    String command, {
+    Map<String, dynamic>? args,
+    required String kitId,
+  }) async {
+    print('[Flutter] Mock MQTT publish: $command');
+  }
+
+  @override
+  void enableAutoMode(String deviceId) {
+    print('[Flutter] Mock enable auto mode');
+  }
+
+  @override
+  void disableAutoMode(String deviceId) {
+    print('[Flutter] Mock disable auto mode');
+  }
+}
+
 /// This test suite covers the complete monitor screen user journey:
 /// - Viewing sensor data (pH, PPM, Temperature, Humidity)
 /// - Switching between Auto and Manual modes
 /// - Using manual control buttons
 /// - Selecting different kits
-/// 
-/// These are BLACK BOX tests - they test from the user's perspective
-/// without knowledge of internal implementation details.
+
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
+  // Helper function to create test overrides
+  createTestOverrides() {
+    return [
+      // Override the base URL provider to avoid dotenv dependency
+      apiBaseUrlProvider.overrideWith((ref) => 'http://localhost:8000'),
+
+      // Override the API service provider with mock
+      apiServiceProvider.overrideWith((ref) => MockApiService()),
+
+      // Override the API kits list provider
+      apiKitsListProvider.overrideWith((ref) async {
+        return [
+          {'id': 'test-kit-001', 'name': 'Test Kit 1'},
+          {'id': 'test-kit-002', 'name': 'Test Kit 2'},
+        ];
+      }),
+
+      // Override the MQTT provider with mock
+      mqttProvider.overrideWith((ref) => MockMqttVM(ref)),
+    ];
+  }
+
   group('Monitor Screen Flow Integration Tests', () {
-    testWidgets('should display all sensor gauges',
-        (WidgetTester tester) async {
+    testWidgets('should display all sensor gauges', (
+      WidgetTester tester,
+    ) async {
       // Arrange & Act
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [
-            apiKitsListProvider.overrideWith((ref) async {
-              return [
-                {'id': 'test-kit-001', 'name': 'Test Kit 1'},
-              ];
-            }),
-            
-          ],
+          overrides: createTestOverrides(),
           child: const MaterialApp(
             home: MonitorScreen(selectedKit: 'test-kit-001'),
           ),
@@ -49,18 +119,13 @@ void main() {
       expect(find.text('Temperature'), findsOneWidget);
     });
 
-    testWidgets('should display sensor values with units',
-        (WidgetTester tester) async {
+    testWidgets('should display sensor values with units', (
+      WidgetTester tester,
+    ) async {
       // Arrange & Act
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [
-            apiKitsListProvider.overrideWith((ref) async {
-              return [
-                {'id': 'test-kit-001', 'name': 'Test Kit 1'},
-              ];
-            }),
-          ],
+          overrides: createTestOverrides(),
           child: const MaterialApp(
             home: MonitorScreen(selectedKit: 'test-kit-001'),
           ),
@@ -75,19 +140,13 @@ void main() {
       expect(find.textContaining('°C'), findsWidgets);
     });
 
-    testWidgets('should display Your Kit section with kit selector',
-        (WidgetTester tester) async {
+    testWidgets('should display Your Kit section with kit selector', (
+      WidgetTester tester,
+    ) async {
       // Arrange & Act
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [
-            apiKitsListProvider.overrideWith((ref) async {
-              return [
-                {'id': 'test-kit-001', 'name': 'Test Kit 1'},
-                {'id': 'test-kit-002', 'name': 'Test Kit 2'},
-              ];
-            }),
-          ],
+          overrides: createTestOverrides(),
           child: const MaterialApp(
             home: MonitorScreen(selectedKit: 'test-kit-001'),
           ),
@@ -100,18 +159,13 @@ void main() {
       expect(find.byType(DropdownButton<String>), findsOneWidget);
     });
 
-    testWidgets('should display Mode & Control section',
-        (WidgetTester tester) async {
+    testWidgets('should display Mode & Control section', (
+      WidgetTester tester,
+    ) async {
       // Arrange & Act
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [
-            apiKitsListProvider.overrideWith((ref) async {
-              return [
-                {'id': 'test-kit-001', 'name': 'Test Kit 1'},
-              ];
-            }),
-          ],
+          overrides: createTestOverrides(),
           child: const MaterialApp(
             home: MonitorScreen(selectedKit: 'test-kit-001'),
           ),
@@ -125,18 +179,13 @@ void main() {
       expect(find.text('MANUAL'), findsOneWidget);
     });
 
-    testWidgets('should switch from auto to manual mode',
-        (WidgetTester tester) async {
+    testWidgets('should switch from auto to manual mode', (
+      WidgetTester tester,
+    ) async {
       // Arrange
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [
-            apiKitsListProvider.overrideWith((ref) async {
-              return [
-                {'id': 'test-kit-001', 'name': 'Test Kit 1'},
-              ];
-            }),
-          ],
+          overrides: createTestOverrides(),
           child: const MaterialApp(
             home: MonitorScreen(selectedKit: 'test-kit-001'),
           ),
@@ -144,12 +193,30 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Initially, manual buttons should not be visible
+      // Note: The screen starts in MANUAL mode by default (isAuto = false)
+      // So we first need to switch to AUTO mode, then back to MANUAL
+
+      // First, switch to AUTO mode
+      final autoButton = find.text('AUTO');
+      await tester.tap(autoButton);
+      await tester.pump();
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      // Verify manual buttons are hidden in auto mode
       expect(find.text('PH UP'), findsNothing);
 
       // Act - Switch to manual mode
       final manualButton = find.text('MANUAL');
       await tester.tap(manualButton);
+
+      // Pump once to trigger the tap gesture
+      await tester.pump();
+
+      // Pump again to process the state change
+      await tester.pump();
+
+      // Wait for all animations to complete
       await tester.pumpAndSettle();
 
       // Assert - Manual control buttons should now be visible
@@ -159,18 +226,13 @@ void main() {
       expect(find.text('REFILL'), findsOneWidget);
     });
 
-    testWidgets('should switch from manual to auto mode',
-        (WidgetTester tester) async {
+    testWidgets('should switch from manual to auto mode', (
+      WidgetTester tester,
+    ) async {
       // Arrange
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [
-            apiKitsListProvider.overrideWith((ref) async {
-              return [
-                {'id': 'test-kit-001', 'name': 'Test Kit 1'},
-              ];
-            }),
-          ],
+          overrides: createTestOverrides(),
           child: const MaterialApp(
             home: MonitorScreen(selectedKit: 'test-kit-001'),
           ),
@@ -198,18 +260,13 @@ void main() {
       expect(find.text('REFILL'), findsNothing);
     });
 
-    testWidgets('should tap manual control buttons',
-        (WidgetTester tester) async {
+    testWidgets('should tap manual control buttons', (
+      WidgetTester tester,
+    ) async {
       // Arrange
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [
-            apiKitsListProvider.overrideWith((ref) async {
-              return [
-                {'id': 'test-kit-001', 'name': 'Test Kit 1'},
-              ];
-            }),
-          ],
+          overrides: createTestOverrides(),
           child: const MaterialApp(
             home: MonitorScreen(selectedKit: 'test-kit-001'),
           ),
@@ -247,18 +304,13 @@ void main() {
       expect(true, true);
     });
 
-    testWidgets('should display kit status indicator',
-        (WidgetTester tester) async {
+    testWidgets('should display kit status indicator', (
+      WidgetTester tester,
+    ) async {
       // Arrange & Act
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [
-            apiKitsListProvider.overrideWith((ref) async {
-              return [
-                {'id': 'test-kit-001', 'name': 'Test Kit 1'},
-              ];
-            }),
-          ],
+          overrides: createTestOverrides(),
           child: const MaterialApp(
             home: MonitorScreen(selectedKit: 'test-kit-001'),
           ),
@@ -266,23 +318,18 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Assert - Status dot should be present (Container with circular shape)
+      // Assert - Status dot should be present
       final containers = find.byType(Container);
       expect(containers, findsWidgets);
     });
 
-    testWidgets('should display last update timestamp',
-        (WidgetTester tester) async {
+    testWidgets('should display last update timestamp', (
+      WidgetTester tester,
+    ) async {
       // Arrange & Act
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [
-            apiKitsListProvider.overrideWith((ref) async {
-              return [
-                {'id': 'test-kit-001', 'name': 'Test Kit 1'},
-              ];
-            }),
-          ],
+          overrides: createTestOverrides(),
           child: const MaterialApp(
             home: MonitorScreen(selectedKit: 'test-kit-001'),
           ),
@@ -294,20 +341,15 @@ void main() {
       expect(find.textContaining('Last:'), findsOneWidget);
     });
 
-    testWidgets('complete user flow: view data, switch mode, use controls',
-        (WidgetTester tester) async {
+    testWidgets('complete user flow: view data, switch mode, use controls', (
+      WidgetTester tester,
+    ) async {
       // This test simulates a complete user journey on the monitor screen
 
       // Arrange
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [
-            apiKitsListProvider.overrideWith((ref) async {
-              return [
-                {'id': 'test-kit-001', 'name': 'Test Kit 1'},
-              ];
-            }),
-          ],
+          overrides: createTestOverrides(),
           child: const MaterialApp(
             home: MonitorScreen(selectedKit: 'test-kit-001'),
           ),

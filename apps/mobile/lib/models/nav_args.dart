@@ -1,9 +1,8 @@
-// Satu-satunya definisi HistoryRouteArgs di seluruh project.
 class HistoryRouteArgs {
-  final DateTime? targetTime; // waktu notifikasi terjadi
-  final String? kitName; // nama kit terkait
-  final String? kitId; // ID kit untuk history
-  final String? reason; // pesan/penyebab notifikasi
+  final DateTime? targetTime;
+  final String? kitName;
+  final String? kitId;
+  final String? reason;
 
   const HistoryRouteArgs({
     this.targetTime,
@@ -13,8 +12,7 @@ class HistoryRouteArgs {
   });
 }
 
-// models/nav_args.dart
 class NotificationRouteArgs {
-  final String? initialFilter; // 'info' | 'warning' | 'urgent' | null (All)
+  final String? initialFilter;
   const NotificationRouteArgs({this.initialFilter});
 }

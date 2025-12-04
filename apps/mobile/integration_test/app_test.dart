@@ -3,18 +3,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
 /// Integration Test for the Flutter CEA System App
-///
-/// This test verifies the basic app initialization and navigation.
-/// It serves as a foundation for more complex integration tests.
+
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('App Integration Tests', () {
     testWidgets('app should launch successfully', (WidgetTester tester) async {
-      // Note: This is a basic test structure
-      // In a real scenario, you would initialize the app properly
-      // For now, we'll test basic widget functionality
-
+      // Arrange & Act
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(body: Center(child: Text('CEA System'))),

@@ -145,7 +145,7 @@ class NotificationListNotifier extends StateNotifier<List<NotificationItem>> {
         (temp < _tMin || temp > _tMax);
 
     if (!hasViolation) {
-      // All parameters normal - emit info notification periodically
+      // All parameters normal
       _emitThreshold(
         kitName: name,
         param: 'System',
@@ -196,7 +196,7 @@ class NotificationListNotifier extends StateNotifier<List<NotificationItem>> {
     final key = '$kitName:$param:$dir';
     final now = DateTime.now();
 
-    // Cooldown check - prevents notification spam
+    // Cooldown check
     final last = _lastAlertAt[key];
     if (last != null && now.difference(last) < _cooldown) return;
 

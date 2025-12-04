@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
-
 import '../core/constants.dart';
 import '../domain/telemetry.dart';
 import '../domain/device_status.dart';
@@ -13,7 +12,7 @@ class MqttService {
   final _connStateCtrl = StreamController<MqttConnState>.broadcast();
   Stream<MqttConnState> get connectionState$ => _connStateCtrl.stream;
 
-  // WILDCARD → kita kirim pair: (kitId, Telemetry)
+  // WILDCARD → kit kirim pair: (kitId, Telemetry)
   final _telemetryCtrl =
       StreamController<MapEntry<String, Telemetry>>.broadcast();
   Stream<MapEntry<String, Telemetry>> get telemetry$ => _telemetryCtrl.stream;
@@ -44,7 +43,7 @@ class MqttService {
     c.onDisconnected = _onDisconnected;
     c.onConnected = () => _connStateCtrl.add(MqttConnState.connected);
 
-    // WILL message tetap dipakai CEA-01 default
+    // WILL message
     c.connectionMessage = MqttConnectMessage()
         .withClientIdentifier(clientId)
         .startClean();
@@ -78,7 +77,7 @@ class MqttService {
             msg.payload.message,
           );
 
-          // print("[MQTT] EVENT → $topic : $payload");
+          print("[MQTT] EVENT → $topic : $payload");
 
           final parts = topic.split("/");
           if (parts.length < 3) continue;

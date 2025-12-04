@@ -11,11 +11,9 @@ LOG_DIR = os.path.join(ROOT, "logs")
 os.makedirs(LOG_DIR, exist_ok=True)
 
 # Log rotation settings
-MAX_BYTES = 10 * 1024 * 1024   # 10 MB
-BACKUP_COUNT = 5               # Keep 5 backups
+MAX_BYTES = 10 * 1024 * 1024
+BACKUP_COUNT = 5
 
-# Services to run
-# Services to run
 services = [
     {
         "name": "API Service",
@@ -35,12 +33,6 @@ services = [
         "cwd": os.path.join(ROOT, "services", "mqtt"),
         "log": os.path.join(LOG_DIR, "mqtt_pub.log")
     },
-    # {
-    #     "name": "ML Service",
-    #     "cmd": "python main.py",
-    #     "cwd": os.path.join(ROOT, "services", "ml"),
-    #     "log": os.path.join(LOG_DIR, "ml.log")
-    # }
 ]
 
 # Setup rotating logger

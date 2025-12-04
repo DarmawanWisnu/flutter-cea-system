@@ -92,7 +92,6 @@ def main():
     print("[OK] Publisher berjalan...\n")
 
     try:
-        # interval sensor, dalam detik
         INTERVALS = {
             "tempC": 5,
             "humidity": 5,
@@ -114,7 +113,7 @@ def main():
             for kit in device_ids
         }
 
-        # CHANGED: Each kit has its own random row index
+        # randow row each kit
         device_row_idx = {
             kit: random.randint(0, len(rows) - 1)
             for kit in device_ids
@@ -125,7 +124,7 @@ def main():
 
             for kit in device_ids:
                 client = clients[kit]
-                # CHANGED: Each kit uses its own random row
+                # random row each kit
                 row = rows[device_row_idx[kit]]
                 updated = False
 
@@ -154,7 +153,7 @@ def main():
 
                     print(f"[PUB] {kit} → row#{device_row_idx[kit]}", device_state[kit])
                     
-                    # CHANGED: Move to next random row for this kit
+                    # Move to next random row for this kit
                     device_row_idx[kit] = random.randint(0, len(rows) - 1)
 
             time.sleep(0.2)

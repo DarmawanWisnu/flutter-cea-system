@@ -14,7 +14,7 @@ class HomeScreen extends StatelessWidget {
     Widget featureCard({
       required String title,
       required String subtitle,
-      required String assetImage, // path to image asset
+      required String assetImage,
       required VoidCallback onTap,
     }) {
       return InkWell(
@@ -71,7 +71,7 @@ class HomeScreen extends StatelessWidget {
               height: 180 * s,
               child: Stack(
                 children: [
-                  // hero background image (rounded bottom)
+                  // hero background image
                   Positioned.fill(
                     child: ClipRRect(
                       borderRadius: BorderRadius.vertical(
@@ -84,7 +84,7 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
 
-                  // top controls (left + right) — fixed at top
+                  // top controls
                   Positioned(
                     top: 12 * s,
                     left: 18 * s,

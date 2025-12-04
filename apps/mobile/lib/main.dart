@@ -49,7 +49,6 @@ Future<void> main() async {
       print('Stack trace: $stackTrace');
     }
     
-    // Show error to user and exit
     runApp(
       MaterialApp(
         home: Scaffold(
@@ -95,7 +94,7 @@ Future<void> main() async {
         ),
       ),
     );
-    return; // Exit early if Firebase fails to initialize
+    return;
   }
 
   runApp(
@@ -106,7 +105,7 @@ Future<void> main() async {
           ApiService(
             baseUrl:
                 dotenv.env['API_BASE_URL'] ??
-                'http://10.0.2.2:8000', // default emulator
+                'http://10.0.2.2:8000',
           ),
         ),
       ],
@@ -131,8 +130,7 @@ class FountaineApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      initialRoute: Routes.monitor,
-      // home: const AuthGate(),
+      home: const AuthGate(),
       routes: Routes.routes,
       onGenerateRoute: onGenerateRoute,
     );

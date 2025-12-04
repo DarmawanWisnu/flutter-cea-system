@@ -2,28 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Helper class for common test utilities
 class TestHelpers {
   /// Wraps a widget with necessary providers for testing
-  static Widget wrapWithProviders(
-    Widget child, {
-    dynamic overrides,
-  }) {
+  static Widget wrapWithProviders(Widget child, {dynamic overrides}) {
     return ProviderScope(
       overrides: overrides ?? [],
-      child: MaterialApp(
-        home: child,
-      ),
+      child: MaterialApp(home: child),
     );
   }
 
   /// Wraps a widget with MaterialApp for widget testing
   static Widget wrapWithMaterialApp(Widget child) {
-    return MaterialApp(
-      home: Scaffold(
-        body: child,
-      ),
-    );
+    return MaterialApp(home: Scaffold(body: child));
   }
 
   /// Pumps a widget and settles all animations
@@ -61,10 +51,7 @@ class TestHelpers {
   }
 
   /// Taps a widget and waits for animations
-  static Future<void> tapAndSettle(
-    WidgetTester tester,
-    Finder finder,
-  ) async {
+  static Future<void> tapAndSettle(WidgetTester tester, Finder finder) async {
     await tester.tap(finder);
     await tester.pumpAndSettle();
   }
@@ -126,11 +113,7 @@ class MockData {
     String uid = 'test-uid-123',
     bool emailVerified = true,
   }) {
-    return {
-      'email': email,
-      'uid': uid,
-      'emailVerified': emailVerified,
-    };
+    return {'email': email, 'uid': uid, 'emailVerified': emailVerified};
   }
 
   /// Generates a list of mock kits

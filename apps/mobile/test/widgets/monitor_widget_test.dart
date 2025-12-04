@@ -4,9 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fountaine/features/monitor/monitor_screen.dart';
 import 'package:fountaine/providers/provider/api_provider.dart';
 import 'package:fountaine/providers/provider/mqtt_provider.dart';
-import 'package:fountaine/providers/provider/monitor_provider.dart';
 import 'package:fountaine/services/api_service.dart';
-import 'package:fountaine/services/mqtt_service.dart';
 import 'package:fountaine/domain/telemetry.dart';
 
 // Mock API Service for testing
@@ -40,7 +38,7 @@ class MockApiService extends ApiService {
         'manual': data['manual'] ?? 0,
         'auto': data['auto'] ?? 0,
         'refill': data['refill'] ?? 0,
-      }
+      },
     };
   }
 
@@ -90,10 +88,10 @@ void main() {
     return [
       // Override the base URL provider to avoid dotenv dependency
       apiBaseUrlProvider.overrideWith((ref) => 'http://localhost:8000'),
-      
+
       // Override the API service provider with mock
       apiServiceProvider.overrideWith((ref) => MockApiService()),
-      
+
       // Override the API kits list provider
       apiKitsListProvider.overrideWith((ref) async {
         return [
@@ -101,7 +99,7 @@ void main() {
           {'id': 'test-kit-002', 'name': 'Test Kit 2'},
         ];
       }),
-      
+
       // Override the MQTT provider with mock
       mqttProvider.overrideWith((ref) => MockMqttVM(ref)),
     ];
@@ -261,7 +259,10 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
 
       // Scroll to make buttons visible
-      await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -300));
+      await tester.drag(
+        find.byType(SingleChildScrollView),
+        const Offset(0, -300),
+      );
       await tester.pump();
 
       // First switch to manual to show buttons
@@ -307,7 +308,10 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
 
       // Scroll to make buttons visible
-      await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -300));
+      await tester.drag(
+        find.byType(SingleChildScrollView),
+        const Offset(0, -300),
+      );
       await tester.pump();
 
       // Act & Assert - Toggle to manual

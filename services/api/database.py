@@ -26,7 +26,7 @@ def init_pool():
     if _pool is None:
         _pool = psycopg2.pool.SimpleConnectionPool(
             minconn=5,
-            maxconn=50,  # Increased from 10 to 50 for high-frequency auto mode
+            maxconn=50,
             host=DB_HOST,
             database=DB_NAME,
             user=DB_USER,

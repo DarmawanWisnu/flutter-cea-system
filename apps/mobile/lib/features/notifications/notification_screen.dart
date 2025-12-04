@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/provider/notification_provider.dart';
 import '../../models/nav_args.dart';
 
-// ===== GLOBAL COLOR CONSTANTS =====
+// GLOBAL COLOR CONSTANTS
 const Color kPrimary = Color(0xFF0E5A2A);
 const Color kBg = Color(0xFFF3F9F4);
 const Color kChipBg = Color(0xFFE8F2EC);
@@ -84,14 +84,14 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Nilai efektif tersanitasi: dipakai untuk chip & data
+    // Nilai efektif tersanitasi
     final eff = _sanitizeFilter(_filter);
 
     // Ambil via provider (robust: null/''/all => All)
     final all = ref.watch(notificationListProvider);
     List<NotificationItem> list = ref.watch(filteredNotificationProvider(eff));
 
-    // 🔒 DOUBLE-GUARD: walau sudah difilter provider, saring ulang lokal
+    // DOUBLE-GUARD: walau sudah difilter provider, saring ulang lokal
     if (eff != null) {
       final key = _norm(eff);
       list = list.where((n) => _norm(n.level) == key).toList();
@@ -257,7 +257,7 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
                         arguments: HistoryRouteArgs(
                           targetTime: n.timestamp,
                           kitName: n.kitName,
-                          kitId: n.kitName, // Use kitName as kitId
+                          kitId: n.kitName,
                           reason: n.message,
                         ),
                       );
@@ -272,7 +272,7 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
   }
 }
 
-// ===== Subwidgets =====
+// Subwidgets
 
 class _Glass extends StatelessWidget {
   const _Glass({this.child, this.padding, this.borderRadius = 14});
@@ -300,7 +300,7 @@ class _Glass extends StatelessWidget {
   }
 }
 
-// ====== CHIP KUSTOM (tanpa ChoiceChip) ======
+// CHIP KUSTOM
 class _FilterChips extends StatelessWidget {
   const _FilterChips({
     required this.value, // null => All

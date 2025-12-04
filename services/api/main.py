@@ -13,8 +13,6 @@ app = FastAPI()
 app.include_router(actuator.router, prefix="/actuator")
 app.include_router(ml_router, prefix="/ml")
 
-# MODELS
-
 class TelemetryPayload(BaseModel):
     ppm: float
     ph: float

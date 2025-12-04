@@ -15,9 +15,7 @@ import 'package:fountaine/features/notifications/notification_screen.dart';
 import 'package:fountaine/providers/provider/auth_provider.dart';
 import 'package:fountaine/models/nav_args.dart';
 
-/// ============================
-///   AUTH GATE
-/// ============================
+/// AUTH GATE
 class AuthGate extends ConsumerWidget {
   const AuthGate({super.key});
 
@@ -39,9 +37,7 @@ class AuthGate extends ConsumerWidget {
   }
 }
 
-/// ============================
-///       ROUTE DEFINITIONS
-/// ============================
+/// ROUTE DEFINITIONS
 class Routes {
   static const splash = '/';
   static const login = '/login';
@@ -70,7 +66,7 @@ class Routes {
   };
 }
 
-/// ON GENERATE ROUTE=
+/// ON GENERATE ROUTE
 Route<dynamic>? onGenerateRoute(RouteSettings settings) {
   switch (settings.name) {
     // MONITOR SCREEN

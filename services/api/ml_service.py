@@ -36,7 +36,7 @@ def ml_predict(payload: TelemetryPayload):
         logger.error(f"[ML Service] Traceback:\n{traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=str(e))
 
-    # optional: log prediction
+    # log prediction
     try:
         conn = get_connection()
         cur = conn.cursor()

@@ -1,27 +1,19 @@
-#############################
 # GLOBAL OS TRASH
-#############################
 .DS_Store
 Thumbs.db
 
-#############################
 # GLOBAL PYTHON ENV
-#############################
 **/__pycache__/
 **/*.pyc
 **/.venv/
 **/venv/
 **/env/
 
-#############################
 # GLOBAL ENV FILES
-#############################
 **/.env
 **/.env.*
 
-#############################
 # GLOBAL DATASETS (ML / MQTT)
-#############################
 **/datasets/
 **/dataset/
 **/data/
@@ -32,24 +24,18 @@ Thumbs.db
 **/*.npz
 **/*.pkl
 
-#############################
 # GLOBAL LOGS
-#############################
 **/*.log
 **/logs/
 
-#############################
 # GLOBAL BUILD & COMPILATION OUTPUT
-#############################
 **/build/
 **/.dart_tool/
 **/.gradle/
 **/.pub-cache/
 **/.pytest_cache/
 
-#############################
 # BACKUP / TEMP FILES
-#############################
 *.bak
 *.tmp
 *.swp
@@ -65,3 +51,17 @@ docs/diagrams/**/*.pdf
 docs/**/*.draft.md
 docs/**/*~
 docs/**/.~*
+
+# Test output files
+test_results.json
+test_results.txt
+integration_test_results.json
+integration_test_output.txt
+test_output.txt
+THESIS_TEST_OUTPUT.txt
+TEST_REPORT_FOR_THESIS.md
+HOW_TO_USE_TEST_RESULTS_IN_THESIS.md
+Icov.info
+
+# Coverage reports
+coverage/

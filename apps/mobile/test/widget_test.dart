@@ -1,24 +1,11 @@
-// This is a basic Flutter widget test example.
-//
-// For more comprehensive tests, see:
-// - test/widgets/login_widget_test.dart
-// - test/widgets/monitor_widget_test.dart
-// - integration_test/auth_flow_test.dart
-// - integration_test/monitor_flow_test.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Basic widget test example', (WidgetTester tester) async {
-    // Build a simple widget
     await tester.pumpWidget(
       const MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: Text('Flutter CEA System'),
-          ),
-        ),
+        home: Scaffold(body: Center(child: Text('Flutter CEA System'))),
       ),
     );
 
@@ -46,7 +33,7 @@ void main() {
     // Find and tap the button
     final button = find.text('Tap Me');
     expect(button, findsOneWidget);
-    
+
     await tester.tap(button);
     await tester.pump();
 

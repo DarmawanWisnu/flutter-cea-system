@@ -29,7 +29,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     setState(() => _isSending = true);
 
     try {
-      // === Riverpod AuthNotifier ===
+      // Riverpod AuthNotifier
       await ref
           .read(authProvider.notifier)
           .sendPasswordReset(_emailCtrl.text.trim());
@@ -85,7 +85,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
       body: Stack(
         children: [
-          // === background gradient ===
+          // background gradient
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -96,13 +96,13 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             ),
           ),
 
-          // === content ===
+          // content
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 36),
               child: Column(
                 children: [
-                  // --- header card ---
+                  // header card
                   Card(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(18),
@@ -155,7 +155,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                   ),
                   const SizedBox(height: 24),
 
-                  // --- form card ---
+                  // form card
                   Card(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
@@ -202,7 +202,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                             ),
                             const SizedBox(height: 18),
 
-                            // --- action button ---
+                            // action button
                             SizedBox(
                               height: 48,
                               child: ElevatedButton(
@@ -243,7 +243,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
                             const SizedBox(height: 12),
 
-                            // --- secondary action ---
+                            // secondary action
                             TextButton(
                               onPressed: _isSending
                                   ? null
@@ -258,7 +258,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
                   const SizedBox(height: 20),
 
-                  // --- tips ---
+                  // tips
                   Row(
                     children: [
                       const Icon(Icons.info_outline, size: 16),

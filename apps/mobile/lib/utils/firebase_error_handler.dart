@@ -1,12 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
-/// Centralized Firebase error handler that converts Firebase exceptions
-/// into user-friendly error messages.
 class FirebaseErrorHandler {
-  /// Converts a Firebase exception into a user-friendly error message.
-  /// 
-  /// Returns a tuple of (title, message) for display in dialogs or snackbars.
   static (String title, String message) handleAuthException(dynamic error) {
     if (error is FirebaseAuthException) {
       return _handleFirebaseAuthException(error);
@@ -132,7 +127,7 @@ class FirebaseErrorHandler {
     }
   }
 
-  /// Extracts just the error message (without title) for simple displays
+  /// Extracts just the error message
   static String getErrorMessage(dynamic error) {
     final (_, message) = handleAuthException(error);
     return message;

@@ -18,7 +18,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _pwCtrl = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  // --- State UI ---
+  // State UI
   bool _loading = false;
   bool _obscure = true;
 
@@ -41,10 +41,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       Navigator.pushReplacementNamed(context, Routes.home);
     } catch (e) {
       if (!mounted) return;
-      
+
       // Use FirebaseErrorHandler for user-friendly error messages
       final (title, message) = FirebaseErrorHandler.handleAuthException(e);
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Column(
@@ -99,7 +99,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // ===== Tombol Back =====
+                // Tombol Back
                 Align(
                   alignment: Alignment.centerLeft,
                   child: CircleAvatar(
@@ -114,7 +114,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                 const SizedBox(height: 32),
 
-                // ===== Judul Halaman =====
+                // Judul Halaman
                 const Text(
                   'Hello Again!',
                   textAlign: TextAlign.center,
@@ -133,7 +133,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                 const SizedBox(height: 36),
 
-                // ===== Label Email =====
+                // Label Email
                 const Text(
                   'Email Address',
                   style: TextStyle(
@@ -144,7 +144,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 const SizedBox(height: 8),
 
-                // ===== Field Email + Validator =====
+                // Field Email + Validator
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -168,7 +168,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                 const SizedBox(height: 20),
 
-                // ===== Label Password =====
+                // Label Password
                 const Text(
                   'Password',
                   style: TextStyle(
@@ -179,7 +179,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 const SizedBox(height: 8),
 
-                // ===== Field Password + Toggle Eye + Validator =====
+                // Field Password + Toggle Eye + Validator
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -222,7 +222,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                 const SizedBox(height: 8),
 
-                // ===== Link Lupa Password =====
+                // Link Lupa Password
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
@@ -237,7 +237,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                 const SizedBox(height: 24),
 
-                // ===== Tombol Sign In =====
+                // Tombol Sign In
                 _HoverScaleButton(
                   height: 56,
                   radius: 40,
@@ -263,7 +263,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                 const SizedBox(height: 16),
 
-                // ===== Tombol Google =====
+                // Tombol Google
                 _HoverScaleButton(
                   height: 56,
                   radius: 40,
@@ -298,7 +298,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                 const SizedBox(height: 28),
 
-                // ===== Footer ke Register =====
+                // Footer ke Register
                 Center(
                   child: RichText(
                     text: TextSpan(

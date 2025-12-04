@@ -130,7 +130,7 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
 
               const SizedBox(height: 20),
 
-              // Banner (logo + title)
+              // Banner
               Container(
                 padding: EdgeInsets.symmetric(
                   vertical: 22 * s,

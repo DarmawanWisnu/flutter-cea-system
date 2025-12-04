@@ -1,6 +1,4 @@
-# ============================
 # PYTHON CACHE & ENV
-# ============================
 __pycache__/
 *.pyc
 *.pyo
@@ -15,16 +13,11 @@ env/
 .env/
 ENV/
 
-# ============================
 # SECRETS & CREDENTIALS
-# ============================
 .env
 .env.*
 
-# ============================
 # DATASETS & RAW DATA
-# ============================
-# Ignore large dataset folders
 Lettuce Dataset/
 Lettuce Dataset 2/
 datasets/
@@ -51,10 +44,7 @@ data_processed/
 **/*.png
 **/*.bmp
 
-# ============================
 # TRAINED MODELS & CHECKPOINTS
-# ============================
-# Ignore model binary files (they're large and can be regenerated)
 model_registry/**/*.pkl
 model_registry/**/*.joblib
 model_registry/**/scaler.pkl
@@ -86,18 +76,14 @@ logs/
 tensorboard/
 tb_logs/
 
-# ============================
 # NOTEBOOKS
-# ============================
 .ipynb_checkpoints/
 
 # Ignore all notebooks EXCEPT the training notebook
 **/*.ipynb
 !colab_training.ipynb
 
-# ============================
 # EDITOR & OS
-# ============================
 .DS_Store
 Thumbs.db
 *.swp
@@ -107,9 +93,7 @@ Thumbs.db
 .idea/
 *.sublime-*
 
-# ============================
 # LOGS & TEMP
-# ============================
 *.log
 tmp/
 temp/

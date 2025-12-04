@@ -71,7 +71,7 @@ class _SplashScreenState extends State<SplashScreen>
               ),
             ),
 
-            // 🌱 Logo dan teks di atas karakter
+            // Logo dan teks di atas karakter
             Positioned(
               top: screen.height * 0.08,
               left: 0,

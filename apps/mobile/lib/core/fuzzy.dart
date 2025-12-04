@@ -1,12 +1,5 @@
 import 'dart:math' as math;
 
-/// Simplified Fuzzy Logic for Notification Severity Determination
-/// Analyzes telemetry deviations and outputs severity level: info/warning/urgent
-
-// ============================================================================
-// MEMBERSHIP FUNCTIONS
-// ============================================================================
-
 abstract class MembershipFunction {
   double mu(double x);
 }
@@ -14,7 +7,7 @@ abstract class MembershipFunction {
 class TriangularMF implements MembershipFunction {
   final double a, b, c;
   const TriangularMF(this.a, this.b, this.c);
-  
+
   @override
   double mu(double x) {
     if (x <= a || x >= c) return 0.0;
@@ -27,7 +20,7 @@ class TriangularMF implements MembershipFunction {
 class TrapezoidalMF implements MembershipFunction {
   final double a, b, c, d;
   const TrapezoidalMF(this.a, this.b, this.c, this.d);
-  
+
   @override
   double mu(double x) {
     if (x <= a || x >= d) return 0.0;
@@ -37,9 +30,7 @@ class TrapezoidalMF implements MembershipFunction {
   }
 }
 
-// ============================================================================
 // FUZZY VARIABLES
-// ============================================================================
 
 class FuzzyVariable {
   final String name;
@@ -55,12 +46,10 @@ class FuzzyVariable {
   });
 }
 
-// ============================================================================
 // NOTIFICATION SEVERITY FUZZY SYSTEM
-// ============================================================================
 
 class NotificationSeverityService {
-  // Ideal ranges (from ThresholdConst)
+  // Ideal ranges
   static const double _phIdealMin = 5.5;
   static const double _phIdealMax = 6.5;
   static const double _ppmIdealMin = 560.0;
@@ -75,7 +64,7 @@ class NotificationSeverityService {
     if (value >= idealMin && value <= idealMax) {
       return 0.0; // Within ideal range
     }
-    
+
     if (value < idealMin) {
       // Below ideal - calculate how far below as percentage
       final range = idealMax - idealMin;
@@ -101,7 +90,11 @@ class NotificationSeverityService {
     final phDev = _calculateDeviation(ph, _phIdealMin, _phIdealMax);
     final ppmDev = _calculateDeviation(ppm, _ppmIdealMin, _ppmIdealMax);
     final tempDev = _calculateDeviation(temp, _tempIdealMin, _tempIdealMax);
-    final waterDev = _calculateDeviation(waterLevel, _waterIdealMin, _waterIdealMax);
+    final waterDev = _calculateDeviation(
+      waterLevel,
+      _waterIdealMin,
+      _waterIdealMax,
+    );
 
     // Fuzzy membership functions for deviation
     // low: 0-20%, medium: 15-50%, high: 45%+
@@ -111,7 +104,7 @@ class NotificationSeverityService {
 
     // Calculate max deviation membership for each level
     final deviations = [phDev, ppmDev, tempDev, waterDev];
-    
+
     double maxLow = 0.0;
     double maxMedium = 0.0;
     double maxHigh = 0.0;
@@ -133,22 +126,22 @@ class NotificationSeverityService {
     if (maxHigh > 0.5) {
       return 'urgent';
     }
-    
+
     // If multiple parameters have medium deviation → urgent
     if (mediumCount >= 2) {
       return 'urgent';
     }
-    
+
     // If any parameter has medium deviation → warning
     if (maxMedium > 0.5) {
       return 'warning';
     }
-    
+
     // All parameters are within acceptable range → info
     return 'info';
   }
 
-  /// Get detailed severity analysis (for debugging)
+  /// severity analysis
   Map<String, dynamic> analyzeDetailed({
     required double ph,
     required double ppm,
@@ -158,7 +151,11 @@ class NotificationSeverityService {
     final phDev = _calculateDeviation(ph, _phIdealMin, _phIdealMax);
     final ppmDev = _calculateDeviation(ppm, _ppmIdealMin, _ppmIdealMax);
     final tempDev = _calculateDeviation(temp, _tempIdealMin, _tempIdealMax);
-    final waterDev = _calculateDeviation(waterLevel, _waterIdealMin, _waterIdealMax);
+    final waterDev = _calculateDeviation(
+      waterLevel,
+      _waterIdealMin,
+      _waterIdealMax,
+    );
 
     final severity = evaluateSeverity(
       ph: ph,
@@ -175,10 +172,9 @@ class NotificationSeverityService {
         'temp': tempDev.toStringAsFixed(1),
         'water': waterDev.toStringAsFixed(1),
       },
-      'maxDeviation': math.max(
-        math.max(phDev, ppmDev),
-        math.max(tempDev, waterDev),
-      ).toStringAsFixed(1),
+      'maxDeviation': math
+          .max(math.max(phDev, ppmDev), math.max(tempDev, waterDev))
+          .toStringAsFixed(1),
     };
   }
 }

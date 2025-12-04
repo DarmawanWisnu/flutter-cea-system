@@ -1,6 +1,4 @@
-# ============================
 # PYTHON CACHE & ENV
-# ============================
 __pycache__/
 *.pyc
 *.pyo
@@ -17,9 +15,7 @@ env/
 .mypy_cache/
 .pytest_cache/
 
-# ============================
 # DATASETS & RAW DATA
-# ============================
 dataset kaggle/
 datasets/
 dataset/
@@ -46,9 +42,7 @@ data.csv
 **/*.png
 **/*.bmp
 
-# ============================
 # TRAINED MODELS & CHECKPOINTS
-# ============================
 checkpoints/
 weights/
 models/
@@ -73,15 +67,11 @@ logs/
 tensorboard/
 tb_logs/
 
-# ============================
 # NOTEBOOKS
-# ============================
 .ipynb_checkpoints/
 **/*.ipynb
 
-# ============================
 # EDITOR & MISC
-# ============================
 .DS_Store
 Thumbs.db
 *.log

@@ -55,10 +55,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       Navigator.pushReplacementNamed(context, Routes.verify);
     } catch (e) {
       if (!mounted) return;
-      
-      // Use FirebaseErrorHandler for user-friendly error messages
+
+      // Use FirebaseErrorHandler
       final (title, message) = FirebaseErrorHandler.handleAuthException(e);
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Column(
@@ -116,7 +116,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // === Back button ===
+                // Back button
                 Align(
                   alignment: Alignment.centerLeft,
                   child: CircleAvatar(
@@ -135,7 +135,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                 SizedBox(height: 24 * s),
 
-                // === Title ===
+                // Title
                 Text(
                   'Create Account',
                   style: TextStyle(
@@ -154,7 +154,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                 SizedBox(height: 28 * s),
 
-                // === Name ===
+                // Name
                 Text(
                   'Your Name',
                   style: TextStyle(
@@ -174,7 +174,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                 SizedBox(height: 18 * s),
 
-                // === Email ===
+                // Email
                 Text(
                   'Email Address',
                   style: TextStyle(
@@ -193,7 +193,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                 SizedBox(height: 18 * s),
 
-                // === Password ===
+                // Password
                 Text(
                   'Password',
                   style: TextStyle(
@@ -243,7 +243,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                 SizedBox(height: 18 * s),
 
-                // === Location ===
+                // Location
                 Text(
                   'Location',
                   style: TextStyle(
@@ -290,7 +290,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                 SizedBox(height: 22 * s),
 
-                // === Sign Up button ===
+                // Sign Up button
                 SizedBox(
                   height: 56 * s,
                   child: ElevatedButton(
@@ -316,7 +316,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                 SizedBox(height: 16 * s),
 
-                // === Google Sign-in ===
+                // Google Sign-in
                 SizedBox(
                   height: 56 * s,
                   child: OutlinedButton(

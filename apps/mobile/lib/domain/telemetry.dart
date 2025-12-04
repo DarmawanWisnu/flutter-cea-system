@@ -1,6 +1,6 @@
 class Telemetry {
   final int? id;
-  final int? ingestTime; // ⭐ FIX: tambahkan ini
+  final int? ingestTime;
   final double ppm;
   final double ph;
   final double tempC;

@@ -1,6 +1,4 @@
-# ============================
 # PYTHON CACHE & ENV
-# ============================
 __pycache__/
 *.pyc
 *.pyo
@@ -15,9 +13,7 @@ env/
 .env/
 ENV/
 
-# ============================
 # SECRETS & CREDENTIALS
-# ============================
 .env
 .env.*
 *.key
@@ -27,27 +23,21 @@ ENV/
 secrets/
 credentials/
 
-# ============================
 # DATABASE FILES
-# ============================
 *.db
 *.sqlite3
 migrations/
 alembic.ini
 alembic/
 
-# ============================
 # LOGS & TEMP
-# ============================
 *.log
 logs/
 tmp/
 temp/
 *.tmp
 
-# ============================
 # EDITOR & OS
-# ============================
 .DS_Store
 Thumbs.db
 *.swp
@@ -57,9 +47,7 @@ Thumbs.db
 .idea/
 *.sublime-*
 
-# ============================
 # TESTING
-# ============================
 .coverage
 htmlcov/
 .pytest_cache/

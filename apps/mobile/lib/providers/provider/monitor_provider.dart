@@ -83,7 +83,7 @@ class MonitorNotifier extends StateNotifier<MonitorState> {
     }
   }
 
-  /// SWITCH KIT (does NOT touch MQTT anymore)
+  /// SWITCH KIT
   Future<void> switchKit(String newKitId) async {
     if (newKitId == kitId) return;
 
@@ -100,8 +100,6 @@ class MonitorNotifier extends StateNotifier<MonitorState> {
       lastUpdated: DateTime.now(),
       loading: false,
     );
-
-    // stream real-time akan update otomatis dari listener
   }
 
   /// ACTUATOR API
@@ -128,10 +126,10 @@ class MonitorNotifier extends StateNotifier<MonitorState> {
     Map<String, dynamic>? responseData;
     try {
       final res = await api.postJson("/actuator/event?deviceId=$kitId", body);
-      print("[Flutter] Response received: $res"); // ADD THIS
+      print("[Flutter] Response received: $res");
       if (res != null && res['data'] != null) {
         responseData = res['data'];
-        print("[Flutter] Response data: $responseData"); // ADD THIS
+        print("[Flutter] Response data: $responseData");
       }
     } catch (e) {
       print("[Actuator] Error: $e");
