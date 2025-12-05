@@ -46,7 +46,23 @@ class MqttVM extends ChangeNotifier {
 
     _teleSub = _svc.telemetry$.listen((entry) {
       final deviceId = entry.key;
-      telemetryMap[deviceId] = entry.value;
+      final newTelemetry = entry.value;
+      
+      // Merge with existing telemetry (partial payload support)
+      if (telemetryMap.containsKey(deviceId)) {
+        final existing = telemetryMap[deviceId]!;
+        telemetryMap[deviceId] = existing.copyWith(
+          ppm: newTelemetry.ppm != 0.0 ? newTelemetry.ppm : null,
+          ph: newTelemetry.ph != 0.0 ? newTelemetry.ph : null,
+          tempC: newTelemetry.tempC != 0.0 ? newTelemetry.tempC : null,
+          humidity: newTelemetry.humidity != 0.0 ? newTelemetry.humidity : null,
+          waterTemp: newTelemetry.waterTemp != 0.0 ? newTelemetry.waterTemp : null,
+          waterLevel: newTelemetry.waterLevel != 0.0 ? newTelemetry.waterLevel : null,
+        );
+      } else {
+        // First time, use the new telemetry as-is
+        telemetryMap[deviceId] = newTelemetry;
+      }
 
       // Auto mode: trigger actuator event when telemetry arrives
       if (_autoModeDevices.contains(deviceId)) {
@@ -114,6 +130,11 @@ class MqttVM extends ChangeNotifier {
     _autoModeDevices.remove(deviceId);
     print("[MQTT] Auto mode DISABLED for $deviceId");
     notifyListeners();
+  }
+
+  /// Check if a device is in auto mode
+  bool isAutoMode(String deviceId) {
+    return _autoModeDevices.contains(deviceId);
   }
 
   Future<void> disposeSafely() async {

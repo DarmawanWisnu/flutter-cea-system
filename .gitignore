@@ -65,3 +65,18 @@ Icov.info
 
 # Coverage reports
 coverage/
+
+# Personal documents
+*.pdf
+*.docx
+
+# Temporary files
+temp_*.json
+test_*.py
+
+# ML utility scripts
+services/ml/check_*.py
+services/ml/validate_*.py
+services/ml/verify_*.py
+services/ml/adapt_*.py
+services/ml/analyze_*.py

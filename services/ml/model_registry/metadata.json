@@ -1,8 +1,8 @@
 {
-  "version": "v20251203T073809Z",
-  "timestamp": "20251203T073809Z",
-  "training_samples": 40000,
-  "test_samples": 10000,
+  "version": "v20251204T063242Z",
+  "timestamp": "20251204T063242Z",
+  "training_samples": 40456,
+  "test_samples": 10114,
   "features": [
     "ppm",
     "ph",
@@ -19,28 +19,28 @@
   ],
   "metrics": {
     "phUp": {
-      "test_mae": 0.0,
-      "test_rmse": 0.0,
-      "test_r2": 1.0
+      "test_mae": 0.013749646575740935,
+      "test_rmse": 0.13846865564258262,
+      "test_r2": 0.789401676151893
     },
     "phDown": {
-      "test_mae": 0.0,
-      "test_rmse": 0.0,
-      "test_r2": 1.0
+      "test_mae": 0.021957601958582863,
+      "test_rmse": 0.10618442339603713,
+      "test_r2": 0.16815996159648117
     },
     "nutrientAdd": {
-      "test_mae": 0.0,
-      "test_rmse": 0.0,
-      "test_r2": 1.0
+      "test_mae": 0.02105388300659089,
+      "test_rmse": 0.1035508423396915,
+      "test_r2": 0.8090429419747235
     },
     "refill": {
-      "test_mae": 0.0002530646825396824,
-      "test_rmse": 0.007309799054781007,
-      "test_r2": 0.9999987507188431
+      "test_mae": 0.023288252405571606,
+      "test_rmse": 0.10914237378357335,
+      "test_r2": 0.7198031465471928
     }
   },
-  "overall_test_mae": 6.32661706349206e-05,
-  "overall_test_rmse": 0.0036548995273905033,
+  "overall_test_mae": 0.020012345986621573,
+  "overall_test_rmse": 0.1151993219074942,
   "logic_version": "priority_based_v1",
-  "conflicting_actions": 0
+  "conflicting_actions": 1022
 }

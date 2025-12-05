@@ -111,6 +111,8 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
 
         if (mounted) {
           setState(() => kitId = initial);
+          // Update shared kit ID for notifications
+          ref.read(currentKitIdProvider.notifier).state = initial;
         }
       } catch (e) {
         print("[Monitor] Kit loading error: $e");
@@ -393,6 +395,8 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
               onChanged: (v) {
                 if (v != null && v != kitId) {
                   setState(() => kitId = v);
+                  // Update shared kit ID for notifications
+                  ref.read(currentKitIdProvider.notifier).state = v;
                 }
               },
             ),

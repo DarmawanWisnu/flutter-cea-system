@@ -129,80 +129,78 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
             letterSpacing: .2,
           ),
         ),
+        actions: [
+          PopupMenuButton<String>(
+            tooltip: 'More',
+            icon: const Icon(Icons.more_vert, color: kPrimary),
+            onSelected: (v) async {
+              switch (v) {
+                case 'read':
+                  notifier.markAllRead();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('All marked as read')),
+                  );
+                  break;
+                case 'delete':
+                  final ok =
+                      await showDialog<bool>(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: const Text('Delete all notifications?'),
+                          content: const Text(
+                            'This action cannot be undone.',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx, false),
+                              child: const Text('Cancel'),
+                            ),
+                            FilledButton(
+                              onPressed: () => Navigator.pop(ctx, true),
+                              child: const Text('Delete'),
+                            ),
+                          ],
+                        ),
+                      ) ??
+                      false;
+                  if (ok) {
+                    notifier.clearAll();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('All notifications deleted'),
+                      ),
+                    );
+                  }
+                  break;
+              }
+            },
+            itemBuilder: (ctx) => const [
+              PopupMenuItem(value: 'read', child: Text('Mark all read')),
+              PopupMenuItem(value: 'delete', child: Text('Delete all')),
+            ],
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(12, 6, 12, 20),
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: _Glass(
-                  borderRadius: 14,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 6,
-                  ),
-                  child: _FilterChips(
-                    value: eff, // chip pakai nilai efektif
-                    onChanged: (newKey) =>
-                        setState(() => _filter = _sanitizeFilter(newKey)),
-                    infoCount: countLevel('info'),
-                    warningCount: countLevel('warning'),
-                    urgentCount: countLevel('urgent'),
-                  ),
-                ),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: _Glass(
+              borderRadius: 14,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 8,
+                vertical: 6,
               ),
-              const SizedBox(width: 6),
-              PopupMenuButton<String>(
-                tooltip: 'More',
-                icon: const Icon(Icons.more_vert, color: kPrimary),
-                onSelected: (v) async {
-                  switch (v) {
-                    case 'read':
-                      notifier.markAllRead();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('All marked as read')),
-                      );
-                      break;
-                    case 'delete':
-                      final ok =
-                          await showDialog<bool>(
-                            context: context,
-                            builder: (ctx) => AlertDialog(
-                              title: const Text('Delete all notifications?'),
-                              content: const Text(
-                                'This action cannot be undone.',
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(ctx, false),
-                                  child: const Text('Cancel'),
-                                ),
-                                FilledButton(
-                                  onPressed: () => Navigator.pop(ctx, true),
-                                  child: const Text('Delete'),
-                                ),
-                              ],
-                            ),
-                          ) ??
-                          false;
-                      if (ok) {
-                        notifier.clearAll();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('All notifications deleted'),
-                          ),
-                        );
-                      }
-                      break;
-                  }
-                },
-                itemBuilder: (ctx) => const [
-                  PopupMenuItem(value: 'read', child: Text('Mark all read')),
-                  PopupMenuItem(value: 'delete', child: Text('Delete all')),
-                ],
+              child: _FilterChips(
+                value: eff,
+                onChanged: (newKey) =>
+                    setState(() => _filter = _sanitizeFilter(newKey)),
+                infoCount: countLevel('info'),
+                warningCount: countLevel('warning'),
+                urgentCount: countLevel('urgent'),
               ),
-            ],
+            ),
           ),
           const SizedBox(height: 8),
           if (list.isEmpty)
@@ -342,23 +340,21 @@ class _FilterChips extends StatelessWidget {
       ),
     ];
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: items.map((it) {
-          final selected = value == it.key;
-          return Padding(
-            padding: const EdgeInsets.only(right: 6),
-            child: _ChipBtn(
-              label: it.label,
-              selected: selected,
-              icon: it.icon,
-              badge: it.count == null ? null : _cap(it.count!),
-              onTap: () => onChanged(it.key), // hanya user tap yang bisa ganti
-            ),
-          );
-        }).toList(),
-      ),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: items.map((it) {
+        final selected = value == it.key;
+        return Padding(
+          padding: const EdgeInsets.only(right: 6),
+          child: _ChipBtn(
+            label: it.label,
+            selected: selected,
+            icon: it.icon,
+            badge: it.count == null ? null : _cap(it.count!),
+            onTap: () => onChanged(it.key),
+          ),
+        );
+      }).toList(),
     );
   }
 }
@@ -478,7 +474,7 @@ class _EmptyState extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              "Santai, sistem kamu aman-aman aja kok… untuk sekarang 😏",
+              "Your system is operating normally. No issues detected.",
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.black.withOpacity(.65)),
             ),

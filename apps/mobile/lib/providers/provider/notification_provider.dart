@@ -2,14 +2,15 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import '../../core/constants.dart';
-import '../../core/fuzzy.dart';
+import '../../domain/telemetry.dart';
 import './api_provider.dart';
+import './mqtt_provider.dart';
 
 String _norm(String? s) => (s ?? '').trim().toLowerCase();
 
 class NotificationItem {
   final String id;
-  final String level;
+  final String level; // 'urgent', 'warning', 'info'
   final String title;
   final String message;
   final DateTime timestamp;
@@ -39,45 +40,44 @@ class NotificationItem {
 
 class NotificationListNotifier extends StateNotifier<List<NotificationItem>> {
   NotificationListNotifier(this.ref) : super([]) {
-    // listen perubahan kit list
-    _kitsSub = ref.listen(apiKitsListProvider, (prev, next) {
-      next.whenData((kits) => _evaluateAll(kits));
-    });
-
-    // evaluasi awal setelah app load
-    Future.microtask(() {
-      final kits = ref.read(apiKitsListProvider).value ?? [];
-      if (!_hasAnyViolationNow(kits)) {
-        _emitSafeInfo();
+    print('[Notification] ===== INITIALIZED =====');
+    
+    // Listen to current kit ID changes
+    _kitIdSub = ref.listen(currentKitIdProvider, (prev, next) {
+      print('[Notification] Kit changed: $prev -> $next');
+      if (next != null) {
+        _fetchAndEvaluate(next);
       }
     });
 
-    // periodic safety check
-    _safeTimer = Timer.periodic(const Duration(minutes: 1), (_) {
-      final kits = ref.read(apiKitsListProvider).value ?? [];
-      final now = DateTime.now();
-      final last1m = now.subtract(const Duration(minutes: 1));
+    // Initial evaluation
+    Future.microtask(() {
+      final kitId = ref.read(currentKitIdProvider);
+      print('[Notification] Initial kit: $kitId');
+      if (kitId != null) {
+        _fetchAndEvaluate(kitId);
+      }
+    });
 
-      final hasRecentWarning = state.any(
-        (n) => _norm(n.level) != 'info' && n.timestamp.isAfter(last1m),
-      );
-
-      if (!hasRecentWarning && !_hasAnyViolationNow(kits)) {
-        _emitSafeInfo();
+    // Periodic check every 1 minute
+    _timer = Timer.periodic(const Duration(minutes: 1), (_) {
+      final kitId = ref.read(currentKitIdProvider);
+      print('[Notification] ===== PERIODIC (1m) kit=$kitId =====');
+      if (kitId != null) {
+        _fetchAndEvaluate(kitId);
       }
     });
   }
 
   final Ref ref;
-  Timer? _safeTimer;
-  ProviderSubscription? _kitsSub;
-  final Map<String, DateTime> _lastAlertAt = {};
+  Timer? _timer;
+  ProviderSubscription? _kitIdSub;
+  final Map<String, DateTime> _cooldowns = {};
+  
+  // Cooldown: 20 seconds between same notification type
   static const Duration _cooldown = Duration(seconds: 20);
 
-  // Fuzzy logic service for severity determination
-  final _fuzzyService = NotificationSeverityService();
-
-  // Threshold - Warning levels (still used for detection)
+  // Thresholds from constants
   static const double _phMin = ThresholdConst.phMin;
   static const double _phMax = ThresholdConst.phMax;
   static const double _ppmMin = ThresholdConst.ppmMin;
@@ -87,158 +87,172 @@ class NotificationListNotifier extends StateNotifier<List<NotificationItem>> {
   static const double _tMin = ThresholdConst.tempMin;
   static const double _tMax = ThresholdConst.tempMax;
 
-  // helpers
-  Map<String, dynamic>? _telemetryOf(Map<String, dynamic> kit) {
-    final t = kit["telemetry"];
-    if (t is Map<String, dynamic>) return t;
-    return null;
-  }
-
-  double? _get(Map<String, dynamic>? t, String key) {
-    if (t == null) return null;
-    final v = t[key];
-    if (v is num) return v.toDouble();
-    return null;
-  }
-
-  // cek apakah ada pelanggaran threshold
-  bool _hasAnyViolationNow(List<Map<String, dynamic>> kits) {
-    for (final kit in kits) {
-      final t = _telemetryOf(kit);
-      final ph = _get(t, 'ph');
-      if (ph != null && (ph < _phMin || ph > _phMax)) return true;
-
-      final ppm = _get(t, 'ppm');
-      if (ppm != null && (ppm < _ppmMin || ppm > _ppmMax)) return true;
-
-      final wl = _get(t, 'waterLevel');
-      if (wl != null && (wl < _wlMin || wl > _wlMax)) return true;
-
-      final temp = _get(t, 'tempC');
-      if (temp != null && (temp < _tMin || temp > _tMax)) return true;
-    }
-    return false;
-  }
-
-  // evaluate semua kit
-  void _evaluateAll(List<Map<String, dynamic>> kits) {
-    for (final kit in kits) {
-      _checkThreshold(kit);
+  /// Check if device is in auto mode
+  bool _isAutoMode(String kitId) {
+    try {
+      return ref.read(mqttProvider).isAutoMode(kitId);
+    } catch (_) {
+      return false;
     }
   }
 
-  void _checkThreshold(Map<String, dynamic> kit) {
-    final name = kit['name'];
-    final t = _telemetryOf(kit);
-    if (t == null) return;
+  /// Calculate deviation percentage from threshold
+  double _deviation(double value, double min, double max) {
+    final range = max - min;
+    if (range <= 0) return 0;
+    if (value < min) return ((min - value) / range) * 100;
+    if (value > max) return ((value - max) / range) * 100;
+    return 0;
+  }
 
-    final ph = _get(t, 'ph') ?? 6.0;
-    final ppm = _get(t, 'ppm') ?? 700.0;
-    final wl = _get(t, 'waterLevel') ?? 1.8;
-    final temp = _get(t, 'tempC') ?? 21.0;
+  /// Determine severity based on deviation
+  /// URGENT: any deviation > 50% OR multiple deviations > 20%
+  /// WARNING: any deviation > 0%
+  String _determineSeverity(double phDev, double ppmDev, double tempDev, double wlDev) {
+    final deviations = [phDev, ppmDev, tempDev, wlDev];
+    
+    // Count significant deviations
+    final highCount = deviations.where((d) => d > 50).length;
+    final medCount = deviations.where((d) => d > 20).length;
+    
+    // URGENT: any high deviation OR multiple medium deviations
+    if (highCount >= 1 || medCount >= 2) {
+      return 'urgent';
+    }
+    
+    // WARNING: any deviation at all
+    return 'warning';
+  }
 
-    // Check if any parameter is out of ideal range
-    final hasViolation =
-        (ph < _phMin || ph > _phMax) ||
-        (ppm < _ppmMin || ppm > _ppmMax) ||
-        (wl < _wlMin || wl > _wlMax) ||
-        (temp < _tMin || temp > _tMax);
+  /// Fetch telemetry from DB and evaluate
+  Future<void> _fetchAndEvaluate(String kitId) async {
+    try {
+      final api = ref.read(apiServiceProvider);
+      final t = await api.getLatestTelemetry(kitId);
+      
+      if (t == null) {
+        print('[Notification] No telemetry for $kitId');
+        return;
+      }
+      
+      await _evaluate(kitId, t);
+    } catch (e) {
+      print('[Notification] Error: $e');
+    }
+  }
 
+  Future<void> _evaluate(String kitId, Telemetry t) async {
+    final isAuto = _isAutoMode(kitId);
+    
+    // Calculate deviations
+    final phDev = _deviation(t.ph, _phMin, _phMax);
+    final ppmDev = _deviation(t.ppm, _ppmMin, _ppmMax);
+    final tempDev = _deviation(t.tempC, _tMin, _tMax);
+    final wlDev = _deviation(t.waterLevel, _wlMin, _wlMax);
+    
+    final hasViolation = phDev > 0 || ppmDev > 0 || tempDev > 0 || wlDev > 0;
+    
+    print('[Notification] isAuto=$isAuto, hasViolation=$hasViolation');
+    print('[Notification] Deviations: ph=${phDev.toStringAsFixed(1)}%, ppm=${ppmDev.toStringAsFixed(1)}%, temp=${tempDev.toStringAsFixed(1)}%, wl=${wlDev.toStringAsFixed(1)}%');
+
+    // CASE 1: No violation
     if (!hasViolation) {
-      // All parameters normal
-      _emitThreshold(
-        kitName: name,
-        param: 'System',
-        message: 'All Parameters Within Safe Limits',
-        dir: 'normal',
-        level: 'info',
-      );
+      // Only show "All Safe" if no recent urgent/warning (5 min)
+      final now = DateTime.now();
+      final hasRecentIssue = state.any((n) =>
+          (n.level == 'urgent' || n.level == 'warning') &&
+          now.difference(n.timestamp).inMinutes < 5);
+      
+      if (!hasRecentIssue) {
+        _emit(kitId, 'info', 'All Parameters Within Safe Limits');
+      } else {
+        print('[Notification] Skip "All Safe" - recent issues exist');
+      }
       return;
     }
 
-    // Use fuzzy logic to determine severity
-    final severity = _fuzzyService.evaluateSeverity(
-      ph: ph,
-      ppm: ppm,
-      temp: temp,
-      waterLevel: wl,
-    );
-
-    // Build detailed message
+    // CASE 2: Has violation - build message
     final violations = <String>[];
-    if (ph < _phMin) violations.add('pH Low: ${ph.toStringAsFixed(2)}');
-    if (ph > _phMax) violations.add('pH High: ${ph.toStringAsFixed(2)}');
-    if (ppm < _ppmMin) violations.add('PPM Low: ${ppm.toStringAsFixed(0)}');
-    if (ppm > _ppmMax) violations.add('PPM High: ${ppm.toStringAsFixed(0)}');
-    if (wl < _wlMin) violations.add('Water Low: ${wl.toStringAsFixed(1)}');
-    if (wl > _wlMax) violations.add('Water High: ${wl.toStringAsFixed(1)}');
-    if (temp < _tMin) violations.add('Temp Low: ${temp.toStringAsFixed(1)}°C');
-    if (temp > _tMax) violations.add('Temp High: ${temp.toStringAsFixed(1)}°C');
-
+    if (t.ph < _phMin) violations.add('pH Low: ${t.ph.toStringAsFixed(2)}');
+    if (t.ph > _phMax) violations.add('pH High: ${t.ph.toStringAsFixed(2)}');
+    if (t.ppm < _ppmMin) violations.add('PPM Low: ${t.ppm.toStringAsFixed(0)}');
+    if (t.ppm > _ppmMax) violations.add('PPM High: ${t.ppm.toStringAsFixed(0)}');
+    if (t.waterLevel < _wlMin) violations.add('Water Low: ${t.waterLevel.toStringAsFixed(1)}');
+    if (t.waterLevel > _wlMax) violations.add('Water High: ${t.waterLevel.toStringAsFixed(1)}');
+    if (t.tempC < _tMin) violations.add('Temp Low: ${t.tempC.toStringAsFixed(1)}°C');
+    if (t.tempC > _tMax) violations.add('Temp High: ${t.tempC.toStringAsFixed(1)}°C');
+    
     final message = violations.join(', ');
 
-    _emitThreshold(
-      kitName: name,
-      param: 'Telemetry',
-      message: message,
-      dir: 'deviation',
-      level: severity,
-    );
+    if (isAuto) {
+      // AUTO MODE: Fetch latest actuator event and show what was done
+      await _emitAutoModeNotification(kitId, message);
+    } else {
+      // MANUAL MODE: Determine severity based on deviation
+      final severity = _determineSeverity(phDev, ppmDev, tempDev, wlDev);
+      print('[Notification] MANUAL - severity=$severity');
+      _emit(kitId, severity, message);
+    }
   }
 
-  void _emitThreshold({
-    required String kitName,
-    required String param,
-    required String message,
-    required String dir,
-    required String level,
-  }) {
-    final key = '$kitName:$param:$dir';
+  /// Fetch actuator event and emit user-friendly auto mode notification
+  Future<void> _emitAutoModeNotification(String kitId, String fallbackMsg) async {
+    try {
+      final api = ref.read(apiServiceProvider);
+      final event = await api.getLatestActuatorEvent(kitId);
+      
+      if (event != null) {
+        final actions = <String>[];
+        
+        // Format each action with duration
+        final phUp = event['phUp'] as int? ?? 0;
+        final phDown = event['phDown'] as int? ?? 0;
+        final nutrient = event['nutrientAdd'] as int? ?? 0;
+        final refill = event['refill'] as int? ?? 0;
+        
+        if (phUp > 0) actions.add('pH Up: ${phUp}s');
+        if (phDown > 0) actions.add('pH Down: ${phDown}s');
+        if (nutrient > 0) actions.add('Nutrient: ${nutrient}s');
+        if (refill > 0) actions.add('Refill: ${refill}s');
+        
+        if (actions.isNotEmpty) {
+          final msg = 'Auto adjustment: ${actions.join(', ')}';
+          print('[Notification] AUTO - $msg');
+          _emit(kitId, 'info', msg);
+          return;
+        }
+      }
+      
+      // Fallback if no action found
+      _emit(kitId, 'info', 'Auto mode: Monitoring $fallbackMsg');
+    } catch (e) {
+      print('[Notification] Error fetching actuator: $e');
+      _emit(kitId, 'info', 'Auto mode active');
+    }
+  }
+
+  void _emit(String kitId, String level, String message) {
+    final key = '$kitId:$level';
     final now = DateTime.now();
 
     // Cooldown check
-    final last = _lastAlertAt[key];
-    if (last != null && now.difference(last) < _cooldown) return;
-
-    _lastAlertAt[key] = now;
+    final last = _cooldowns[key];
+    if (last != null && now.difference(last) < _cooldown) {
+      print('[Notification] Cooldown: $key');
+      return;
+    }
+    _cooldowns[key] = now;
 
     final n = NotificationItem(
       id: now.millisecondsSinceEpoch.toString(),
       level: level,
-      title: level == 'urgent'
-          ? 'Urgent'
-          : (level == 'warning' ? 'Warning' : 'Info'),
+      title: level == 'urgent' ? 'Urgent' : (level == 'warning' ? 'Warning' : 'Info'),
       message: message,
       timestamp: now,
-      kitName: kitName,
+      kitName: kitId,
     );
 
-    add(n);
-  }
-
-  void _emitSafeInfo() {
-    final now = DateTime.now();
-
-    final lastInfo = state.where((n) => n.level == 'info').toList()
-      ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
-
-    if (lastInfo.isNotEmpty &&
-        now.difference(lastInfo.first.timestamp).inSeconds < 30) {
-      return;
-    }
-
-    final n = NotificationItem(
-      id: 'safe_${now.millisecondsSinceEpoch}',
-      level: 'info',
-      title: 'Info',
-      message: 'All Parameters Are Within Safe Limits',
-      timestamp: now,
-    );
-
-    add(n);
-  }
-
-  void add(NotificationItem n) {
+    print('[Notification] ADDED: level=$level, message=$message');
     state = [n, ...state];
   }
 
@@ -263,18 +277,16 @@ class NotificationListNotifier extends StateNotifier<List<NotificationItem>> {
 
   @override
   void dispose() {
-    _safeTimer?.cancel();
-    _kitsSub?.close();
+    _timer?.cancel();
+    _kitIdSub?.close();
     super.dispose();
   }
 }
 
 // PROVIDERS
 final notificationListProvider =
-    StateNotifierProvider.autoDispose<
-      NotificationListNotifier,
-      List<NotificationItem>
-    >((ref) {
+    StateNotifierProvider<NotificationListNotifier, List<NotificationItem>>((ref) {
+      ref.keepAlive();
       return NotificationListNotifier(ref);
     });
 

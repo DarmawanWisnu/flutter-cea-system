@@ -131,4 +131,19 @@ class ApiService {
       return [];
     }
   }
+
+  /// GET LATEST ACTUATOR EVENT
+  Future<Map<String, dynamic>?> getLatestActuatorEvent(String deviceId) async {
+    try {
+      final res = await getJson('/actuator/latest?deviceId=$deviceId');
+      
+      if (res is Map<String, dynamic> && res.containsKey('id')) {
+        return res;
+      }
+      return null;
+    } catch (e) {
+      debugPrint('getLatestActuatorEvent error: $e');
+      return null;
+    }
+  }
 }

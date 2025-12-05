@@ -34,6 +34,10 @@ CLIENT_ID = f"csv-subscriber-{KIT_ID}"
 STATE = {}   # per-device state
 state_lock = Lock()
 
+# Track which sensors have updated since last backend send
+sensor_updated = {}  # per-device: {sensor: bool}
+REQUIRED_SENSORS = ["ppm", "ph", "tempC", "humidity", "waterTemp", "waterLevel"]
+
 print("[INIT] KIT_ID:", KIT_ID)
 print("[INIT] SUBSCRIBING:", TOPIC)
 
@@ -107,16 +111,29 @@ def on_message(client, userdata, msg):
                     "waterTemp": 0.0,
                     "waterLevel": 0.0,
                 }
+                sensor_updated[kit_id] = {s: False for s in REQUIRED_SENSORS}
 
-                for key in STATE[kit_id]:
-                    STATE[kit_id][key] = safe_float(data.get(key, STATE[kit_id][key]), STATE[kit_id][key])
-
+            # Update state with new data from MQTT and mark sensors as updated
+            for key in data:
+                if key in STATE[kit_id]:
+                    STATE[kit_id][key] = safe_float(data[key], STATE[kit_id][key])
+                    sensor_updated[kit_id][key] = True  # Mark this sensor as updated
 
         print("Updated State:")
         print(pretty_json(STATE[kit_id]))
         print()
 
-        send_snapshot(kit_id)
+        # Check if all sensors have been updated at least once
+        all_updated = all(sensor_updated[kit_id].values())
+        
+        if all_updated:
+            print("✅ All sensors updated, sending to backend...")
+            send_snapshot(kit_id)
+            # Reset the tracking
+            sensor_updated[kit_id] = {s: False for s in REQUIRED_SENSORS}
+        else:
+            pending = [s for s, updated in sensor_updated[kit_id].items() if not updated]
+            print(f"⏳ Waiting for: {', '.join(pending)}")
 
         print("──────────────────────────────────────────────")
 

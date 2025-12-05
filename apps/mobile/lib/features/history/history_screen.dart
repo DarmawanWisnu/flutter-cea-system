@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -31,6 +32,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
   // Data storage
   List<Map<String, dynamic>> _entries = [];
+  
+  // Auto-refresh timer
+  Timer? _refreshTimer;
 
   @override
   void didChangeDependencies() {
@@ -61,27 +65,59 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       }
 
       if (mounted) setState(() {});
+      
+      // Start auto-refresh timer (every 30 seconds)
+      _refreshTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+        if (mounted) {
+          _loadData();
+        }
+      });
     });
+  }
+  
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    _scroll.dispose();
+    super.dispose();
   }
 
   // LOAD FROM BACKEND
   Future<void> _loadData() async {
-    if (kitId == null) return;
+    if (kitId == null) {
+      print('[HistoryScreen] kitId is null, cannot load data');
+      return;
+    }
     
-    final api = ref.read(apiServiceProvider);
+    try {
+      print('[HistoryScreen] Loading data for kitId: $kitId');
+      final api = ref.read(apiServiceProvider);
 
-    final res = await api.getJson(
-      "/telemetry/history?deviceId=$kitId&limit=500",
-    );
+      final res = await api.getJson(
+        "/telemetry/history?deviceId=$kitId&limit=500",
+      );
 
-    final List items = res["items"] ?? [];
+      print('[HistoryScreen] API response: $res');
 
-    _entries = items.map((e) {
-      final t = Telemetry.fromJson(e["data"]);
-      final ts = e["ingestTime"] as int;
+      final List items = res["items"] ?? [];
+      print('[HistoryScreen] Found ${items.length} items');
 
-      return {"t": t, "ts": ts};
-    }).toList();
+      _entries = items.map((e) {
+        final t = Telemetry.fromJson(e["data"]);
+        final ts = e["ingestTime"] as int;
+
+        return {"t": t, "ts": ts};
+      }).toList();
+
+      print('[HistoryScreen] Loaded ${_entries.length} entries');
+      
+      if (mounted) setState(() {});
+    } catch (e, stackTrace) {
+      print('[HistoryScreen] Error loading data: $e');
+      print('[HistoryScreen] Stack trace: $stackTrace');
+      _entries = [];
+      if (mounted) setState(() {});
+    }
   }
 
   // SWITCH KIT

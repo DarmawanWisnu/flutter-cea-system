@@ -107,9 +107,10 @@ def main():
             for kit in device_ids
         }
 
-        # timer per kit per sensor
+        # timer per kit per sensor (initialize to trigger immediately on first loop)
+        start_time = time.time()
         device_timer = {
-            kit: {s: 0 for s in INTERVALS.keys()}
+            kit: {s: start_time - INTERVALS[s] for s in INTERVALS.keys()}
             for kit in device_ids
         }
 
@@ -124,37 +125,47 @@ def main():
 
             for kit in device_ids:
                 client = clients[kit]
-                # random row each kit
-                row = rows[device_row_idx[kit]]
-                updated = False
+                
+                # Build partial payload with only updated sensors
+                partial_payload = {}
 
                 for sensor in INTERVALS:
-                    if now - device_timer[kit][sensor] >= INTERVALS[sensor]:
+                    elapsed = now - device_timer[kit][sensor]
+                    
+                    # Debug: Show pH timer status
+                    if sensor == "ph" and elapsed >= INTERVALS[sensor] - 1:
+                        print(f"[DEBUG] {kit} pH timer: {elapsed:.1f}s / {INTERVALS[sensor]}s")
+                    
+                    if elapsed >= INTERVALS[sensor]:
+                        # Pick a random row for THIS sensor update
+                        row = rows[random.randint(0, len(rows) - 1)]
+                        
                         if sensor == "ppm":
-                            device_state[kit]["ppm"] = pick(row, "TDS", "tds")
+                            value = pick(row, "TDS", "tds")
                         elif sensor == "ph":
-                            device_state[kit]["ph"] = pick(row, "pH", "ph")
+                            value = pick(row, "pH", "ph")
+                            print(f"[DEBUG] {kit} pH TRIGGERED! Value: {value}")
                         elif sensor == "tempC":
-                            device_state[kit]["tempC"] = pick(row, "DHT_temp", "dht_temp", "tempC")
+                            value = pick(row, "DHT_temp", "dht_temp", "tempC")
                         elif sensor == "humidity":
-                            device_state[kit]["humidity"] = pick(row, "DHT_humidity", "humidity")
+                            value = pick(row, "DHT_humidity", "humidity")
                         elif sensor == "waterTemp":
-                            device_state[kit]["waterTemp"] = pick(row, "water_temp")
+                            value = pick(row, "water_temp")
                         elif sensor == "waterLevel":
-                            device_state[kit]["waterLevel"] = pick(row, "water_level")
-
+                            value = pick(row, "water_level")
+                        
+                        # Update state and add to partial payload
+                        device_state[kit][sensor] = value
+                        partial_payload[sensor] = value
                         device_timer[kit][sensor] = now
-                        updated = True
 
-                if updated:
+                # Only publish if there are updates
+                if partial_payload:
                     topic = f"kit/{kit}/telemetry"
-                    payload = json.dumps(device_state[kit])
+                    payload = json.dumps(partial_payload)
                     client.publish(topic, payload, qos=QOS, retain=RETAIN)
 
-                    print(f"[PUB] {kit} → row#{device_row_idx[kit]}", device_state[kit])
-                    
-                    # Move to next random row for this kit
-                    device_row_idx[kit] = random.randint(0, len(rows) - 1)
+                    print(f"[PUB] {kit} → {list(partial_payload.keys())} = {partial_payload}")
 
             time.sleep(0.2)
 

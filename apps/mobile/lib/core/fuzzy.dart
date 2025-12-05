@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'constants.dart';
 
 abstract class MembershipFunction {
   double mu(double x);
@@ -23,10 +24,14 @@ class TrapezoidalMF implements MembershipFunction {
 
   @override
   double mu(double x) {
-    if (x <= a || x >= d) return 0.0;
+    if (x <= a) return 0.0;
     if (x >= b && x <= c) return 1.0;
     if (x > a && x < b) return (x - a) / (b - a);
-    return (d - x) / (d - c);
+    if (x > c && x < d) return (d - x) / (d - c);
+    // For open-ended trapezoid (c == d), stay at 1.0 for x >= c
+    if (c == d && x >= c) return 1.0;
+    if (x >= d) return 0.0;
+    return 0.0;
   }
 }
 
@@ -49,15 +54,15 @@ class FuzzyVariable {
 // NOTIFICATION SEVERITY FUZZY SYSTEM
 
 class NotificationSeverityService {
-  // Ideal ranges
-  static const double _phIdealMin = 5.5;
-  static const double _phIdealMax = 6.5;
-  static const double _ppmIdealMin = 560.0;
-  static const double _ppmIdealMax = 840.0;
-  static const double _tempIdealMin = 18.0;
-  static const double _tempIdealMax = 24.0;
-  static const double _waterIdealMin = 1.2;
-  static const double _waterIdealMax = 2.5;
+  // Ideal ranges - using ThresholdConst for consistency
+  static const double _phIdealMin = ThresholdConst.phMin;
+  static const double _phIdealMax = ThresholdConst.phMax;
+  static const double _ppmIdealMin = ThresholdConst.ppmMin;
+  static const double _ppmIdealMax = ThresholdConst.ppmMax;
+  static const double _tempIdealMin = ThresholdConst.tempMin;
+  static const double _tempIdealMax = ThresholdConst.tempMax;
+  static const double _waterIdealMin = ThresholdConst.wlMin;
+  static const double _waterIdealMax = ThresholdConst.wlMax;
 
   /// Calculate deviation percentage from ideal range
   double _calculateDeviation(double value, double idealMin, double idealMax) {
@@ -96,6 +101,8 @@ class NotificationSeverityService {
       _waterIdealMax,
     );
 
+    print('[Fuzzy] Deviations: ph=$phDev%, ppm=$ppmDev%, temp=$tempDev%, water=$waterDev%');
+
     // Fuzzy membership functions for deviation
     // low: 0-20%, medium: 15-50%, high: 45%+
     final lowMF = TrapezoidalMF(0, 0, 10, 20);
@@ -115,6 +122,8 @@ class NotificationSeverityService {
       maxHigh = math.max(maxHigh, highMF.mu(dev));
     }
 
+    print('[Fuzzy] Memberships: maxLow=$maxLow, maxMedium=$maxMedium, maxHigh=$maxHigh');
+
     // Count how many parameters have significant deviations
     int mediumCount = 0;
     for (final dev in deviations) {
@@ -124,20 +133,24 @@ class NotificationSeverityService {
     // Decision logic
     // If any parameter is highly deviated → urgent
     if (maxHigh > 0.5) {
+      print('[Fuzzy] Result: urgent (maxHigh > 0.5)');
       return 'urgent';
     }
 
     // If multiple parameters have medium deviation → urgent
     if (mediumCount >= 2) {
+      print('[Fuzzy] Result: urgent (mediumCount >= 2)');
       return 'urgent';
     }
 
     // If any parameter has medium deviation → warning
     if (maxMedium > 0.5) {
+      print('[Fuzzy] Result: warning (maxMedium > 0.5)');
       return 'warning';
     }
 
     // All parameters are within acceptable range → info
+    print('[Fuzzy] Result: info (no significant deviation)');
     return 'info';
   }
 

@@ -130,7 +130,6 @@ class FountaineApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const AuthGate(),
       routes: Routes.routes,
       onGenerateRoute: onGenerateRoute,
     );
