@@ -39,6 +39,11 @@ class MockMqttVM extends ChangeNotifier implements MqttVM {
   }
 
   @override
+  bool isAutoMode(String deviceId) {
+    return false;
+  }
+
+  @override
   Future<void> disposeSafely() async {
     // No-op
   }

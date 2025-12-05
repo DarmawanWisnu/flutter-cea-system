@@ -138,7 +138,6 @@ void main() {
       );
 
       // Tap at the center-right of the RichText where the link is
-      final richTextWidget = tester.widget<RichText>(richTextFinder);
       final renderBox = tester.renderObject(richTextFinder) as RenderBox;
       final position = renderBox.localToGlobal(Offset.zero);
       final size = renderBox.size;

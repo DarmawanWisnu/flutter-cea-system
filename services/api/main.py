@@ -280,7 +280,7 @@ def get_history(deviceId: str, days: int = 7, limit: int = 10000):
     - days: How many days back to fetch (default 7, max 30)
     - limit: Max entries to return (default 10000, for safety)
     """
-    days = max(1, min(days, 30))  # 1-30 days
+    days = max(1, min(days, 7))
     limit = max(1, min(limit, 50000))  # Safety cap
     
     # Calculate timestamp for N days ago

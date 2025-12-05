@@ -4,70 +4,93 @@ import 'package:fountaine/providers/provider/monitor_provider.dart';
 import 'package:fountaine/providers/provider/api_provider.dart';
 import 'package:fountaine/providers/provider/mqtt_provider.dart';
 import '../../domain/telemetry.dart';
-import 'dart:ui';
-import 'dart:math' as math;
+import '../../core/constants.dart';
+
+// Color scheme - human-like, minimal
+const Color _kPrimary = Color(0xFF0E5A2A);
+const Color _kBg = Color(0xFFF3F9F4);
+const Color _kCardBg = Colors.white;
+const Color _kGreen = Color(0xFF2E7D32); // Normal
+const Color _kYellow = Color(0xFFFFB300); // Warning
+const Color _kRed = Color(0xFFE53935); // Urgent
 
 IconData _iconFor(String title) {
   switch (title.toLowerCase()) {
-    case 'pH':
     case 'ph':
-      return Icons.science_rounded;
+      return Icons.science_outlined;
     case 'ppm':
-      return Icons.bubble_chart_rounded;
+    case 'tds':
+      return Icons.bubble_chart_outlined;
     case 'humidity':
-      return Icons.water_drop_rounded;
+      return Icons.water_drop_outlined;
+    case 'air temp':
     case 'temperature':
-      return Icons.thermostat_rounded;
+      return Icons.thermostat_outlined;
+    case 'water temp':
+      return Icons.waves_outlined;
+    case 'water level':
+      return Icons.straighten_outlined;
     default:
-      return Icons.circle;
+      return Icons.sensors_outlined;
   }
 }
 
-class _ArcPainter extends CustomPainter {
-  final Color color;
-  final double fraction;
-  final double strokeFactor;
-
-  _ArcPainter({
-    required this.color,
-    required this.fraction,
-    this.strokeFactor = 0.1,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final minSide = math.min(size.width, size.height);
-    final stroke = minSide * strokeFactor;
-
-    final bg = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = stroke
-      ..color = const Color(0xFFF0F0F0);
-
-    final fg = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = stroke
-      ..strokeCap = StrokeCap.round
-      ..color = color;
-
-    final rect = Rect.fromLTWH(
-      (size.width - minSide) / 2 + stroke / 2,
-      (size.height - minSide) / 2 + stroke / 2,
-      minSide - stroke,
-      minSide - stroke,
-    );
-
-    canvas.drawArc(rect, 0, math.pi * 2, false, bg);
-
-    final start = math.pi * 0.75;
-    final sweepMax = math.pi * 0.9;
-
-    canvas.drawArc(rect, start, sweepMax * fraction, false, fg);
+/// Determine color based on value severity using ThresholdConst
+Color _severityColor(String key, double value) {
+  switch (key.toLowerCase()) {
+    case 'ph':
+      if (value >= ThresholdConst.phMin && value <= ThresholdConst.phMax) {
+        return _kGreen;
+      } else if (value >= ThresholdConst.phMin - 0.5 &&
+          value <= ThresholdConst.phMax + 0.5) {
+        return _kYellow;
+      }
+      return _kRed;
+    case 'ppm':
+    case 'tds':
+      if (value >= ThresholdConst.ppmMin && value <= ThresholdConst.ppmMax) {
+        return _kGreen;
+      } else if (value >= ThresholdConst.ppmMin - 100 &&
+          value <= ThresholdConst.ppmMax + 100) {
+        return _kYellow;
+      }
+      return _kRed;
+    case 'air temp':
+    case 'temperature':
+      if (value >= ThresholdConst.tempMin && value <= ThresholdConst.tempMax) {
+        return _kGreen;
+      } else if (value >= ThresholdConst.tempMin - 3 &&
+          value <= ThresholdConst.tempMax + 3) {
+        return _kYellow;
+      }
+      return _kRed;
+    case 'water temp':
+      // Water temp ideal: 18-26°C
+      if (value >= 18 && value <= 26) {
+        return _kGreen;
+      } else if (value >= 15 && value <= 30) {
+        return _kYellow;
+      }
+      return _kRed;
+    case 'water level':
+      if (value >= ThresholdConst.wlMin && value <= ThresholdConst.wlMax) {
+        return _kGreen;
+      } else if (value >= ThresholdConst.wlMin - 0.3 &&
+          value <= ThresholdConst.wlMax + 0.3) {
+        return _kYellow;
+      }
+      return _kRed;
+    case 'humidity':
+      // Humidity ideal: 50-80%
+      if (value >= 50 && value <= 80) {
+        return _kGreen;
+      } else if (value >= 40 && value <= 90) {
+        return _kYellow;
+      }
+      return _kRed;
+    default:
+      return _kGreen;
   }
-
-  @override
-  bool shouldRepaint(covariant _ArcPainter old) =>
-      old.fraction != fraction || old.color != color;
 }
 
 class MonitorScreen extends ConsumerStatefulWidget {
@@ -124,27 +147,14 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
   Widget build(BuildContext context) {
     final _kitId = kitId;
 
-    const bg = Color(0xFFF6FBF6);
-    const primary = Color(0xFF154B2E);
-    const muted = Color(0xFF7A7A7A);
-
     final size = MediaQuery.of(context).size;
     final s = size.width / 375.0;
 
     if (_kitId == null) {
       return Scaffold(
-        backgroundColor: bg,
-        appBar: AppBar(
-          backgroundColor: bg,
-          elevation: 0,
-          centerTitle: true,
-          title: const Text(
-            'Monitor',
-            style: TextStyle(color: primary, fontWeight: FontWeight.w800),
-          ),
-          iconTheme: const IconThemeData(color: primary),
-        ),
-        body: const Center(child: CircularProgressIndicator()),
+        backgroundColor: _kBg,
+        appBar: _buildAppBar(s),
+        body: const Center(child: CircularProgressIndicator(color: _kPrimary)),
       );
     }
 
@@ -158,15 +168,19 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
     double frac(String key, double v) {
       switch (key) {
         case 'ph':
-          return (v / 14).clamp(0, 1);
+          return (v / 14).clamp(0.0, 1.0);
         case 'ppm':
-          return (v / 3000).clamp(0, 1);
+          return (v / 3000).clamp(0.0, 1.0);
         case 'humidity':
-          return (v / 100).clamp(0, 1);
+          return (v / 100).clamp(0.0, 1.0);
         case 'temperature':
-          return ((v + 10) / 60).clamp(0, 1);
+          return ((v + 10) / 60).clamp(0.0, 1.0);
+        case 'waterTemp':
+          return (v / 50).clamp(0.0, 1.0);
+        case 'waterLevel':
+          return (v / 3).clamp(0.0, 1.0);
       }
-      return 0;
+      return 0.0;
     }
 
     String format(DateTime? dt) {
@@ -178,157 +192,141 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
     }
 
     return Scaffold(
-      backgroundColor: bg,
-      appBar: AppBar(
-        backgroundColor: bg,
-        elevation: 0,
-        centerTitle: true,
-        title: const Text(
-          'Monitor',
-          style: TextStyle(color: primary, fontWeight: FontWeight.w800),
-        ),
-        iconTheme: const IconThemeData(color: primary),
-      ),
+      backgroundColor: _kBg,
+      appBar: _buildAppBar(s),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.fromLTRB(16 * s, 10 * s, 16 * s, 16 * s),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // GRID GAUGES
+              // GRID GAUGES - 3x2 for 6 sensors
               GridView(
                 padding: EdgeInsets.zero,
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: size.width >= 420 ? 3 : 2,
-                  crossAxisSpacing: 14 * s,
-                  mainAxisSpacing: 14 * s,
-                  childAspectRatio: 0.75,
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 8 * s,
+                  mainAxisSpacing: 20 * s,
+                  childAspectRatio: 1.0,
                 ),
                 children: [
-                  _gaugeBox(
+                  _sensorCard(
                     s,
                     'pH',
                     safe(t?.ph),
-                    'pH',
+                    '',
                     frac('ph', safe(t?.ph)),
+                    _severityColor('ph', safe(t?.ph)),
                   ),
-                  _gaugeBox(
+                  _sensorCard(
                     s,
-                    'PPM',
+                    'TDS',
                     safe(t?.ppm),
                     'ppm',
                     frac('ppm', safe(t?.ppm)),
+                    _severityColor('ppm', safe(t?.ppm)),
                   ),
-                  _gaugeBox(
+                  _sensorCard(
                     s,
                     'Humidity',
                     safe(t?.humidity),
                     '%',
                     frac('humidity', safe(t?.humidity)),
+                    _severityColor('humidity', safe(t?.humidity)),
                   ),
-                  _gaugeBox(
+                  _sensorCard(
                     s,
-                    'Temperature',
+                    'Air Temp',
                     safe(t?.tempC),
                     '°C',
                     frac('temperature', safe(t?.tempC)),
+                    _severityColor('air temp', safe(t?.tempC)),
+                  ),
+                  _sensorCard(
+                    s,
+                    'Water Temp',
+                    safe(t?.waterTemp),
+                    '°C',
+                    frac('waterTemp', safe(t?.waterTemp)),
+                    _severityColor('water temp', safe(t?.waterTemp)),
+                  ),
+                  _sensorCard(
+                    s,
+                    'Water Level',
+                    safe(t?.waterLevel),
+                    '',
+                    frac('waterLevel', safe(t?.waterLevel)),
+                    _severityColor('water level', safe(t?.waterLevel)),
                   ),
                 ],
               ),
 
-              SizedBox(height: 22 * s),
+              SizedBox(height: 20 * s),
 
               Text(
                 'Your Kit',
                 style: TextStyle(
-                  fontSize: 18 * s,
-                  fontWeight: FontWeight.w800,
-                  color: primary,
+                  fontSize: 16 * s,
+                  fontWeight: FontWeight.w700,
+                  color: _kPrimary,
                 ),
               ),
-              SizedBox(height: 10 * s),
+              SizedBox(height: 8 * s),
 
-              // YOUR KIT CARD + DROPDOWN INSIDE
+              // YOUR KIT CARD
               Container(
+                padding: EdgeInsets.all(14 * s),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(18 * s),
-                  border: Border.all(
-                    color: const Color(0xFF4DD4AC).withOpacity(0.35),
-                    width: 1.4,
-                  ),
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      const Color(0xFFE7FFF5).withOpacity(0.55),
-                      const Color(0xFFDFFFFA).withOpacity(0.40),
-                    ],
-                  ),
+                  color: _kCardBg,
+                  borderRadius: BorderRadius.circular(12 * s),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF4DD4AC).withOpacity(0.20),
-                      blurRadius: 18,
-                      offset: Offset(0, 6 * s),
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
                     ),
                   ],
                 ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(18 * s),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 14 * s,
-                        vertical: 14 * s,
+                child: Row(
+                  children: [
+                    // STATUS DOT
+                    Container(
+                      width: 10 * s,
+                      height: 10 * s,
+                      decoration: BoxDecoration(
+                        color: t == null ? Colors.grey : _kGreen,
+                        shape: BoxShape.circle,
                       ),
-                      child: Row(
+                    ),
+
+                    SizedBox(width: 12 * s),
+
+                    Expanded(
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // STATUS DOT
-                          Container(
-                            width: 10 * s,
-                            height: 10 * s,
-                            margin: EdgeInsets.only(top: 6 * s),
-                            decoration: BoxDecoration(
-                              color: t == null
-                                  ? Colors.grey
-                                  : const Color(0xFF04D98B),
-                              shape: BoxShape.circle,
-                            ),
-                          ),
+                          // DROPDOWN
+                          _kitSelector(s),
 
-                          SizedBox(width: 12 * s),
+                          SizedBox(height: 4 * s),
 
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // DROPDOWN
-                                _kitSelectorInsideCard(s),
-
-                                SizedBox(height: 8 * s),
-
-                                Text(
-                                  'Last: ${format(last)}',
-                                  style: TextStyle(
-                                    fontSize: 12 * s,
-                                    color: Colors.black.withOpacity(0.55),
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
+                          Text(
+                            'Last: ${format(last)}',
+                            style: TextStyle(
+                              fontSize: 11 * s,
+                              color: _kPrimary.withOpacity(0.5),
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ),
+                  ],
                 ),
               ),
 
-              SizedBox(height: 22 * s),
+              SizedBox(height: 20 * s),
 
               _modeSection(context, s, _kitId),
             ],
@@ -338,315 +336,313 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
     );
   }
 
-  // DROPDOWN INSIDE YOUR KIT CARD
-  Widget _kitSelectorInsideCard(double s) {
+  PreferredSizeWidget _buildAppBar(double s) {
+    return AppBar(
+      backgroundColor: _kBg,
+      elevation: 0,
+      surfaceTintColor: Colors.transparent,
+      centerTitle: true,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back, color: _kPrimary),
+        onPressed: () => Navigator.pop(context),
+      ),
+      title: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Image.asset(
+            'assets/images/logo.png',
+            width: 24 * s,
+            height: 24 * s,
+            errorBuilder: (_, __, ___) =>
+                Icon(Icons.eco, color: _kPrimary, size: 24 * s),
+          ),
+          SizedBox(width: 8 * s),
+          Text(
+            'Fountaine',
+            style: TextStyle(
+              color: _kPrimary,
+              fontWeight: FontWeight.w800,
+              fontSize: 18 * s,
+            ),
+          ),
+        ],
+      ),
+      iconTheme: const IconThemeData(color: _kPrimary),
+    );
+  }
+
+  // KIT DROPDOWN SELECTOR
+  Widget _kitSelector(double s) {
     final kitsAsync = ref.watch(apiKitsListProvider);
 
     return kitsAsync.when(
-      loading: () => Container(
-        height: 42 * s,
-        alignment: Alignment.centerLeft,
-        child: const CircularProgressIndicator(strokeWidth: 2),
+      loading: () => SizedBox(
+        height: 20 * s,
+        width: 20 * s,
+        child: const CircularProgressIndicator(
+          strokeWidth: 2,
+          color: _kPrimary,
+        ),
       ),
-      error: (e, _) => Text("Failed load kits: $e"),
+      error: (e, _) => Text("Failed: $e", style: TextStyle(fontSize: 12 * s)),
       data: (kits) {
-        if (kits.isEmpty) return const Text("No kits registered.");
+        if (kits.isEmpty)
+          return Text("No kits", style: TextStyle(fontSize: 12 * s));
 
-        return Container(
-          height: 42 * s,
-          padding: EdgeInsets.symmetric(horizontal: 12 * s),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12 * s),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.white.withOpacity(0.70),
-                Colors.white.withOpacity(0.55),
-              ],
+        return DropdownButtonHideUnderline(
+          child: DropdownButton<String>(
+            isDense: true,
+            value: kitId,
+            icon: Icon(
+              Icons.keyboard_arrow_down_rounded,
+              color: _kPrimary,
+              size: 20 * s,
             ),
-            border: Border.all(
-              color: const Color(0xFF4DD4AC).withOpacity(0.40),
-              width: 1.2,
-            ),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              isExpanded: true,
-              value: kitId,
-              icon: const Icon(
-                Icons.keyboard_arrow_down_rounded,
-                color: Color(0xFF154B2E),
-              ),
-              items: kits.map<DropdownMenuItem<String>>((k) {
-                final id = k["id"] as String;
-                return DropdownMenuItem(
-                  value: id,
-                  child: Text(
-                    id,
-                    style: TextStyle(
-                      fontSize: 14 * s,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF154B2E),
-                    ),
+            items: kits.map<DropdownMenuItem<String>>((k) {
+              final id = k["id"] as String;
+              return DropdownMenuItem(
+                value: id,
+                child: Text(
+                  id,
+                  style: TextStyle(
+                    fontSize: 14 * s,
+                    fontWeight: FontWeight.w600,
+                    color: _kPrimary,
                   ),
-                );
-              }).toList(),
-              onChanged: (v) {
-                if (v != null && v != kitId) {
-                  setState(() => kitId = v);
-                  // Update shared kit ID for notifications
-                  ref.read(currentKitIdProvider.notifier).state = v;
-                }
-              },
-            ),
+                ),
+              );
+            }).toList(),
+            onChanged: (v) {
+              if (v != null && v != kitId) {
+                setState(() => kitId = v);
+                // Update shared kit ID for notifications
+                ref.read(currentKitIdProvider.notifier).state = v;
+              }
+            },
           ),
         );
       },
     );
   }
 
-  Widget _gaugeBox(
+  // NEW SENSOR CARD with loading bar
+  Widget _sensorCard(
     double s,
     String title,
     double value,
     String unit,
     double fraction,
+    Color barColor,
   ) {
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: fraction),
-      duration: const Duration(milliseconds: 650),
+      duration: const Duration(milliseconds: 600),
       curve: Curves.easeOutCubic,
       builder: (context, fr, _) {
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 260),
-          padding: EdgeInsets.all(8 * s),
+        return Container(
+          padding: EdgeInsets.all(10 * s),
           decoration: BoxDecoration(
-            color: const Color(0xFFF6FBF6).withOpacity(0.55),
-            borderRadius: BorderRadius.circular(18 * s),
-            border: Border.all(
-              color: const Color.fromARGB(
-                255,
-                24,
-                116,
-                88,
-              ).withOpacity(0.45), // tegas
-              width: 1.4,
-            ),
+            color: _kCardBg,
+            borderRadius: BorderRadius.circular(12 * s),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF4DD4AC).withOpacity(0.18),
-                blurRadius: 14,
-                offset: const Offset(0, 4),
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
             ],
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(18 * s),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
-              child: Column(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Icon + Title row - centered
+              Row(
                 mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
                     _iconFor(title),
-                    size: 16 * s,
-                    color: const Color(0xFF06B48A),
+                    size: 12 * s,
+                    color: _kPrimary.withOpacity(0.6),
                   ),
-
-                  SizedBox(height: 3 * s),
-
+                  SizedBox(width: 4 * s),
                   Text(
                     title,
                     style: TextStyle(
-                      fontSize: 10 * s,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black.withOpacity(0.7),
-                    ),
-                  ),
-
-                  SizedBox(height: 4 * s),
-
-                  SizedBox(
-                    width: 45 * s,
-                    height: 45 * s,
-                    child: CustomPaint(
-                      painter: _ArcPainter(
-                        color: const Color(0xFF06B48A),
-                        fraction: fr,
-                      ),
-                    ),
-                  ),
-
-                  SizedBox(height: 4 * s),
-
-                  Text(
-                    "$value $unit",
-                    style: TextStyle(
-                      fontSize: 12 * s,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.black.withOpacity(0.85),
+                      fontSize: 11 * s,
+                      fontWeight: FontWeight.w500,
+                      color: _kPrimary.withOpacity(0.7),
                     ),
                   ),
                 ],
               ),
-            ),
+
+              SizedBox(height: 6 * s),
+
+              // Value
+              Text(
+                unit.isEmpty
+                    ? value.toStringAsFixed(2)
+                    : '${value.toStringAsFixed(1)} $unit',
+                style: TextStyle(
+                  fontSize: 16 * s,
+                  fontWeight: FontWeight.w800,
+                  color: _kPrimary,
+                ),
+              ),
+
+              SizedBox(height: 6 * s),
+
+              // Progress bar
+              ClipRRect(
+                borderRadius: BorderRadius.circular(3 * s),
+                child: LinearProgressIndicator(
+                  value: fr,
+                  minHeight: 5 * s,
+                  backgroundColor: Colors.grey.shade200,
+                  valueColor: AlwaysStoppedAnimation<Color>(barColor),
+                ),
+              ),
+            ],
           ),
         );
       },
     );
   }
 
-  // FUTURISTIC MODE SECTION
+  // MODE SECTION - simplified
   Widget _modeSection(BuildContext context, double s, String currentKitId) {
-    const primary = Color(0xFF154B2E);
-    const muted = Color(0xFF7A7A7A);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Mode & Control',
+          'Mode',
           style: TextStyle(
-            fontSize: 18 * s,
-            fontWeight: FontWeight.w800,
-            color: primary,
+            fontSize: 16 * s,
+            fontWeight: FontWeight.w700,
+            color: _kPrimary,
           ),
         ),
+        SizedBox(height: 10 * s),
+
+        // Sliding pill toggle with centered circle
+        Container(
+          height: 48 * s,
+          padding: EdgeInsets.all(4 * s),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(50 * s),
+          ),
+          child: Stack(
+            children: [
+              // Animated sliding pill
+              AnimatedAlign(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                alignment: isAuto
+                    ? Alignment.centerLeft
+                    : Alignment.centerRight,
+                child: FractionallySizedBox(
+                  widthFactor: 0.5,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: _kPrimary,
+                      borderRadius: BorderRadius.circular(50 * s),
+                      boxShadow: [
+                        BoxShadow(
+                          color: _kPrimary.withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              // Text labels
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() => isAuto = true);
+                        ref
+                            .read(
+                              monitorTelemetryProvider(currentKitId).notifier,
+                            )
+                            .setAuto();
+                      },
+                      child: Container(
+                        color: Colors.transparent,
+                        child: Center(
+                          child: AnimatedDefaultTextStyle(
+                            duration: const Duration(milliseconds: 200),
+                            style: TextStyle(
+                              fontSize: 13 * s,
+                              fontWeight: FontWeight.w700,
+                              color: isAuto
+                                  ? Colors.white
+                                  : _kPrimary.withOpacity(0.5),
+                            ),
+                            child: const Text("AUTO"),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() => isAuto = false);
+                        ref
+                            .read(
+                              monitorTelemetryProvider(currentKitId).notifier,
+                            )
+                            .setManual();
+                      },
+                      child: Container(
+                        color: Colors.transparent,
+                        child: Center(
+                          child: AnimatedDefaultTextStyle(
+                            duration: const Duration(milliseconds: 200),
+                            style: TextStyle(
+                              fontSize: 13 * s,
+                              fontWeight: FontWeight.w700,
+                              color: !isAuto
+                                  ? Colors.white
+                                  : _kPrimary.withOpacity(0.5),
+                            ),
+                            child: const Text("MANUAL"),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+
         SizedBox(height: 16 * s),
 
-        // Futuristic Segmented Control
-        AnimatedContainer(
-          duration: Duration(milliseconds: 350),
-          curve: Curves.easeOutQuint,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [const Color(0xFFF6FBF6), const Color(0xFFEFF9EF)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-
-            borderRadius: BorderRadius.circular(18 * s),
-            border: Border.all(color: Colors.white70, width: 1),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.07),
-                blurRadius: 20,
-                offset: Offset(0, 8),
-              ),
-            ],
-          ),
-          padding: EdgeInsets.all(5 * s),
-          child: Row(
-            children: [
-              Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() => isAuto = true);
-                    ref
-                        .read(monitorTelemetryProvider(currentKitId).notifier)
-                        .setAuto();
-                  },
-                  child: AnimatedContainer(
-                    duration: Duration(milliseconds: 250),
-                    curve: Curves.easeOut,
-                    padding: EdgeInsets.symmetric(vertical: 14 * s),
-                    decoration: BoxDecoration(
-                      gradient: isAuto
-                          ? LinearGradient(
-                              colors: [Color(0xFF4DD4AC), Color(0xFF3AA6D0)],
-                            )
-                          : null,
-                      borderRadius: BorderRadius.circular(14 * s),
-                      boxShadow: isAuto
-                          ? [
-                              BoxShadow(
-                                color: Color(0xFF3AA6D0).withOpacity(0.4),
-                                blurRadius: 12,
-                                spreadRadius: 1,
-                                offset: Offset(0, 3),
-                              ),
-                            ]
-                          : [],
-                    ),
-                    child: AnimatedDefaultTextStyle(
-                      duration: Duration(milliseconds: 200),
-                      style: TextStyle(
-                        fontSize: 14 * s,
-                        fontWeight: FontWeight.w700,
-                        color: isAuto ? Colors.white : muted,
-                        letterSpacing: isAuto ? 0.6 : 0.3,
-                      ),
-                      child: Center(child: Text("AUTO")),
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(width: 8 * s),
-              Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() => isAuto = false);
-                    ref
-                        .read(monitorTelemetryProvider(currentKitId).notifier)
-                        .setManual();
-                  },
-                  child: AnimatedContainer(
-                    duration: Duration(milliseconds: 250),
-                    curve: Curves.easeOut,
-                    padding: EdgeInsets.symmetric(vertical: 14 * s),
-                    decoration: BoxDecoration(
-                      gradient: !isAuto
-                          ? LinearGradient(
-                              colors: [Color(0xFF4DD4AC), Color(0xFF3AA6D0)],
-                            )
-                          : null,
-                      borderRadius: BorderRadius.circular(14 * s),
-                      boxShadow: !isAuto
-                          ? [
-                              BoxShadow(
-                                color: Color(0xFF4DD4AC).withOpacity(0.4),
-                                blurRadius: 12,
-                                spreadRadius: 1,
-                                offset: Offset(0, 3),
-                              ),
-                            ]
-                          : [],
-                    ),
-                    child: AnimatedDefaultTextStyle(
-                      duration: Duration(milliseconds: 200),
-                      style: TextStyle(
-                        fontSize: 14 * s,
-                        fontWeight: FontWeight.w700,
-                        color: !isAuto ? Colors.white : muted,
-                        letterSpacing: !isAuto ? 0.6 : 0.3,
-                      ),
-                      child: Center(child: Text("MANUAL")),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        SizedBox(height: 20 * s),
-
+        // Actuator buttons - only show in manual mode
         if (!isAuto)
           Column(
             children: [
               Row(
                 children: [
                   Expanded(
-                    child: _manualBtn(s, "PH UP", () {
+                    child: _actionBtn(s, "PH UP", () {
                       ref
                           .read(monitorTelemetryProvider(currentKitId).notifier)
                           .phUp();
                     }),
                   ),
-                  SizedBox(width: 12 * s),
+                  SizedBox(width: 10 * s),
                   Expanded(
-                    child: _manualBtn(s, "PH DOWN", () {
+                    child: _actionBtn(s, "PH DOWN", () {
                       ref
                           .read(monitorTelemetryProvider(currentKitId).notifier)
                           .phDown();
@@ -654,19 +650,19 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
                   ),
                 ],
               ),
-              SizedBox(height: 12 * s),
+              SizedBox(height: 10 * s),
               Row(
                 children: [
                   Expanded(
-                    child: _manualBtn(s, "NUTRIENT", () {
+                    child: _actionBtn(s, "NUTRIENT", () {
                       ref
                           .read(monitorTelemetryProvider(currentKitId).notifier)
                           .nutrientAdd();
                     }),
                   ),
-                  SizedBox(width: 12 * s),
+                  SizedBox(width: 10 * s),
                   Expanded(
-                    child: _manualBtn(s, "REFILL", () {
+                    child: _actionBtn(s, "REFILL", () {
                       ref
                           .read(monitorTelemetryProvider(currentKitId).notifier)
                           .refill();
@@ -674,49 +670,39 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
                   ),
                 ],
               ),
-              SizedBox(height: 22 * s),
+              SizedBox(height: 20 * s),
             ],
           ),
       ],
     );
   }
 
-  Widget _manualBtn(double s, String label, VoidCallback onTap) {
+  // Simple action button
+  Widget _actionBtn(double s, String label, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(20 * s),
-      splashColor: Color(0xFF4DD4AC).withOpacity(0.2),
-      highlightColor: Colors.transparent,
-      child: AnimatedContainer(
-        duration: Duration(milliseconds: 200),
-        padding: EdgeInsets.symmetric(vertical: 16 * s),
+      borderRadius: BorderRadius.circular(10 * s),
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 14 * s),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFFF6FBF6), Color(0xFFE9F6EC)],
-          ),
-          borderRadius: BorderRadius.circular(20 * s),
+          color: _kCardBg,
+          borderRadius: BorderRadius.circular(10 * s),
+          border: Border.all(color: _kPrimary.withOpacity(0.2), width: 1),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
-              blurRadius: 10 * s,
-              offset: Offset(0, 4 * s),
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
             ),
           ],
-          border: Border.all(
-            color: Color(0xFF4DD4AC).withOpacity(0.35),
-            width: 1.2,
-          ),
         ),
         child: Center(
           child: Text(
             label,
             style: TextStyle(
-              fontSize: 15 * s,
+              fontSize: 13 * s,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF1A5E45),
-              letterSpacing: 0.5,
+              color: _kPrimary,
             ),
           ),
         ),

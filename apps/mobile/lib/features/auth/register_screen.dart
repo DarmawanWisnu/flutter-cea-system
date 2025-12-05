@@ -25,22 +25,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   static const Color _primaryColor = Color(0xFF154B2E);
   static const Color _mutedText = Color(0xFF6B6B6B);
 
-  void _show(String title, String msg) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text(title),
-        content: Text(msg),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
   Future<void> _doRegister() async {
     if (!_formKey.currentState!.validate()) return;
 

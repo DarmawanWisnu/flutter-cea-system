@@ -22,7 +22,7 @@ class MockApiService extends ApiService {
       tempC: 25.0,
       humidity: 60.0,
       waterTemp: 22.0,
-      waterLevel: 80.0,
+      waterLevel: 2.0,
     );
   }
 
@@ -55,7 +55,7 @@ class MockApiService extends ApiService {
 
 // Mock MQTT ViewModel for testing
 class MockMqttVM extends MqttVM {
-  MockMqttVM(super.ref);
+  MockMqttVM(Ref ref) : super(ref);
 
   @override
   Future<void> init() async {
@@ -79,6 +79,12 @@ class MockMqttVM extends MqttVM {
   @override
   void disableAutoMode(String deviceId) {
     // Mock disable - do nothing
+  }
+
+  @override
+  bool isAutoMode(String deviceId) {
+    // Mock - always return false
+    return false;
   }
 }
 
@@ -106,7 +112,7 @@ void main() {
   }
 
   group('Monitor Screen Widget Tests', () {
-    testWidgets('should display monitor screen title', (
+    testWidgets('should display Fountaine title', (
       WidgetTester tester,
     ) async {
       // Set larger viewport to prevent overflow
@@ -126,11 +132,11 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 
-      // Assert
-      expect(find.text('Monitor'), findsOneWidget);
+      // Assert - Updated to match new title
+      expect(find.text('Fountaine'), findsOneWidget);
     });
 
-    testWidgets('should display all sensor gauges', (
+    testWidgets('should display all 6 sensor cards', (
       WidgetTester tester,
     ) async {
       // Set larger viewport to prevent overflow
@@ -150,11 +156,13 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 
-      // Assert - All sensor types should be displayed
+      // Assert - All 6 sensor types should be displayed
       expect(find.text('pH'), findsOneWidget);
-      expect(find.text('PPM'), findsOneWidget);
+      expect(find.text('TDS'), findsOneWidget);
       expect(find.text('Humidity'), findsOneWidget);
-      expect(find.text('Temperature'), findsOneWidget);
+      expect(find.text('Air Temp'), findsOneWidget);
+      expect(find.text('Water Temp'), findsOneWidget);
+      expect(find.text('Water Level'), findsOneWidget);
     });
 
     testWidgets('should display Your Kit section', (WidgetTester tester) async {
@@ -179,7 +187,7 @@ void main() {
       expect(find.text('Your Kit'), findsOneWidget);
     });
 
-    testWidgets('should display Mode & Control section', (
+    testWidgets('should display Mode section', (
       WidgetTester tester,
     ) async {
       // Set larger viewport to prevent overflow
@@ -199,8 +207,8 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 
-      // Assert
-      expect(find.text('Mode & Control'), findsOneWidget);
+      // Assert - Updated to match new text
+      expect(find.text('Mode'), findsOneWidget);
       expect(find.text('AUTO'), findsOneWidget);
       expect(find.text('MANUAL'), findsOneWidget);
     });
@@ -349,6 +357,30 @@ void main() {
 
       // Assert - Dropdown should be present
       expect(find.byType(DropdownButton<String>), findsOneWidget);
+    });
+
+    testWidgets('should display progress bars for sensors', (
+      WidgetTester tester,
+    ) async {
+      // Set larger viewport to prevent overflow
+      tester.view.physicalSize = const Size(1200, 1800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      // Arrange & Act
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: createTestOverrides(),
+          child: const MaterialApp(
+            home: MonitorScreen(selectedKit: 'test-kit-001'),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      // Assert - Should have 6 progress indicators (one per sensor)
+      expect(find.byType(LinearProgressIndicator), findsNWidgets(6));
     });
   });
 }
