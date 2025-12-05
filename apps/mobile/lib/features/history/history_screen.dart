@@ -7,6 +7,14 @@ import '../../providers/provider/api_provider.dart';
 import '../../domain/telemetry.dart';
 import '../../models/nav_args.dart';
 
+// Match color scheme from other screens
+const Color _kPrimary = Color(0xFF0E5A2A);
+const Color _kBg = Color(0xFFF3F9F4);
+const Color _kChipBg = Color(0xFFE8F2EC);
+
+// Time filter options (within selected day)
+enum TimeFilter { all, hour1, hour6 }
+
 class HistoryScreen extends ConsumerStatefulWidget {
   final String? kitId;
   final DateTime? targetTime;
@@ -17,64 +25,58 @@ class HistoryScreen extends ConsumerStatefulWidget {
 }
 
 class _HistoryScreenState extends ConsumerState<HistoryScreen> {
-  DateTime? selectedDate;
-  String? kitId;
+  DateTime? selectedDate; // null = today
+  TimeFilter _timeFilter = TimeFilter.all;
+  bool _sortDesc = true; // true = newest first, false = oldest first
   bool _inited = false;
 
   final ScrollController _scroll = ScrollController();
   final Map<int, GlobalKey> _itemKeys = {};
   DateTime? _pendingTargetTime;
 
-  // UI colors
-  static const Color _bg = Color(0xFFF6FBF6);
-  static const Color _primary = Color(0xFF154B2E);
-  static const Color _muted = Color(0xFF7A7A7A);
-
-  // Data storage
   List<Map<String, dynamic>> _entries = [];
-  
-  // Auto-refresh timer
+  bool _isLoading = false;
   Timer? _refreshTimer;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_inited) return;
-
-    // Extract kitId from route args or widget
-    final args = ModalRoute.of(context)?.settings.arguments;
-    if (args is HistoryRouteArgs) {
-      kitId = args.kitId;
-    } else if (args is Map) {
-      kitId = args['kitId'] as String?;
-    }
-    kitId ??= widget.kitId;
-
     _inited = true;
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await _loadData();
-
-      if (widget.targetTime != null) {
-        _pendingTargetTime = widget.targetTime;
-        selectedDate = DateTime(
-          widget.targetTime!.year,
-          widget.targetTime!.month,
-          widget.targetTime!.day,
-        );
+      final args = ModalRoute.of(context)?.settings.arguments;
+      if (args is HistoryRouteArgs && args.kitId != null) {
+        await _loadData(args.kitId!, days: 7);
+        if (widget.targetTime != null || args.targetTime != null) {
+          _pendingTargetTime = widget.targetTime ?? args.targetTime;
+          selectedDate = DateTime(
+            _pendingTargetTime!.year,
+            _pendingTargetTime!.month,
+            _pendingTargetTime!.day,
+          );
+        }
+      } else {
+        final currentKit = ref.read(currentKitIdProvider);
+        if (currentKit != null) {
+          await _loadData(currentKit, days: 1);
+        }
       }
 
       if (mounted) setState(() {});
-      
-      // Start auto-refresh timer (every 30 seconds)
+
+      // Auto-refresh every 30 seconds (only for today)
       _refreshTimer = Timer.periodic(const Duration(seconds: 30), (_) {
-        if (mounted) {
-          _loadData();
+        if (mounted && selectedDate == null) {
+          final currentKit = ref.read(currentKitIdProvider);
+          if (currentKit != null) {
+            _loadData(currentKit, days: 1);
+          }
         }
       });
     });
   }
-  
+
   @override
   void dispose() {
     _refreshTimer?.cancel();
@@ -82,74 +84,81 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     super.dispose();
   }
 
-  // LOAD FROM BACKEND
-  Future<void> _loadData() async {
-    if (kitId == null) {
-      print('[HistoryScreen] kitId is null, cannot load data');
-      return;
-    }
-    
-    try {
-      print('[HistoryScreen] Loading data for kitId: $kitId');
-      final api = ref.read(apiServiceProvider);
+  Future<void> _loadData(String kitId, {int days = 1}) async {
+    setState(() => _isLoading = true);
+    final limit = days == 1 ? 2880 : 20160;
 
+    try {
+      final api = ref.read(apiServiceProvider);
       final res = await api.getJson(
-        "/telemetry/history?deviceId=$kitId&limit=500",
+        "/telemetry/history?deviceId=$kitId&days=$days&limit=$limit",
       );
 
-      print('[HistoryScreen] API response: $res');
-
       final List items = res["items"] ?? [];
-      print('[HistoryScreen] Found ${items.length} items');
-
       _entries = items.map((e) {
         final t = Telemetry.fromJson(e["data"]);
         final ts = e["ingestTime"] as int;
-
         return {"t": t, "ts": ts};
       }).toList();
-
-      print('[HistoryScreen] Loaded ${_entries.length} entries');
-      
-      if (mounted) setState(() {});
-    } catch (e, stackTrace) {
-      print('[HistoryScreen] Error loading data: $e');
-      print('[HistoryScreen] Stack trace: $stackTrace');
+    } catch (e) {
       _entries = [];
-      if (mounted) setState(() {});
     }
+
+    if (mounted) setState(() => _isLoading = false);
   }
 
-  // SWITCH KIT
-  Future<void> _switchKit(String newKitId) async {
-    if (newKitId == kitId) return;
-    setState(() {
-      kitId = newKitId;
-      _entries = [];
-      selectedDate = null;
-      _pendingTargetTime = null;
-    });
-    await _loadData();
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final dateOnly = DateTime(date.year, date.month, date.day);
+
+    if (dateOnly == today) return 'Today';
+    if (dateOnly == yesterday) return 'Yesterday';
+    return DateFormat('EEE, d MMM').format(date);
+  }
+
+  // Filter entries by selected date AND time filter
+  List<Map<String, dynamic>> _getFiltered() {
+    final now = DateTime.now();
+    final targetDate = selectedDate ?? DateTime(now.year, now.month, now.day);
+
+    // First filter by date
+    var filtered = _entries.where((e) {
+      final ts = e['ts'] as int;
+      final d = DateTime.fromMillisecondsSinceEpoch(ts);
+      return d.year == targetDate.year &&
+          d.month == targetDate.month &&
+          d.day == targetDate.day;
+    }).toList();
+
+    // Then filter by time (only for today)
+    if (selectedDate == null && _timeFilter != TimeFilter.all) {
+      final hoursBack = _timeFilter == TimeFilter.hour1 ? 1 : 6;
+      final cutoff = now.subtract(Duration(hours: hoursBack));
+      filtered = filtered.where((e) {
+        final ts = e['ts'] as int;
+        final d = DateTime.fromMillisecondsSinceEpoch(ts);
+        return d.isAfter(cutoff);
+      }).toList();
+    }
+
+    // Apply sort order
+    if (_sortDesc) {
+      filtered.sort((a, b) => (b['ts'] as int).compareTo(a['ts'] as int));
+    } else {
+      filtered.sort((a, b) => (a['ts'] as int).compareTo(b['ts'] as int));
+    }
+
+    return filtered;
   }
 
   @override
   Widget build(BuildContext context) {
-    final s = MediaQuery.of(context).size.width / 375.0;
-
+    final currentKit = ref.watch(currentKitIdProvider);
     final unread = ref.watch(unreadNotificationCountProvider);
+    final filtered = _getFiltered();
 
-    // FILTER BY DATE
-    final filtered = selectedDate == null
-        ? _entries
-        : _entries.where((e) {
-            final d1 = DateFormat(
-              'yyyy-MM-dd',
-            ).format(DateTime.fromMillisecondsSinceEpoch(e['ts']));
-            final d2 = DateFormat('yyyy-MM-dd').format(selectedDate!);
-            return d1 == d2;
-          }).toList();
-
-    // Auto-scroll if needed
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_pendingTargetTime != null && filtered.isNotEmpty) {
         _jumpToTarget(_pendingTargetTime!, filtered);
@@ -158,223 +167,199 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     });
 
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: _kBg,
       appBar: AppBar(
-        backgroundColor: _bg,
+        backgroundColor: _kBg,
         elevation: 0,
-        centerTitle: true,
+        surfaceTintColor: Colors.transparent,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: _kPrimary),
+          onPressed: () => Navigator.pop(context),
+        ),
         title: const Text(
           'History',
           style: TextStyle(
-            color: _primary,
-            fontWeight: FontWeight.w800,
-            fontSize: 22,
+            color: _kPrimary,
+            fontWeight: FontWeight.w900,
+            fontSize: 20,
+            letterSpacing: .2,
           ),
         ),
-        iconTheme: const IconThemeData(color: _primary),
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20 * s, vertical: 14 * s),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // DATE PICKER
-              GestureDetector(
-                onTap: () async {
-                  final picked = await showDatePicker(
-                    context: context,
-                    initialDate: selectedDate ?? DateTime.now(),
-                    firstDate: DateTime(2024, 1, 1),
-                    lastDate: DateTime(2026, 12, 31),
-                  );
-                  if (picked != null) {
-                    setState(() => selectedDate = picked);
-                    await _loadData();
-                    _pendingTargetTime = null;
-                  }
-                },
-                child: Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 18 * s,
-                    vertical: 14 * s,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(18 * s),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 10 * s,
-                        offset: Offset(0, 3 * s),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.calendar_today_rounded,
-                            color: _primary,
-                            size: 20,
-                          ),
-                          SizedBox(width: 8 * s),
-                          Text(
-                            selectedDate == null
-                                ? 'Select Date'
-                                : DateFormat(
-                                    'd MMMM yyyy',
-                                  ).format(selectedDate!),
-                            style: TextStyle(
-                              color: selectedDate == null ? _muted : _primary,
-                              fontSize: 15 * s,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Icon(
-                        Icons.keyboard_arrow_down_rounded,
-                        color: _primary,
-                        size: 22 * s,
-                      ),
-                    ],
+        centerTitle: true,
+        actions: [
+          if (currentKit != null)
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(right: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: _kChipBg,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  currentKit,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: _kPrimary,
                   ),
                 ),
               ),
-
-              SizedBox(height: 12 * s),
-
-              // KIT SELECTOR
-              _kitSelector(s),
-
-              SizedBox(height: 18 * s),
-
-              // EMPTY / LIST
-              if (filtered.isEmpty)
-                Expanded(
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.history_toggle_off_rounded,
-                          size: 80 * s,
-                          color: _muted.withOpacity(0.4),
-                        ),
-                        SizedBox(height: 12 * s),
-                        Text(
-                          'No data available for this date.',
-                          style: TextStyle(
-                            color: _muted,
-                            fontSize: 15 * s,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              else
-                Expanded(
-                  child: ListView.builder(
-                    controller: _scroll,
-                    itemCount: filtered.length,
-                    itemBuilder: (context, index) {
-                      final item = filtered[index];
-                      final Telemetry t = item['t'];
-                      final date = DateTime.fromMillisecondsSinceEpoch(
-                        item['ts'],
-                      );
-
-                      final key = _itemKeys.putIfAbsent(
-                        date.millisecondsSinceEpoch,
-                        () => GlobalKey(),
-                      );
-
-                      return Padding(
-                        key: key,
-                        padding: EdgeInsets.only(bottom: 14 * s),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16 * s),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.06),
-                                blurRadius: 12 * s,
-                                offset: Offset(0, 4 * s),
-                              ),
-                            ],
-                          ),
-                          child: Padding(
-                            padding: EdgeInsets.all(16 * s),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+            ),
+          if (_isLoading)
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2, color: _kPrimary),
+              ),
+            )
+          else
+            IconButton(
+              icon: const Icon(Icons.refresh, color: _kPrimary),
+              onPressed: () {
+                if (currentKit != null) {
+                  _loadData(currentKit, days: selectedDate != null ? 7 : 1);
+                }
+              },
+            ),
+        ],
+      ),
+      body: currentKit == null
+          ? _buildNoKit()
+          : Column(
+              children: [
+                // Date picker row
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                  child: Row(
+                    children: [
+                      // Date picker button
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => _showDatePicker(currentKit),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              color: _kChipBg,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Row(
                               children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      kitId ?? 'Unknown Kit',
-                                      style: TextStyle(
-                                        color: _primary,
-                                        fontSize: 17 * s,
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                    ),
-                                    Container(
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: 10 * s,
-                                        vertical: 4 * s,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: _primary.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(
-                                          12 * s,
-                                        ),
-                                      ),
-                                      child: Text(
-                                        DateFormat('HH:mm:ss').format(date),
-                                        style: TextStyle(
-                                          color: _primary,
-                                          fontSize: 12 * s,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                                const Icon(
+                                  Icons.calendar_today_outlined,
+                                  size: 18,
+                                  color: _kPrimary,
                                 ),
-
-                                const Divider(),
-
-                                _dataRow('Water Acidity', '${t.ph} pH', s),
-                                _dataRow('TDS', '${t.ppm} ppm', s),
-                                _dataRow('Humidity', '${t.humidity} %', s),
-                                _dataRow(
-                                  'Temperature',
-                                  '${t.tempC.toStringAsFixed(1)} °C',
-                                  s,
+                                const SizedBox(width: 10),
+                                Text(
+                                  selectedDate == null
+                                      ? 'Today'
+                                      : _formatDate(selectedDate!),
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: _kPrimary,
+                                  ),
+                                ),
+                                const Spacer(),
+                                Icon(
+                                  Icons.keyboard_arrow_down,
+                                  color: _kPrimary.withOpacity(0.5),
                                 ),
                               ],
                             ),
                           ),
                         ),
-                      );
-                    },
+                      ),
+                      if (selectedDate != null) ...[
+                        const SizedBox(width: 8),
+                        GestureDetector(
+                          onTap: () async {
+                            setState(() {
+                              selectedDate = null;
+                              _timeFilter = TimeFilter.all;
+                            });
+                            await _loadData(currentKit, days: 1);
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.red[50],
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Icon(
+                              Icons.close,
+                              size: 20,
+                              color: Colors.red[400],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
-            ],
-          ),
-        ),
-      ),
 
-      // NOTIFICATION FAB
+                // Time filter chips (only for today)
+                if (selectedDate == null)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                    child: Row(
+                      children: [
+                        _filterChip('All', TimeFilter.all),
+                        const SizedBox(width: 8),
+                        _filterChip('1h', TimeFilter.hour1),
+                        const SizedBox(width: 8),
+                        _filterChip('6h', TimeFilter.hour6),
+                        const Spacer(),
+                        // Sort toggle
+                        GestureDetector(
+                          onTap: () => setState(() => _sortDesc = !_sortDesc),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: _kChipBg,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  _sortDesc ? Icons.arrow_downward : Icons.arrow_upward,
+                                  size: 14,
+                                  color: _kPrimary,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  _sortDesc ? 'New' : 'Old',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: _kPrimary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                // Content
+                Expanded(
+                  child: filtered.isEmpty
+                      ? _buildEmpty()
+                      : _buildList(filtered, currentKit),
+                ),
+              ],
+            ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: _primary,
+        backgroundColor: _kPrimary,
         onPressed: () {
           Navigator.pushNamed(
             context,
@@ -382,165 +367,169 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             arguments: const NotificationRouteArgs(initialFilter: 'info'),
           );
         },
-        shape: const CircleBorder(),
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            const Icon(Icons.notifications_rounded, color: Colors.white),
-            if (unread > 0)
-              Positioned(
-                right: -2,
-                top: -2,
-                child: Container(
-                  padding: const EdgeInsets.all(3),
-                  decoration: const BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
-                  ),
-                  constraints: const BoxConstraints(
-                    minWidth: 18,
-                    minHeight: 18,
-                  ),
-                  child: const Center(
-                    child: Text(
-                      '!',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-          ],
+        child: Badge(
+          isLabelVisible: unread > 0,
+          label: Text(unread > 9 ? '9+' : '$unread'),
+          child: const Icon(Icons.notifications_outlined, color: Colors.white),
         ),
       ),
     );
   }
 
-  Widget _dataRow(String label, String value, double s) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 4 * s),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  void _showDatePicker(String currentKit) async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate ?? DateTime.now(),
+      firstDate: DateTime.now().subtract(const Duration(days: 30)),
+      lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(primary: _kPrimary),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      final today = DateTime.now();
+      final isToday = picked.year == today.year &&
+          picked.month == today.month &&
+          picked.day == today.day;
+
+      setState(() {
+        selectedDate = isToday ? null : picked;
+        _timeFilter = TimeFilter.all;
+      });
+      await _loadData(currentKit, days: isToday ? 1 : 7);
+    }
+  }
+
+  Widget _filterChip(String label, TimeFilter filter) {
+    final isSelected = _timeFilter == filter;
+    return GestureDetector(
+      onTap: () => setState(() => _timeFilter = filter),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? _kPrimary : _kChipBg,
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: isSelected ? Colors.white : _kPrimary,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNoKit() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(
-            label,
+          Icon(Icons.sensors_off, size: 48, color: _kPrimary.withOpacity(0.4)),
+          const SizedBox(height: 16),
+          const Text(
+            'No kit selected',
             style: TextStyle(
-              color: _muted,
-              fontSize: 14 * s,
+              fontSize: 16,
               fontWeight: FontWeight.w500,
+              color: _kPrimary,
             ),
           ),
+          const SizedBox(height: 8),
           Text(
-            value,
-            style: TextStyle(
-              color: _primary,
-              fontSize: 14 * s,
-              fontWeight: FontWeight.w700,
-            ),
+            'Select a kit from Monitor first',
+            style: TextStyle(fontSize: 14, color: _kPrimary.withOpacity(0.6)),
           ),
         ],
       ),
     );
   }
 
-  // KIT SELECTOR DROPDOWN
-  Widget _kitSelector(double s) {
-    final kitsAsync = ref.watch(apiKitsListProvider);
-
-    return kitsAsync.when(
-      loading: () => Container(
-        height: 50 * s,
-        padding: EdgeInsets.symmetric(horizontal: 18 * s),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18 * s),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10 * s,
-              offset: Offset(0, 3 * s),
+  Widget _buildEmpty() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.inbox_outlined, size: 48, color: _kPrimary.withOpacity(0.4)),
+          const SizedBox(height: 16),
+          const Text(
+            'No data',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: _kPrimary,
             ),
-          ],
-        ),
-        child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'No readings for this period',
+            style: TextStyle(fontSize: 14, color: _kPrimary.withOpacity(0.6)),
+          ),
+        ],
       ),
-      error: (e, _) => Text("Failed to load kits: $e"),
-      data: (kits) {
-        if (kits.isEmpty) return const Text("No kits registered.");
+    );
+  }
 
-        // If kitId is null, use first kit
-        if (kitId == null && kits.isNotEmpty) {
-          Future.microtask(() {
-            setState(() => kitId = kits.first["id"] as String);
-            _loadData();
-          });
-        }
+  Widget _buildList(List<Map<String, dynamic>> data, String kitId) {
+    return ListView.builder(
+      controller: _scroll,
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+      itemCount: data.length,
+      itemBuilder: (context, index) {
+        final item = data[index];
+        final Telemetry t = item['t'];
+        final ts = item['ts'] as int;
+        final date = DateTime.fromMillisecondsSinceEpoch(ts);
+
+        final key = _itemKeys.putIfAbsent(ts, () => GlobalKey());
 
         return Container(
-          padding: EdgeInsets.symmetric(horizontal: 18 * s, vertical: 14 * s),
+          key: key,
+          margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(18 * s),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10 * s,
-                offset: Offset(0, 3 * s),
-              ),
-            ],
+            borderRadius: BorderRadius.circular(12),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Time
               Row(
                 children: [
-                  const Icon(
-                    Icons.devices_rounded,
-                    color: _primary,
-                    size: 20,
-                  ),
-                  SizedBox(width: 8 * s),
+                  Icon(Icons.access_time, size: 14, color: _kPrimary.withOpacity(0.5)),
+                  const SizedBox(width: 6),
                   Text(
-                    'Kit:',
+                    DateFormat('HH:mm:ss').format(date),
                     style: TextStyle(
-                      color: _muted,
-                      fontSize: 15 * s,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                      color: _kPrimary.withOpacity(0.6),
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                  SizedBox(width: 8 * s),
-                  DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value: kitId,
-                      icon: Icon(
-                        Icons.keyboard_arrow_down_rounded,
-                        color: _primary,
-                        size: 20 * s,
-                      ),
-                      items: kits.map<DropdownMenuItem<String>>((k) {
-                        final id = k["id"] as String;
-                        return DropdownMenuItem(
-                          value: id,
-                          child: Text(
-                            id,
-                            style: TextStyle(
-                              fontSize: 15 * s,
-                              fontWeight: FontWeight.w700,
-                              color: _primary,
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (v) {
-                        if (v != null && v != kitId) {
-                          _switchKit(v);
-                        }
-                      },
-                    ),
-                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              // Sensor values
+              Row(
+                children: [
+                  _sensorValue('pH', t.ph.toStringAsFixed(2)),
+                  _sensorValue('TDS', '${t.ppm.toInt()} ppm'),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  _sensorValue('Humidity', '${t.humidity.toStringAsFixed(1)}%'),
+                  _sensorValue('Temp', '${t.tempC.toStringAsFixed(1)}°C'),
                 ],
               ),
             ],
@@ -550,17 +539,37 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     );
   }
 
-  // scroll to the target item
-  void _jumpToTarget(DateTime target, List<Map<String, dynamic>> filtered) {
+  Widget _sensorValue(String label, String value) {
+    return Expanded(
+      child: Row(
+        children: [
+          Text(
+            '$label: ',
+            style: TextStyle(
+              fontSize: 13,
+              color: _kPrimary.withOpacity(0.6),
+            ),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: _kPrimary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _jumpToTarget(DateTime target, List<Map<String, dynamic>> data) {
     int? keyTs;
     Duration best = const Duration(days: 9999);
 
-    for (final it in filtered) {
+    for (final it in data) {
       final ts = it['ts'] as int;
-      final diff = DateTime.fromMillisecondsSinceEpoch(
-        ts,
-      ).difference(target).abs();
-
+      final diff = DateTime.fromMillisecondsSinceEpoch(ts).difference(target).abs();
       if (diff < best) {
         best = diff;
         keyTs = ts;

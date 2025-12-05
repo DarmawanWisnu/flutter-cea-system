@@ -274,8 +274,17 @@ def get_latest(deviceId: str):
 
 # TELEMETRY GET HISTORY
 @app.get("/telemetry/history")
-def get_history(deviceId: str, limit: int = 50):
-    limit = max(1, min(limit, 500))
+def get_history(deviceId: str, days: int = 7, limit: int = 10000):
+    """
+    Get telemetry history for a device.
+    - days: How many days back to fetch (default 7, max 30)
+    - limit: Max entries to return (default 10000, for safety)
+    """
+    days = max(1, min(days, 30))  # 1-30 days
+    limit = max(1, min(limit, 50000))  # Safety cap
+    
+    # Calculate timestamp for N days ago
+    cutoff_time = int((time.time() - (days * 24 * 60 * 60)) * 1000)
 
     conn = get_connection()
     cur = conn.cursor()
@@ -284,15 +293,16 @@ def get_history(deviceId: str, limit: int = 50):
         cur.execute("""
             SELECT "payloadJson", "ingestTime"
             FROM telemetry
-            WHERE "deviceId" = %s
+            WHERE "deviceId" = %s AND "ingestTime" >= %s
             ORDER BY "ingestTime" DESC
             LIMIT %s;
-        """, (deviceId, limit))
+        """, (deviceId, cutoff_time, limit))
 
         rows = cur.fetchall()
 
         return {
             "deviceId": deviceId,
+            "days": days,
             "count": len(rows),
             "items": [
                 {"ingestTime": r[1], "data": map_payload(r[0])}
