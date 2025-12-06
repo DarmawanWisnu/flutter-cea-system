@@ -1,7 +1,15 @@
+/// Basic Widget Tests
+///
+/// Example tests demonstrating Flutter widget testing patterns.
+/// These serve as templates for understanding test structure.
+/// Covers:
+/// - Basic widget display verification
+/// - Button tap interaction testing
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  /// Verifies a basic widget renders text correctly.
   testWidgets('Basic widget test example', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
@@ -9,14 +17,13 @@ void main() {
       ),
     );
 
-    // Verify the widget displays correctly
     expect(find.text('Flutter CEA System'), findsOneWidget);
   });
 
+  /// Demonstrates button tap testing pattern.
   testWidgets('Button tap test example', (WidgetTester tester) async {
     int counter = 0;
 
-    // Build a widget with a button
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -30,14 +37,12 @@ void main() {
       ),
     );
 
-    // Find and tap the button
     final button = find.text('Tap Me');
     expect(button, findsOneWidget);
 
     await tester.tap(button);
     await tester.pump();
 
-    // Verify the action occurred
     expect(counter, 1);
   });
 }

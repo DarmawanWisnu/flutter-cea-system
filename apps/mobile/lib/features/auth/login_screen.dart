@@ -274,7 +274,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Image.asset('assets/images/google_logo.png', height: 20),
+                      Image.asset(
+                        'assets/images/google_logo.png',
+                        height: 20,
+                        errorBuilder: (_, __, ___) => const Icon(
+                          Icons.g_mobiledata,
+                          size: 20,
+                          color: _primaryColor,
+                        ),
+                      ),
                       const SizedBox(width: 10),
                       const Text(
                         'Sign in with Google',

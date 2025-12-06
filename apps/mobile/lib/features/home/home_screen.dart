@@ -52,6 +52,12 @@ class HomeScreen extends StatelessWidget {
                     width: 110 * s,
                     height: 90 * s,
                     fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      width: 110 * s,
+                      height: 90 * s,
+                      color: primary.withOpacity(0.1),
+                      child: Icon(Icons.image, size: 32 * s, color: primary),
+                    ),
                   ),
                 ),
               ),
@@ -80,6 +86,9 @@ class HomeScreen extends StatelessWidget {
                       child: Image.asset(
                         'assets/images/weather_icon.png',
                         fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          color: primary.withOpacity(0.3),
+                        ),
                       ),
                     ),
                   ),
@@ -204,6 +213,11 @@ class HomeScreen extends StatelessWidget {
                         'assets/images/rain_icon.png',
                         width: 72 * s,
                         height: 72 * s,
+                        errorBuilder: (_, __, ___) => Icon(
+                          Icons.cloud,
+                          size: 72 * s,
+                          color: primary.withOpacity(0.3),
+                        ),
                       ),
                     ],
                   ),

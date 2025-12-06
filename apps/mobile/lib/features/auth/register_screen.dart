@@ -320,6 +320,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         Image.asset(
                           'assets/images/google_logo.png',
                           height: 20 * s,
+                          errorBuilder: (_, __, ___) => Icon(
+                            Icons.g_mobiledata,
+                            size: 20 * s,
+                            color: _primaryColor,
+                          ),
                         ),
                         SizedBox(width: 10 * s),
                         Text(

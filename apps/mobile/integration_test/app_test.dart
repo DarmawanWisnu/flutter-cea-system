@@ -1,27 +1,31 @@
+/// App Integration Tests
+///
+/// Basic integration tests verifying app launch and core navigation.
+/// These serve as smoke tests to ensure the app starts correctly.
+/// Covers:
+/// - App launch success
+/// - Basic screen navigation
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-
-/// Integration Test for the Flutter CEA System App
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('App Integration Tests', () {
+    /// Verifies app launches successfully.
     testWidgets('app should launch successfully', (WidgetTester tester) async {
-      // Arrange & Act
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(body: Center(child: Text('CEA System'))),
         ),
       );
 
-      // Verify app loads
       expect(find.text('CEA System'), findsOneWidget);
     });
 
+    /// Tests basic screen navigation.
     testWidgets('should navigate between screens', (WidgetTester tester) async {
-      // Arrange
       await tester.pumpWidget(
         MaterialApp(
           home: const HomeScreen(),
@@ -29,18 +33,16 @@ void main() {
         ),
       );
 
-      // Act - Tap navigation button
       final button = find.byType(ElevatedButton);
       await tester.tap(button);
       await tester.pumpAndSettle();
 
-      // Assert - Should navigate to second screen
       expect(find.text('Second Screen'), findsOneWidget);
     });
   });
 }
 
-// Mock screens for testing navigation
+/// Mock home screen for navigation testing.
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -57,6 +59,7 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
+/// Mock second screen for navigation testing.
 class SecondScreen extends StatelessWidget {
   const SecondScreen({super.key});
 

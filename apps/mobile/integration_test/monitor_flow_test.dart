@@ -1,3 +1,13 @@
+/// Monitor Screen Flow Integration Tests
+///
+/// End-to-end tests covering the complete monitor screen user journey.
+/// Tests use mock API and MQTT providers to avoid real network/broker calls.
+/// Covers:
+/// - Sensor gauge display (pH, TDS, Temperature, Humidity)
+/// - Kit selection and status
+/// - AUTO/MANUAL mode switching
+/// - Manual control button interactions
+/// - Complete user flow simulation
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -8,7 +18,7 @@ import 'package:fountaine/providers/provider/mqtt_provider.dart';
 import 'package:fountaine/services/api_service.dart';
 import 'package:fountaine/domain/telemetry.dart';
 
-// Mock API Service to avoid real network calls
+/// Mock API Service that returns static telemetry data for testing.
 class MockApiService extends ApiService {
   MockApiService() : super(baseUrl: 'http://localhost:8000');
 
@@ -35,7 +45,7 @@ class MockApiService extends ApiService {
   }
 }
 
-// Mock MQTT ViewModel to avoid real MQTT connections
+/// Mock MQTT ViewModel that provides no-op implementations for testing.
 class MockMqttVM extends MqttVM {
   MockMqttVM(super.ref);
 
@@ -64,42 +74,29 @@ class MockMqttVM extends MqttVM {
   }
 }
 
-/// This test suite covers the complete monitor screen user journey:
-/// - Viewing sensor data (pH, PPM, Temperature, Humidity)
-/// - Switching between Auto and Manual modes
-/// - Using manual control buttons
-/// - Selecting different kits
-
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  // Helper function to create test overrides
+  /// Creates provider overrides for test isolation.
   createTestOverrides() {
     return [
-      // Override the base URL provider to avoid dotenv dependency
       apiBaseUrlProvider.overrideWith((ref) => 'http://localhost:8000'),
-
-      // Override the API service provider with mock
       apiServiceProvider.overrideWith((ref) => MockApiService()),
-
-      // Override the API kits list provider
       apiKitsListProvider.overrideWith((ref) async {
         return [
           {'id': 'test-kit-001', 'name': 'Test Kit 1'},
           {'id': 'test-kit-002', 'name': 'Test Kit 2'},
         ];
       }),
-
-      // Override the MQTT provider with mock
       mqttProvider.overrideWith((ref) => MockMqttVM(ref)),
     ];
   }
 
   group('Monitor Screen Flow Integration Tests', () {
+    /// Verifies all sensor gauges are displayed.
     testWidgets('should display all sensor gauges', (
       WidgetTester tester,
     ) async {
-      // Arrange & Act
       await tester.pumpWidget(
         ProviderScope(
           overrides: createTestOverrides(),
@@ -108,21 +105,19 @@ void main() {
           ),
         ),
       );
-      // Use pump instead of pumpAndSettle to avoid timeout
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 
-      // Assert - All sensor types should be displayed
       expect(find.text('pH'), findsOneWidget);
-      expect(find.text('PPM'), findsOneWidget);
+      expect(find.text('TDS'), findsOneWidget);
       expect(find.text('Humidity'), findsOneWidget);
-      expect(find.text('Temperature'), findsOneWidget);
+      expect(find.text('Air Temp'), findsOneWidget);
     });
 
+    /// Verifies sensor values display with proper units.
     testWidgets('should display sensor values with units', (
       WidgetTester tester,
     ) async {
-      // Arrange & Act
       await tester.pumpWidget(
         ProviderScope(
           overrides: createTestOverrides(),
@@ -133,17 +128,16 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Assert - Units should be displayed
       expect(find.textContaining('pH'), findsWidgets);
       expect(find.textContaining('ppm'), findsWidgets);
       expect(find.textContaining('%'), findsWidgets);
       expect(find.textContaining('°C'), findsWidgets);
     });
 
+    /// Verifies kit section with selector is displayed.
     testWidgets('should display Your Kit section with kit selector', (
       WidgetTester tester,
     ) async {
-      // Arrange & Act
       await tester.pumpWidget(
         ProviderScope(
           overrides: createTestOverrides(),
@@ -154,15 +148,14 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Assert
       expect(find.text('Your Kit'), findsOneWidget);
       expect(find.byType(DropdownButton<String>), findsOneWidget);
     });
 
+    /// Verifies mode section with toggle buttons is displayed.
     testWidgets('should display Mode & Control section', (
       WidgetTester tester,
     ) async {
-      // Arrange & Act
       await tester.pumpWidget(
         ProviderScope(
           overrides: createTestOverrides(),
@@ -173,16 +166,15 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Assert
-      expect(find.text('Mode & Control'), findsOneWidget);
+      expect(find.text('Mode'), findsOneWidget);
       expect(find.text('AUTO'), findsOneWidget);
       expect(find.text('MANUAL'), findsOneWidget);
     });
 
+    /// Tests switching from auto to manual mode reveals control buttons.
     testWidgets('should switch from auto to manual mode', (
       WidgetTester tester,
     ) async {
-      // Arrange
       await tester.pumpWidget(
         ProviderScope(
           overrides: createTestOverrides(),
@@ -193,43 +185,30 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Note: The screen starts in MANUAL mode by default (isAuto = false)
-      // So we first need to switch to AUTO mode, then back to MANUAL
-
-      // First, switch to AUTO mode
       final autoButton = find.text('AUTO');
       await tester.tap(autoButton);
       await tester.pump();
       await tester.pump();
       await tester.pumpAndSettle();
 
-      // Verify manual buttons are hidden in auto mode
       expect(find.text('PH UP'), findsNothing);
 
-      // Act - Switch to manual mode
       final manualButton = find.text('MANUAL');
       await tester.tap(manualButton);
-
-      // Pump once to trigger the tap gesture
       await tester.pump();
-
-      // Pump again to process the state change
       await tester.pump();
-
-      // Wait for all animations to complete
       await tester.pumpAndSettle();
 
-      // Assert - Manual control buttons should now be visible
       expect(find.text('PH UP'), findsOneWidget);
       expect(find.text('PH DOWN'), findsOneWidget);
       expect(find.text('NUTRIENT'), findsOneWidget);
       expect(find.text('REFILL'), findsOneWidget);
     });
 
+    /// Tests switching from manual to auto mode hides control buttons.
     testWidgets('should switch from manual to auto mode', (
       WidgetTester tester,
     ) async {
-      // Arrange
       await tester.pumpWidget(
         ProviderScope(
           overrides: createTestOverrides(),
@@ -240,30 +219,26 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // First switch to manual mode
       final manualButton = find.text('MANUAL');
       await tester.tap(manualButton);
       await tester.pumpAndSettle();
 
-      // Verify manual buttons are visible
       expect(find.text('PH UP'), findsOneWidget);
 
-      // Act - Switch back to auto mode
       final autoButton = find.text('AUTO');
       await tester.tap(autoButton);
       await tester.pumpAndSettle();
 
-      // Assert - Manual control buttons should be hidden
       expect(find.text('PH UP'), findsNothing);
       expect(find.text('PH DOWN'), findsNothing);
       expect(find.text('NUTRIENT'), findsNothing);
       expect(find.text('REFILL'), findsNothing);
     });
 
+    /// Tests manual control buttons are tappable.
     testWidgets('should tap manual control buttons', (
       WidgetTester tester,
     ) async {
-      // Arrange
       await tester.pumpWidget(
         ProviderScope(
           overrides: createTestOverrides(),
@@ -274,12 +249,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Switch to manual mode
       final manualButton = find.text('MANUAL');
       await tester.tap(manualButton);
       await tester.pumpAndSettle();
 
-      // Act & Assert - Tap each manual control button
       final phUpButton = find.text('PH UP');
       expect(phUpButton, findsOneWidget);
       await tester.tap(phUpButton);
@@ -300,14 +273,13 @@ void main() {
       await tester.tap(refillButton);
       await tester.pump();
 
-      // If we got here without errors, all buttons are tappable
       expect(true, true);
     });
 
+    /// Verifies kit status indicator is present.
     testWidgets('should display kit status indicator', (
       WidgetTester tester,
     ) async {
-      // Arrange & Act
       await tester.pumpWidget(
         ProviderScope(
           overrides: createTestOverrides(),
@@ -318,15 +290,14 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Assert - Status dot should be present
       final containers = find.byType(Container);
       expect(containers, findsWidgets);
     });
 
+    /// Verifies last update timestamp is displayed.
     testWidgets('should display last update timestamp', (
       WidgetTester tester,
     ) async {
-      // Arrange & Act
       await tester.pumpWidget(
         ProviderScope(
           overrides: createTestOverrides(),
@@ -337,16 +308,13 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Assert - "Last:" text should be present
       expect(find.textContaining('Last:'), findsOneWidget);
     });
 
+    /// Simulates complete user flow: view data, switch mode, use controls.
     testWidgets('complete user flow: view data, switch mode, use controls', (
       WidgetTester tester,
     ) async {
-      // This test simulates a complete user journey on the monitor screen
-
-      // Arrange
       await tester.pumpWidget(
         ProviderScope(
           overrides: createTestOverrides(),
@@ -357,35 +325,28 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Step 1: User views sensor data
       expect(find.text('pH'), findsOneWidget);
-      expect(find.text('PPM'), findsOneWidget);
+      expect(find.text('TDS'), findsOneWidget);
       expect(find.text('Humidity'), findsOneWidget);
-      expect(find.text('Temperature'), findsOneWidget);
+      expect(find.text('Air Temp'), findsOneWidget);
 
-      // Step 2: User switches to manual mode
       final manualButton = find.text('MANUAL');
       await tester.tap(manualButton);
       await tester.pumpAndSettle();
 
-      // Step 3: User sees manual control buttons
       expect(find.text('PH UP'), findsOneWidget);
       expect(find.text('PH DOWN'), findsOneWidget);
 
-      // Step 4: User taps PH UP button
       final phUpButton = find.text('PH UP');
       await tester.tap(phUpButton);
       await tester.pump();
 
-      // Step 5: User switches back to auto mode
       final autoButton = find.text('AUTO');
       await tester.tap(autoButton);
       await tester.pumpAndSettle();
 
-      // Step 6: Manual buttons are hidden
       expect(find.text('PH UP'), findsNothing);
 
-      // Complete flow executed successfully
       expect(true, true);
     });
   });

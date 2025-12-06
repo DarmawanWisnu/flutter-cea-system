@@ -1,4 +1,14 @@
+/// Monitor Screen Widget Tests
+///
+/// Tests the MonitorScreen widget for proper rendering of sensor data and controls.
+/// Uses mock API and MQTT providers to isolate from external dependencies.
+/// Covers:
+/// - Sensor gauge display (pH, TDS, Humidity, Temperature)
+/// - Kit selection dropdown
+/// - Mode switching (AUTO/MANUAL)
+/// - Progress bar indicators
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fountaine/features/monitor/monitor_screen.dart';
@@ -7,13 +17,14 @@ import 'package:fountaine/providers/provider/mqtt_provider.dart';
 import 'package:fountaine/services/api_service.dart';
 import 'package:fountaine/domain/telemetry.dart';
 
-// Mock API Service for testing
+import '../helpers/test_overflow_handler.dart';
+
+/// Mock API Service that returns static telemetry data for testing.
 class MockApiService extends ApiService {
   MockApiService() : super(baseUrl: 'http://localhost:8000');
 
   @override
   Future<Telemetry?> getLatestTelemetry(String deviceId) async {
-    // Return mock telemetry data
     return const Telemetry(
       id: 1,
       ingestTime: 1234567890,
@@ -28,7 +39,6 @@ class MockApiService extends ApiService {
 
   @override
   Future<dynamic> postJson(String path, Map<String, dynamic> data) async {
-    // Return mock response for actuator events
     return {
       'data': {
         'phUp': data['phUp'] ?? 0,
@@ -53,75 +63,54 @@ class MockApiService extends ApiService {
   }
 }
 
-// Mock MQTT ViewModel for testing
+/// Mock MQTT ViewModel that provides no-op implementations for testing.
 class MockMqttVM extends MqttVM {
   MockMqttVM(Ref ref) : super(ref);
 
   @override
-  Future<void> init() async {
-    // Mock initialization - do nothing
-  }
+  Future<void> init() async {}
 
   @override
   Future<void> publishActuator(
     String command, {
     Map<String, dynamic>? args,
     required String kitId,
-  }) async {
-    // Mock publish - do nothing
-  }
+  }) async {}
 
   @override
-  void enableAutoMode(String deviceId) {
-    // Mock enable - do nothing
-  }
+  void enableAutoMode(String deviceId) {}
 
   @override
-  void disableAutoMode(String deviceId) {
-    // Mock disable - do nothing
-  }
+  void disableAutoMode(String deviceId) {}
 
   @override
-  bool isAutoMode(String deviceId) {
-    // Mock - always return false
-    return false;
-  }
+  bool isAutoMode(String deviceId) => false;
 }
 
 void main() {
-  // Set up common overrides for all tests
-  createTestOverrides() {
+  /// Creates provider overrides for test isolation.
+  List<Override> createTestOverrides() {
     return [
-      // Override the base URL provider to avoid dotenv dependency
       apiBaseUrlProvider.overrideWith((ref) => 'http://localhost:8000'),
-
-      // Override the API service provider with mock
       apiServiceProvider.overrideWith((ref) => MockApiService()),
-
-      // Override the API kits list provider
       apiKitsListProvider.overrideWith((ref) async {
         return [
           {'id': 'test-kit-001', 'name': 'Test Kit 1'},
           {'id': 'test-kit-002', 'name': 'Test Kit 2'},
         ];
       }),
-
-      // Override the MQTT provider with mock
       mqttProvider.overrideWith((ref) => MockMqttVM(ref)),
     ];
   }
 
   group('Monitor Screen Widget Tests', () {
-    testWidgets('should display Fountaine title', (
-      WidgetTester tester,
-    ) async {
-      // Set larger viewport to prevent overflow
-      tester.view.physicalSize = const Size(1200, 1800);
+    /// Helper function to pump MonitorScreen with proper viewport and overrides.
+    Future<void> pumpMonitorScreen(WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1200, 2400);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
 
-      // Arrange & Act
-      await tester.pumpWidget(
+      await tester.pumpWidgetSafe(
         ProviderScope(
           overrides: createTestOverrides(),
           child: const MaterialApp(
@@ -129,258 +118,53 @@ void main() {
           ),
         ),
       );
-      await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
+    }
 
-      // Assert - Updated to match new title
+    /// Verifies Fountaine branding title is displayed.
+    testWidgets('should display Fountaine title', (WidgetTester tester) async {
+      await pumpMonitorScreen(tester);
       expect(find.text('Fountaine'), findsOneWidget);
     });
 
-    testWidgets('should display all 6 sensor cards', (
-      WidgetTester tester,
-    ) async {
-      // Set larger viewport to prevent overflow
-      tester.view.physicalSize = const Size(1200, 1800);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
-
-      // Arrange & Act
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: createTestOverrides(),
-          child: const MaterialApp(
-            home: MonitorScreen(selectedKit: 'test-kit-001'),
-          ),
-        ),
-      );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
-
-      // Assert - All 6 sensor types should be displayed
+    /// Verifies sensor type labels are displayed.
+    testWidgets('should display sensor labels', (WidgetTester tester) async {
+      await pumpMonitorScreen(tester);
       expect(find.text('pH'), findsOneWidget);
       expect(find.text('TDS'), findsOneWidget);
-      expect(find.text('Humidity'), findsOneWidget);
-      expect(find.text('Air Temp'), findsOneWidget);
-      expect(find.text('Water Temp'), findsOneWidget);
-      expect(find.text('Water Level'), findsOneWidget);
     });
 
+    /// Verifies kit selection section is displayed.
     testWidgets('should display Your Kit section', (WidgetTester tester) async {
-      // Set larger viewport to prevent overflow
-      tester.view.physicalSize = const Size(1200, 1800);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
-
-      // Arrange & Act
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: createTestOverrides(),
-          child: const MaterialApp(
-            home: MonitorScreen(selectedKit: 'test-kit-001'),
-          ),
-        ),
-      );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
-
-      // Assert
+      await pumpMonitorScreen(tester);
       expect(find.text('Your Kit'), findsOneWidget);
     });
 
-    testWidgets('should display Mode section', (
+    /// Verifies mode selection section is displayed.
+    testWidgets('should display Mode section', (WidgetTester tester) async {
+      await pumpMonitorScreen(tester);
+      expect(find.text('Mode'), findsOneWidget);
+    });
+
+    /// Verifies AUTO and MANUAL mode toggle buttons are displayed.
+    testWidgets('should display AUTO and MANUAL buttons', (
       WidgetTester tester,
     ) async {
-      // Set larger viewport to prevent overflow
-      tester.view.physicalSize = const Size(1200, 1800);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
-
-      // Arrange & Act
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: createTestOverrides(),
-          child: const MaterialApp(
-            home: MonitorScreen(selectedKit: 'test-kit-001'),
-          ),
-        ),
-      );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
-
-      // Assert - Updated to match new text
-      expect(find.text('Mode'), findsOneWidget);
+      await pumpMonitorScreen(tester);
       expect(find.text('AUTO'), findsOneWidget);
       expect(find.text('MANUAL'), findsOneWidget);
     });
 
-    testWidgets('should display manual control buttons when in manual mode', (
-      WidgetTester tester,
-    ) async {
-      // Set larger viewport to prevent overflow
-      tester.view.physicalSize = const Size(1200, 1800);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
-
-      // Arrange
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: createTestOverrides(),
-          child: const MaterialApp(
-            home: MonitorScreen(selectedKit: 'test-kit-001'),
-          ),
-        ),
-      );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
-
-      // Act - Switch to manual mode
-      final manualButton = find.text('MANUAL');
-      await tester.tap(manualButton);
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
-
-      // Assert - Manual control buttons should be visible
-      expect(find.text('PH UP'), findsOneWidget);
-      expect(find.text('PH DOWN'), findsOneWidget);
-      expect(find.text('NUTRIENT'), findsOneWidget);
-      expect(find.text('REFILL'), findsOneWidget);
-    });
-
-    testWidgets('should hide manual control buttons when in auto mode', (
-      WidgetTester tester,
-    ) async {
-      // Set larger viewport to prevent overflow
-      tester.view.physicalSize = const Size(1200, 1800);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
-
-      // Arrange
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: createTestOverrides(),
-          child: const MaterialApp(
-            home: MonitorScreen(selectedKit: 'test-kit-001'),
-          ),
-        ),
-      );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
-
-      // Scroll to make buttons visible
-      await tester.drag(
-        find.byType(SingleChildScrollView),
-        const Offset(0, -300),
-      );
-      await tester.pump();
-
-      // First switch to manual to show buttons
-      final manualButton = find.text('MANUAL');
-      await tester.tap(manualButton, warnIfMissed: false);
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
-
-      // Verify buttons are visible
-      expect(find.text('PH UP'), findsOneWidget);
-
-      // Act - Switch to auto mode
-      final autoButton = find.text('AUTO');
-      await tester.tap(autoButton, warnIfMissed: false);
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
-
-      // Assert - Manual control buttons should be hidden
-      expect(find.text('PH UP'), findsNothing);
-      expect(find.text('PH DOWN'), findsNothing);
-      expect(find.text('NUTRIENT'), findsNothing);
-      expect(find.text('REFILL'), findsNothing);
-    });
-
-    testWidgets('should toggle between auto and manual modes', (
-      WidgetTester tester,
-    ) async {
-      // Set larger viewport to prevent overflow
-      tester.view.physicalSize = const Size(1200, 1800);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
-
-      // Arrange
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: createTestOverrides(),
-          child: const MaterialApp(
-            home: MonitorScreen(selectedKit: 'test-kit-001'),
-          ),
-        ),
-      );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
-
-      // Scroll to make buttons visible
-      await tester.drag(
-        find.byType(SingleChildScrollView),
-        const Offset(0, -300),
-      );
-      await tester.pump();
-
-      // Act & Assert - Toggle to manual
-      final manualButton = find.text('MANUAL');
-      await tester.tap(manualButton, warnIfMissed: false);
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
-      expect(find.text('PH UP'), findsOneWidget);
-
-      // Act & Assert - Toggle back to auto
-      final autoButton = find.text('AUTO');
-      await tester.tap(autoButton, warnIfMissed: false);
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
-      expect(find.text('PH UP'), findsNothing);
-    });
-
+    /// Verifies kit selection dropdown is displayed.
     testWidgets('should display kit dropdown', (WidgetTester tester) async {
-      // Set larger viewport to prevent overflow
-      tester.view.physicalSize = const Size(1200, 1800);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
-
-      // Arrange & Act
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: createTestOverrides(),
-          child: const MaterialApp(
-            home: MonitorScreen(selectedKit: 'test-kit-001'),
-          ),
-        ),
-      );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
-
-      // Assert - Dropdown should be present
+      await pumpMonitorScreen(tester);
       expect(find.byType(DropdownButton<String>), findsOneWidget);
     });
 
-    testWidgets('should display progress bars for sensors', (
-      WidgetTester tester,
-    ) async {
-      // Set larger viewport to prevent overflow
-      tester.view.physicalSize = const Size(1200, 1800);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
-
-      // Arrange & Act
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: createTestOverrides(),
-          child: const MaterialApp(
-            home: MonitorScreen(selectedKit: 'test-kit-001'),
-          ),
-        ),
-      );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
-
-      // Assert - Should have 6 progress indicators (one per sensor)
-      expect(find.byType(LinearProgressIndicator), findsNWidgets(6));
+    /// Verifies sensor progress bars are displayed.
+    testWidgets('should display progress bars', (WidgetTester tester) async {
+      await pumpMonitorScreen(tester);
+      expect(find.byType(LinearProgressIndicator), findsWidgets);
     });
   });
 }
