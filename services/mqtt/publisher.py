@@ -10,10 +10,10 @@ def handle_signal(signum, frame):
 signal.signal(signal.SIGINT, handle_signal)
 signal.signal(signal.SIGTERM, handle_signal)
 
-BROKER = "localhost"
+BROKER = "localhost"  # MQTT broker jalan lokal
 PORT = 1883
 CSV_PATH = os.path.join(os.path.dirname(__file__), "data.csv")
-BACKEND_URL = "http://127.0.0.1:8000/kits"
+BACKEND_URL = "http://localhost:8000/kits"
 QOS = 1
 RETAIN = False
 

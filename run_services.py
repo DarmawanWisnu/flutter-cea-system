@@ -17,7 +17,7 @@ BACKUP_COUNT = 5
 services = [
     {
         "name": "API Service",
-        "cmd": "uvicorn services.api.main:app --reload --port 8000",
+        "cmd": "uvicorn services.api.main:app --reload --host 0.0.0.0 --port 8000",
         "cwd": ROOT,  
         "log": os.path.join(LOG_DIR, "api.log")
     },

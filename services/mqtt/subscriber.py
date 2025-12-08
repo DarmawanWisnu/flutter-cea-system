@@ -15,7 +15,7 @@ def handle_signal(signum, frame):
 signal.signal(signal.SIGINT, handle_signal)
 signal.signal(signal.SIGTERM, handle_signal)
 
-BROKER = "localhost"
+BROKER = "localhost"  # MQTT broker jalan lokal
 PORT = 1883
 
 KIT_ID = os.getenv("KIT_ID")
@@ -26,7 +26,7 @@ if IS_MULTI:
 else:
     TOPIC = f"kit/{KIT_ID}/telemetry"
 
-BACKEND_URL = "http://127.0.0.1:8000/telemetry"
+BACKEND_URL = "http://localhost:8000/telemetry"
 QOS = 1
 
 CLIENT_ID = f"csv-subscriber-{KIT_ID}"
