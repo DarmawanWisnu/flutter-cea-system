@@ -30,6 +30,10 @@ class MqttVM extends ChangeNotifier {
   StreamSubscription<MqttConnState>? _connSub;
   StreamSubscription<MapEntry<String, Telemetry>>? _teleSub;
   StreamSubscription<MapEntry<String, DeviceStatus>>? _statSub;
+  
+  // Auto mode timer - triggers every 30 seconds (synced with subscriber DB updates)
+  Timer? _autoModeTimer;
+  static const Duration _autoModeInterval = Duration(seconds: 30);
 
   bool _initialized = false;
 
@@ -64,10 +68,8 @@ class MqttVM extends ChangeNotifier {
         telemetryMap[deviceId] = newTelemetry;
       }
 
-      // Auto mode: trigger actuator event when telemetry arrives
-      if (_autoModeDevices.contains(deviceId)) {
-        _triggerAutoActuator(deviceId);
-      }
+      // NOTE: Auto mode NO LONGER triggers here!
+      // It now uses a 30-second timer to sync with DB updates from subscriber.
 
       notifyListeners();
     });
@@ -120,15 +122,63 @@ class MqttVM extends ChangeNotifier {
     }
   }
 
+  /// Start the auto mode timer if not already running
+  void _startAutoModeTimer() {
+    if (_autoModeTimer != null) return; // Already running
+    
+    print("[MQTT] Starting auto mode timer (every ${_autoModeInterval.inSeconds}s)");
+    
+    // Trigger immediately for the first time
+    _runAutoModeForAllDevices();
+    
+    // Then run periodically
+    _autoModeTimer = Timer.periodic(_autoModeInterval, (_) {
+      _runAutoModeForAllDevices();
+    });
+  }
+
+  /// Stop the auto mode timer
+  void _stopAutoModeTimer() {
+    if (_autoModeTimer == null) return;
+    
+    print("[MQTT] Stopping auto mode timer");
+    _autoModeTimer?.cancel();
+    _autoModeTimer = null;
+  }
+
+  /// Trigger auto actuator for all devices in auto mode
+  void _runAutoModeForAllDevices() {
+    if (_autoModeDevices.isEmpty) return;
+    
+    print("[MQTT] Auto mode timer tick - ${_autoModeDevices.length} device(s)");
+    
+    for (final deviceId in _autoModeDevices) {
+      _triggerAutoActuator(deviceId);
+    }
+  }
+
   void enableAutoMode(String deviceId) {
+    final wasEmpty = _autoModeDevices.isEmpty;
     _autoModeDevices.add(deviceId);
     print("[MQTT] Auto mode ENABLED for $deviceId");
+    
+    // Start timer if this is the first device
+    if (wasEmpty && _autoModeDevices.isNotEmpty) {
+      _startAutoModeTimer();
+    }
+    
     notifyListeners();
   }
 
   void disableAutoMode(String deviceId) {
     _autoModeDevices.remove(deviceId);
     print("[MQTT] Auto mode DISABLED for $deviceId");
+    
+    // Stop timer if no more devices in auto mode
+    if (_autoModeDevices.isEmpty) {
+      _stopAutoModeTimer();
+    }
+    
     notifyListeners();
   }
 
@@ -138,6 +188,10 @@ class MqttVM extends ChangeNotifier {
   }
 
   Future<void> disposeSafely() async {
+    // Cancel auto mode timer
+    _stopAutoModeTimer();
+    _autoModeDevices.clear();
+    
     await _connSub?.cancel();
     await _teleSub?.cancel();
     await _statSub?.cancel();
@@ -152,6 +206,7 @@ class MqttVM extends ChangeNotifier {
 
   @override
   void dispose() {
+    _stopAutoModeTimer();
     super.dispose();
   }
 }

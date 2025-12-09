@@ -130,12 +130,32 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
           return;
         }
 
-        final initial = widget.selectedKit ?? (kits.first["id"] as String);
+        // Priority: 1. currentKitIdProvider (persisted selection), 2. widget.selectedKit, 3. first kit
+        final savedKit = ref.read(currentKitIdProvider);
+        final kitIds = kits.map((k) => k["id"] as String).toList();
+        
+        String initial;
+        if (savedKit != null && kitIds.contains(savedKit)) {
+          // Use previously selected kit
+          initial = savedKit;
+        } else if (widget.selectedKit != null && kitIds.contains(widget.selectedKit)) {
+          // Use kit passed via widget
+          initial = widget.selectedKit!;
+        } else {
+          // Fallback to first kit
+          initial = kitIds.first;
+        }
 
         if (mounted) {
-          setState(() => kitId = initial);
-          // Update shared kit ID for notifications
-          ref.read(currentKitIdProvider.notifier).state = initial;
+          setState(() {
+            kitId = initial;
+            // Sync isAuto state from mqttProvider (persists across navigation)
+            isAuto = ref.read(mqttProvider.notifier).isAutoMode(initial);
+          });
+          // Only update provider if it was null or invalid
+          if (savedKit == null || !kitIds.contains(savedKit)) {
+            ref.read(currentKitIdProvider.notifier).state = initial;
+          }
         }
       } catch (e) {
         print("[Monitor] Kit loading error: $e");
@@ -414,7 +434,11 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
             }).toList(),
             onChanged: (v) {
               if (v != null && v != kitId) {
-                setState(() => kitId = v);
+                setState(() {
+                  kitId = v;
+                  // Sync isAuto state for the newly selected kit
+                  isAuto = ref.read(mqttProvider.notifier).isAutoMode(v);
+                });
                 // Update shared kit ID for notifications
                 ref.read(currentKitIdProvider.notifier).state = v;
               }

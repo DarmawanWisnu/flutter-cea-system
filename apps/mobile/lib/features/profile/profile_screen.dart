@@ -35,10 +35,18 @@ class ProfileScreen extends ConsumerWidget {
     String kitName = 'Your Kit Name';
     String kitId = 'SUF-XXXX-XXXX';
 
+    // Get currently selected kit from monitor screen
+    final currentKitId = ref.watch(currentKitIdProvider);
+
     kitsAsync.whenData((data) {
       if (data.isNotEmpty) {
-        kitName = data.first["name"] as String? ?? 'Your Kit Name';
-        kitId = data.first["id"] as String? ?? 'SUF-XXXX-XXXX';
+        // Find kit matching currentKitIdProvider, fallback to first kit
+        final selectedKit = data.firstWhere(
+          (k) => k["id"] == currentKitId,
+          orElse: () => data.first,
+        );
+        kitName = selectedKit["name"] as String? ?? 'Your Kit Name';
+        kitId = selectedKit["id"] as String? ?? 'SUF-XXXX-XXXX';
       }
     });
 
