@@ -5,6 +5,7 @@ import '../../core/constants.dart';
 import '../../domain/telemetry.dart';
 import './api_provider.dart';
 import './mqtt_provider.dart';
+import './auth_provider.dart';
 
 String _norm(String? s) => (s ?? '').trim().toLowerCase();
 
@@ -50,23 +51,96 @@ class NotificationListNotifier extends StateNotifier<List<NotificationItem>> {
       }
     });
 
-    // Initial evaluation
-    Future.microtask(() {
-      final kitId = ref.read(currentKitIdProvider);
-      print('[Notification] Initial kit: $kitId');
+    // Initial load - get notifications from backend first, then evaluate
+    Future.microtask(() async {
+      String? kitId = ref.read(currentKitIdProvider);
+      final user = ref.read(authProvider);
+      final api = ref.read(apiServiceProvider);
+      
+      // Load existing notifications from backend
+      if (user != null) {
+        await _loadFromBackend(user.uid, api);
+      }
+      
+      // If no kit selected, try to load from backend preference first
+      if (kitId == null && user != null) {
+        try {
+          final savedKit = await api.getUserPreference(userId: user.uid);
+          if (savedKit != null) {
+            kitId = savedKit;
+            ref.read(currentKitIdProvider.notifier).state = savedKit;
+            print('[Notification] Loaded kit from backend preference: $savedKit');
+          }
+        } catch (e) {
+          print('[Notification] Failed to load user preference: $e');
+        }
+      }
+      
+      // Fallback to first kit from API
+      if (kitId == null) {
+        try {
+          final kits = await ref.read(apiKitsListProvider.future);
+          if (kits.isNotEmpty) {
+            kitId = kits.first["id"] as String;
+            ref.read(currentKitIdProvider.notifier).state = kitId;
+            print('[Notification] Using first kit: $kitId');
+          }
+        } catch (e) {
+          print('[Notification] Failed to load kits: $e');
+        }
+      }
+      
       if (kitId != null) {
         _fetchAndEvaluate(kitId);
       }
     });
 
-    // Periodic check every 1 minute
-    _timer = Timer.periodic(const Duration(minutes: 1), (_) {
+    // Periodic refresh from backend + evaluate every 1 minute
+    _timer = Timer.periodic(const Duration(minutes: 1), (_) async {
+      final user = ref.read(authProvider);
+      final api = ref.read(apiServiceProvider);
       final kitId = ref.read(currentKitIdProvider);
+      
+      // Refresh from backend
+      if (user != null) {
+        await _loadFromBackend(user.uid, api);
+      }
+      
       print('[Notification] ===== PERIODIC (1m) kit=$kitId =====');
       if (kitId != null) {
         _fetchAndEvaluate(kitId);
       }
     });
+  }
+
+  /// Load notifications from backend API
+  Future<void> _loadFromBackend(String userId, dynamic api) async {
+    try {
+      final items = await api.getNotifications(userId: userId, days: 7, limit: 100);
+      
+      final loaded = items.map<NotificationItem>((item) {
+        return NotificationItem(
+          id: item['id'].toString(),
+          level: item['level'] ?? 'info',
+          title: item['title'] ?? 'Notification',
+          message: item['message'] ?? '',
+          timestamp: DateTime.tryParse(item['createdAt'] ?? '') ?? DateTime.now(),
+          kitName: item['deviceId'],
+          isRead: item['isRead'] ?? false,
+        );
+      }).toList();
+      
+      // Merge: keep unique by ID, prefer backend version
+      final existingIds = state.map((n) => n.id).toSet();
+      final newItems = loaded.where((n) => !existingIds.contains(n.id)).toList();
+      
+      if (newItems.isNotEmpty || loaded.length != state.length) {
+        state = [...loaded];
+        print('[Notification] Loaded ${loaded.length} from backend');
+      }
+    } catch (e) {
+      print('[Notification] Failed to load from backend: $e');
+    }
   }
 
   final Ref ref;
@@ -87,10 +161,20 @@ class NotificationListNotifier extends StateNotifier<List<NotificationItem>> {
   static const double _tMin = ThresholdConst.tempMin;
   static const double _tMax = ThresholdConst.tempMax;
 
-  /// Check if device is in auto mode
-  bool _isAutoMode(String kitId) {
+  /// Check if device is in auto mode (from backend)
+  Future<bool> _isAutoMode(String kitId) async {
     try {
-      return ref.read(mqttProvider).isAutoMode(kitId);
+      // Try local cache first (for quick response if already loaded)
+      final localMode = ref.read(mqttProvider).isAutoMode(kitId);
+      if (localMode) return true;
+      
+      // Otherwise check backend
+      final user = ref.read(authProvider);
+      if (user != null) {
+        final api = ref.read(apiServiceProvider);
+        return await api.getDeviceMode(userId: user.uid, deviceId: kitId);
+      }
+      return false;
     } catch (_) {
       return false;
     }
@@ -142,7 +226,7 @@ class NotificationListNotifier extends StateNotifier<List<NotificationItem>> {
   }
 
   Future<void> _evaluate(String kitId, Telemetry t) async {
-    final isAuto = _isAutoMode(kitId);
+    final isAuto = await _isAutoMode(kitId);
     
     // Calculate deviations
     final phDev = _deviation(t.ph, _phMin, _phMax);
@@ -258,6 +342,13 @@ class NotificationListNotifier extends StateNotifier<List<NotificationItem>> {
 
   void markAllRead() {
     state = [for (final n in state) n.copyWith(isRead: true)];
+    
+    // Sync to backend
+    final user = ref.read(authProvider);
+    if (user != null) {
+      final api = ref.read(apiServiceProvider);
+      api.markAllNotificationsRead(user.uid);
+    }
   }
 
   void markRead(String id) {
@@ -265,14 +356,35 @@ class NotificationListNotifier extends StateNotifier<List<NotificationItem>> {
       for (final n in state)
         if (n.id == id) n.copyWith(isRead: true) else n,
     ];
+    
+    // Sync to backend
+    final intId = int.tryParse(id);
+    if (intId != null) {
+      final api = ref.read(apiServiceProvider);
+      api.markNotificationRead(intId);
+    }
   }
 
   void delete(String id) {
     state = state.where((n) => n.id != id).toList();
+    
+    // Sync to backend
+    final intId = int.tryParse(id);
+    if (intId != null) {
+      final api = ref.read(apiServiceProvider);
+      api.deleteNotification(intId);
+    }
   }
 
   void clearAll() {
     state = [];
+    
+    // Sync to backend
+    final user = ref.read(authProvider);
+    if (user != null) {
+      final api = ref.read(apiServiceProvider);
+      api.clearAllNotifications(user.uid);
+    }
   }
 
   @override

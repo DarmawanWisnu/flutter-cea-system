@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/provider/notification_provider.dart';
 import '../../providers/provider/api_provider.dart';
+import '../../providers/provider/auth_provider.dart';
 import '../../domain/telemetry.dart';
 import '../../models/nav_args.dart';
 
@@ -57,9 +58,44 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           );
         }
       } else {
-        final currentKit = ref.read(currentKitIdProvider);
-        if (currentKit != null) {
-          await _loadData(currentKit, days: 1);
+        // Try to get current kit from: 1) local provider, 2) backend preference, 3) first kit
+        String? kitToLoad = ref.read(currentKitIdProvider);
+        
+        if (kitToLoad == null) {
+          final api = ref.read(apiServiceProvider);
+          final user = ref.read(authProvider);
+          
+          // Try backend preference first
+          if (user != null) {
+            try {
+              final savedKit = await api.getUserPreference(userId: user.uid);
+              if (savedKit != null) {
+                kitToLoad = savedKit;
+                ref.read(currentKitIdProvider.notifier).state = savedKit;
+                print("[History] Loaded kit from backend preference: $savedKit");
+              }
+            } catch (e) {
+              print("[History] Failed to load user preference: $e");
+            }
+          }
+          
+          // Fallback to first kit from API
+          if (kitToLoad == null) {
+            try {
+              final kits = await ref.read(apiKitsListProvider.future);
+              if (kits.isNotEmpty) {
+                kitToLoad = kits.first["id"] as String;
+                ref.read(currentKitIdProvider.notifier).state = kitToLoad;
+                print("[History] Using first kit: $kitToLoad");
+              }
+            } catch (e) {
+              print("[History] Failed to load kits: $e");
+            }
+          }
+        }
+        
+        if (kitToLoad != null) {
+          await _loadData(kitToLoad, days: 1);
         }
       }
 

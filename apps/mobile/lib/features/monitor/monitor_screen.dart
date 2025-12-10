@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fountaine/providers/provider/monitor_provider.dart';
 import 'package:fountaine/providers/provider/api_provider.dart';
 import 'package:fountaine/providers/provider/mqtt_provider.dart';
+import 'package:fountaine/providers/provider/auth_provider.dart';
 import '../../domain/telemetry.dart';
 import '../../core/constants.dart';
 
@@ -130,31 +131,64 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
           return;
         }
 
-        // Priority: 1. currentKitIdProvider (persisted selection), 2. widget.selectedKit, 3. first kit
-        final savedKit = ref.read(currentKitIdProvider);
         final kitIds = kits.map((k) => k["id"] as String).toList();
+        final api = ref.read(apiServiceProvider);
+        final user = ref.read(authProvider);
+        final userId = user?.uid;
         
         String initial;
-        if (savedKit != null && kitIds.contains(savedKit)) {
-          // Use previously selected kit
-          initial = savedKit;
-        } else if (widget.selectedKit != null && kitIds.contains(widget.selectedKit)) {
-          // Use kit passed via widget
-          initial = widget.selectedKit!;
+        bool shouldSavePreference = false;
+        
+        // Priority 1: Load from backend (persists across app restarts)
+        if (userId != null) {
+          final savedKitFromBackend = await api.getUserPreference(userId: userId);
+          if (savedKitFromBackend != null && kitIds.contains(savedKitFromBackend)) {
+            initial = savedKitFromBackend;
+            print("[Monitor] Loaded kit from backend: $initial");
+          } else if (widget.selectedKit != null && kitIds.contains(widget.selectedKit)) {
+            // Priority 2: Use kit passed via widget
+            initial = widget.selectedKit!;
+            shouldSavePreference = true;
+          } else {
+            // Priority 3: Fallback to first kit
+            initial = kitIds.first;
+            shouldSavePreference = true;
+          }
         } else {
-          // Fallback to first kit
-          initial = kitIds.first;
+          // No user logged in, use local logic
+          final savedKit = ref.read(currentKitIdProvider);
+          if (savedKit != null && kitIds.contains(savedKit)) {
+            initial = savedKit;
+          } else if (widget.selectedKit != null && kitIds.contains(widget.selectedKit)) {
+            initial = widget.selectedKit!;
+          } else {
+            initial = kitIds.first;
+          }
         }
 
         if (mounted) {
           setState(() {
             kitId = initial;
-            // Sync isAuto state from mqttProvider (persists across navigation)
-            isAuto = ref.read(mqttProvider.notifier).isAutoMode(initial);
           });
-          // Only update provider if it was null or invalid
-          if (savedKit == null || !kitIds.contains(savedKit)) {
-            ref.read(currentKitIdProvider.notifier).state = initial;
+          
+          // Load auto mode from backend (persists across app restarts)
+          final loadedAutoMode = await ref
+              .read(mqttProvider.notifier)
+              .loadAutoModeFromBackend(initial);
+          
+          if (mounted) {
+            setState(() {
+              isAuto = loadedAutoMode;
+            });
+          }
+          
+          // Update local provider
+          ref.read(currentKitIdProvider.notifier).state = initial;
+          
+          // Save to backend if this was a new preference
+          if (shouldSavePreference && userId != null) {
+            await api.setUserPreference(userId: userId, selectedKitId: initial);
+            print("[Monitor] Saved kit preference to backend: $initial");
           }
         }
       } catch (e) {
@@ -432,15 +466,36 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
                 ),
               );
             }).toList(),
-            onChanged: (v) {
+            onChanged: (v) async {
               if (v != null && v != kitId) {
                 setState(() {
                   kitId = v;
-                  // Sync isAuto state for the newly selected kit
-                  isAuto = ref.read(mqttProvider.notifier).isAutoMode(v);
                 });
+                
+                // Load auto mode from backend for the newly selected kit
+                final loadedAutoMode = await ref
+                    .read(mqttProvider.notifier)
+                    .loadAutoModeFromBackend(v);
+                
+                if (mounted) {
+                  setState(() {
+                    isAuto = loadedAutoMode;
+                  });
+                }
+                
                 // Update shared kit ID for notifications
                 ref.read(currentKitIdProvider.notifier).state = v;
+                
+                // Save kit preference to backend
+                final user = ref.read(authProvider);
+                if (user != null) {
+                  final api = ref.read(apiServiceProvider);
+                  await api.setUserPreference(
+                    userId: user.uid,
+                    selectedKitId: v,
+                  );
+                  print("[Monitor] Kit preference saved: $v");
+                }
               }
             },
           ),

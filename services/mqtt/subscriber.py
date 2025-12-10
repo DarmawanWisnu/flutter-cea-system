@@ -4,7 +4,7 @@ import signal
 import os
 import requests
 from paho.mqtt import client as mqtt
-from threading import Lock
+from threading import Lock, Thread
 from datetime import datetime
 
 RUNNING = True
@@ -71,6 +71,7 @@ def send_snapshot(kit_id):
         print(f"Backend Status → {r.status_code} | {r.text}")
     except Exception as e:
         print("[ERR] Backend error:", e)
+
 
 def on_connect(client, userdata, flags, reason_code, properties):
     print("[MQTT] Connected →", TOPIC)

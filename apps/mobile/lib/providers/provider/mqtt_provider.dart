@@ -6,6 +6,7 @@ import 'package:fountaine/services/mqtt_service.dart';
 import 'package:fountaine/domain/telemetry.dart';
 import 'package:fountaine/domain/device_status.dart';
 import 'package:fountaine/providers/provider/api_provider.dart';
+import 'package:fountaine/providers/provider/auth_provider.dart';
 
 final mqttProvider = ChangeNotifierProvider<MqttVM>((ref) {
   ref.keepAlive();
@@ -23,6 +24,7 @@ class MqttVM extends ChangeNotifier {
   MqttConnState _state = MqttConnState.disconnected;
   MqttConnState get state => _state;
 
+  // Local cache of auto mode devices (synced with backend)
   final Set<String> _autoModeDevices = {};
   final Map<String, Telemetry> telemetryMap = {};
   final Map<String, DeviceStatus> statusMap = {};
@@ -30,10 +32,6 @@ class MqttVM extends ChangeNotifier {
   StreamSubscription<MqttConnState>? _connSub;
   StreamSubscription<MapEntry<String, Telemetry>>? _teleSub;
   StreamSubscription<MapEntry<String, DeviceStatus>>? _statSub;
-  
-  // Auto mode timer - triggers every 30 seconds (synced with subscriber DB updates)
-  Timer? _autoModeTimer;
-  static const Duration _autoModeInterval = Duration(seconds: 30);
 
   bool _initialized = false;
 
@@ -64,12 +62,8 @@ class MqttVM extends ChangeNotifier {
           waterLevel: newTelemetry.waterLevel != 0.0 ? newTelemetry.waterLevel : null,
         );
       } else {
-        // First time, use the new telemetry as-is
         telemetryMap[deviceId] = newTelemetry;
       }
-
-      // NOTE: Auto mode NO LONGER triggers here!
-      // It now uses a 30-second timer to sync with DB updates from subscriber.
 
       notifyListeners();
     });
@@ -91,105 +85,113 @@ class MqttVM extends ChangeNotifier {
     await _svc.publishControl(command, args ?? {}, kitId);
   }
 
-  Future<void> _triggerAutoActuator(String deviceId) async {
+  /// Get current user ID from Firebase Auth
+  String? _getUserId() {
+    final user = _ref.read(authProvider);
+    return user?.uid;
+  }
+
+  /// Enable auto mode for a device (saves to backend)
+  Future<void> enableAutoMode(String deviceId) async {
+    final userId = _getUserId();
+    if (userId == null) {
+      print("[MQTT] Cannot enable auto mode - user not logged in");
+      return;
+    }
+
+    // Update local state immediately for UI
+    _autoModeDevices.add(deviceId);
+    notifyListeners();
+
+    // Save to backend (backend subscriber will handle the timer)
     try {
       final api = _ref.read(apiServiceProvider);
-
-      // Send auto mode request
-      final res = await api.postJson("/actuator/event?deviceId=$deviceId", {
-        "phUp": 0,
-        "phDown": 0,
-        "nutrientAdd": 0,
-        "valueS": 0,
-        "manual": 0,
-        "auto": 1, // ← This triggers ML/rule-based calculation
-        "refill": 0,
-      });
-
-      // Extract calculated values from response
-      if (res != null && res['data'] != null) {
-        final data = res['data'] as Map<String, dynamic>;
-
-        // Send calculated values to MQTT
-        await _svc.publishControl("auto", data, deviceId);
-
-        print("[MQTT] Auto actuator event sent for $deviceId with data: $data");
+      final success = await api.setDeviceMode(
+        userId: userId,
+        deviceId: deviceId,
+        autoMode: true,
+      );
+      
+      if (success) {
+        print("[MQTT] Auto mode ENABLED for $deviceId (saved to backend)");
       } else {
-        print("[MQTT] Auto actuator response missing data");
+        print("[MQTT] Failed to save auto mode to backend");
+        // Revert local state on failure
+        _autoModeDevices.remove(deviceId);
+        notifyListeners();
       }
     } catch (e) {
-      print("[MQTT] Error sending auto actuator: $e");
+      print("[MQTT] Error enabling auto mode: $e");
+      _autoModeDevices.remove(deviceId);
+      notifyListeners();
     }
   }
 
-  /// Start the auto mode timer if not already running
-  void _startAutoModeTimer() {
-    if (_autoModeTimer != null) return; // Already running
-    
-    print("[MQTT] Starting auto mode timer (every ${_autoModeInterval.inSeconds}s)");
-    
-    // Trigger immediately for the first time
-    _runAutoModeForAllDevices();
-    
-    // Then run periodically
-    _autoModeTimer = Timer.periodic(_autoModeInterval, (_) {
-      _runAutoModeForAllDevices();
-    });
-  }
-
-  /// Stop the auto mode timer
-  void _stopAutoModeTimer() {
-    if (_autoModeTimer == null) return;
-    
-    print("[MQTT] Stopping auto mode timer");
-    _autoModeTimer?.cancel();
-    _autoModeTimer = null;
-  }
-
-  /// Trigger auto actuator for all devices in auto mode
-  void _runAutoModeForAllDevices() {
-    if (_autoModeDevices.isEmpty) return;
-    
-    print("[MQTT] Auto mode timer tick - ${_autoModeDevices.length} device(s)");
-    
-    for (final deviceId in _autoModeDevices) {
-      _triggerAutoActuator(deviceId);
+  /// Disable auto mode for a device (saves to backend)
+  Future<void> disableAutoMode(String deviceId) async {
+    final userId = _getUserId();
+    if (userId == null) {
+      print("[MQTT] Cannot disable auto mode - user not logged in");
+      return;
     }
-  }
 
-  void enableAutoMode(String deviceId) {
-    final wasEmpty = _autoModeDevices.isEmpty;
-    _autoModeDevices.add(deviceId);
-    print("[MQTT] Auto mode ENABLED for $deviceId");
-    
-    // Start timer if this is the first device
-    if (wasEmpty && _autoModeDevices.isNotEmpty) {
-      _startAutoModeTimer();
-    }
-    
-    notifyListeners();
-  }
-
-  void disableAutoMode(String deviceId) {
+    // Update local state immediately for UI
     _autoModeDevices.remove(deviceId);
-    print("[MQTT] Auto mode DISABLED for $deviceId");
-    
-    // Stop timer if no more devices in auto mode
-    if (_autoModeDevices.isEmpty) {
-      _stopAutoModeTimer();
-    }
-    
     notifyListeners();
+
+    // Save to backend
+    try {
+      final api = _ref.read(apiServiceProvider);
+      final success = await api.setDeviceMode(
+        userId: userId,
+        deviceId: deviceId,
+        autoMode: false,
+      );
+      
+      if (success) {
+        print("[MQTT] Auto mode DISABLED for $deviceId (saved to backend)");
+      } else {
+        print("[MQTT] Failed to save manual mode to backend");
+      }
+    } catch (e) {
+      print("[MQTT] Error disabling auto mode: $e");
+    }
   }
 
-  /// Check if a device is in auto mode
+  /// Check if a device is in auto mode (from local cache)
   bool isAutoMode(String deviceId) {
     return _autoModeDevices.contains(deviceId);
   }
 
+  /// Load auto mode state from backend for a specific device
+  Future<bool> loadAutoModeFromBackend(String deviceId) async {
+    final userId = _getUserId();
+    if (userId == null) return false;
+
+    try {
+      final api = _ref.read(apiServiceProvider);
+      final autoMode = await api.getDeviceMode(
+        userId: userId,
+        deviceId: deviceId,
+      );
+      
+      // Update local cache
+      if (autoMode) {
+        _autoModeDevices.add(deviceId);
+      } else {
+        _autoModeDevices.remove(deviceId);
+      }
+      notifyListeners();
+      
+      print("[MQTT] Loaded auto mode from backend: $deviceId = $autoMode");
+      return autoMode;
+    } catch (e) {
+      print("[MQTT] Error loading auto mode from backend: $e");
+      return false;
+    }
+  }
+
   Future<void> disposeSafely() async {
-    // Cancel auto mode timer
-    _stopAutoModeTimer();
     _autoModeDevices.clear();
     
     await _connSub?.cancel();
@@ -206,7 +208,6 @@ class MqttVM extends ChangeNotifier {
 
   @override
   void dispose() {
-    _stopAutoModeTimer();
     super.dispose();
   }
 }

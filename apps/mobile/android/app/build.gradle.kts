@@ -45,7 +45,7 @@ android {
         val variant = this
         variant.outputs.all {
             val output = this as com.android.build.gradle.internal.api.BaseVariantOutputImpl
-            output.outputFileName = "Fountaine-${variant.versionName}.apk"
+            output.outputFileName = "Fountaine.apk"
         }
     }
 }

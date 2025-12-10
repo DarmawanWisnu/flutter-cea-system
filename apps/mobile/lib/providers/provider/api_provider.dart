@@ -1,17 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:fountaine/domain/telemetry.dart';
 import 'package:fountaine/services/api_service.dart';
 import 'package:fountaine/models/kit.dart';
+import 'package:fountaine/providers/provider/url_settings_provider.dart';
 
-/// BASE URL BACKEND
-final apiBaseUrlProvider = Provider.autoDispose<String>((ref) {
-  return dotenv.env['API_BASE_URL'] ?? 'http://10.0.2.2:8000';
+/// BASE URL BACKEND (now uses dynamic URL from SharedPreferences)
+final apiBaseUrlProvider = Provider<String>((ref) {
+  return ref.watch(customApiUrlProvider);
 });
 
 /// API SERVICE (HTTP CLIENT)
-final apiServiceProvider = Provider.autoDispose<ApiService>((ref) {
+final apiServiceProvider = Provider<ApiService>((ref) {
   final baseUrl = ref.watch(apiBaseUrlProvider);
   return ApiService(baseUrl: baseUrl);
 });

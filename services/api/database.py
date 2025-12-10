@@ -128,6 +128,50 @@ def run_migrations():
         );
     """)
 
+    # DEVICE MODE TABLE (per-user, per-device auto/manual tracking)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS device_mode (
+            id SERIAL PRIMARY KEY,
+            "userId" TEXT NOT NULL,
+            "deviceId" TEXT NOT NULL,
+            "autoMode" BOOLEAN DEFAULT FALSE,
+            "updatedAt" TIMESTAMPTZ DEFAULT NOW(),
+            UNIQUE ("userId", "deviceId")
+        );
+    """)
+
+    # USER PREFERENCE TABLE (selected kit per user)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS user_preference (
+            id SERIAL PRIMARY KEY,
+            "userId" TEXT UNIQUE NOT NULL,
+            "selectedKitId" TEXT,
+            "updatedAt" TIMESTAMPTZ DEFAULT NOW()
+        );
+    """)
+
+    # NOTIFICATIONS TABLE (backend-persisted notifications)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS notifications (
+            id SERIAL PRIMARY KEY,
+            "userId" TEXT NOT NULL,
+            "deviceId" TEXT NOT NULL,
+            level TEXT NOT NULL,
+            title TEXT NOT NULL,
+            message TEXT NOT NULL,
+            "isRead" BOOLEAN DEFAULT FALSE,
+            "createdAt" TIMESTAMPTZ DEFAULT NOW()
+        );
+    """)
+    
+    # Indexes for efficient querying
+    cur.execute("""
+        CREATE INDEX IF NOT EXISTS idx_notif_user ON notifications("userId");
+    """)
+    cur.execute("""
+        CREATE INDEX IF NOT EXISTS idx_notif_time ON notifications("createdAt" DESC);
+    """)
+
     conn.commit()
     cur.close()
     release_connection(conn)
