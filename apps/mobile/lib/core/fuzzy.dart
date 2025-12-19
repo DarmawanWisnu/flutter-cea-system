@@ -63,6 +63,11 @@ class NotificationSeverityService {
   static const double _tempIdealMax = ThresholdConst.tempMax;
   static const double _waterIdealMin = ThresholdConst.wlMin;
   static const double _waterIdealMax = ThresholdConst.wlMax;
+  // Additional thresholds for humidity and water temperature
+  static const double _humidityIdealMin = 60.0;
+  static const double _humidityIdealMax = 80.0;
+  static const double _waterTempIdealMin = 18.0;
+  static const double _waterTempIdealMax = 26.0;
 
   /// Calculate deviation percentage from ideal range
   double _calculateDeviation(double value, double idealMin, double idealMax) {
@@ -85,11 +90,14 @@ class NotificationSeverityService {
 
   /// Evaluate severity level based on telemetry values
   /// Returns: 'info', 'warning', or 'urgent'
+  /// Now monitors all 6 parameters: pH, PPM, temp, humidity, waterLevel, waterTemp
   String evaluateSeverity({
     required double ph,
     required double ppm,
     required double temp,
     required double waterLevel,
+    double humidity = 70.0, // Default to safe value if not provided
+    double waterTemp = 22.0, // Default to safe value if not provided
   }) {
     // Calculate deviations (0-100+)
     final phDev = _calculateDeviation(ph, _phIdealMin, _phIdealMax);
@@ -100,8 +108,18 @@ class NotificationSeverityService {
       _waterIdealMin,
       _waterIdealMax,
     );
+    final humidityDev = _calculateDeviation(
+      humidity,
+      _humidityIdealMin,
+      _humidityIdealMax,
+    );
+    final waterTempDev = _calculateDeviation(
+      waterTemp,
+      _waterTempIdealMin,
+      _waterTempIdealMax,
+    );
 
-    print('[Fuzzy] Deviations: ph=$phDev%, ppm=$ppmDev%, temp=$tempDev%, water=$waterDev%');
+    print('[Fuzzy] Deviations: ph=$phDev%, ppm=$ppmDev%, temp=$tempDev%, water=$waterDev%, humidity=$humidityDev%, waterTemp=$waterTempDev%');
 
     // Fuzzy membership functions for deviation
     // low: 0-20%, medium: 15-50%, high: 45%+
@@ -110,7 +128,8 @@ class NotificationSeverityService {
     final highMF = TrapezoidalMF(45, 60, 200, 200);
 
     // Calculate max deviation membership for each level
-    final deviations = [phDev, ppmDev, tempDev, waterDev];
+    // Now includes all 6 parameters
+    final deviations = [phDev, ppmDev, tempDev, waterDev, humidityDev, waterTempDev];
 
     double maxLow = 0.0;
     double maxMedium = 0.0;
@@ -160,6 +179,8 @@ class NotificationSeverityService {
     required double ppm,
     required double temp,
     required double waterLevel,
+    double humidity = 70.0,
+    double waterTemp = 22.0,
   }) {
     final phDev = _calculateDeviation(ph, _phIdealMin, _phIdealMax);
     final ppmDev = _calculateDeviation(ppm, _ppmIdealMin, _ppmIdealMax);
@@ -169,12 +190,24 @@ class NotificationSeverityService {
       _waterIdealMin,
       _waterIdealMax,
     );
+    final humidityDev = _calculateDeviation(
+      humidity,
+      _humidityIdealMin,
+      _humidityIdealMax,
+    );
+    final waterTempDev = _calculateDeviation(
+      waterTemp,
+      _waterTempIdealMin,
+      _waterTempIdealMax,
+    );
 
     final severity = evaluateSeverity(
       ph: ph,
       ppm: ppm,
       temp: temp,
       waterLevel: waterLevel,
+      humidity: humidity,
+      waterTemp: waterTemp,
     );
 
     return {
@@ -184,9 +217,11 @@ class NotificationSeverityService {
         'ppm': ppmDev.toStringAsFixed(1),
         'temp': tempDev.toStringAsFixed(1),
         'water': waterDev.toStringAsFixed(1),
+        'humidity': humidityDev.toStringAsFixed(1),
+        'waterTemp': waterTempDev.toStringAsFixed(1),
       },
-      'maxDeviation': math
-          .max(math.max(phDev, ppmDev), math.max(tempDev, waterDev))
+      'maxDeviation': [phDev, ppmDev, tempDev, waterDev, humidityDev, waterTempDev]
+          .reduce((a, b) => a > b ? a : b)
           .toStringAsFixed(1),
     };
   }

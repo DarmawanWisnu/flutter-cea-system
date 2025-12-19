@@ -1,51 +1,85 @@
 @startuml
-title Sequence Diagram - Notifikasi Sensor (via DB Service)
+title Sequence Diagram - Notifikasi Sensor
 
 actor "User" as User
-participant "Halaman Notifikasi" as Form
-participant "Kit Provider" as Kit
-participant "DB Service" as DB
-participant "MQTT Provider" as MQTT
-participant "Constants (Threshold)" as Const
+participant "Notification Screen" as Form
+participant "NotificationListNotifier" as Notifier
+participant "ApiService" as API
+participant "Backend REST API" as Backend
+participant "MqttVM" as MQTT
+participant "ThresholdConst" as Const
 
-' === Proses data sensor ===
-MQTT -> Kit : Mengirim data sensor terbaru
-activate Kit
+' === Background: Proses generate notifikasi ===
+note over MQTT, Notifier: Proses ini berjalan di background saat app aktif
 
-Kit -> Const : Membaca nilai ambang batas parameter
+MQTT -> Notifier : Telemetry stream update
+activate Notifier
+
+Notifier -> Const : Baca nilai threshold (pH, PPM, Temp, WL)
 activate Const
-Const --> Kit : Mengembalikan nilai threshold
+Const --> Notifier : Threshold values
 deactivate Const
 
-Kit -> Kit : Membandingkan nilai sensor dengan threshold
-Kit -> DB : Menyimpan data sensor ke SQLite
-activate DB
-DB -> DB : Eksekusi insert data sensor
-DB --> Kit : Data tersimpan
-deactivate DB
+Notifier -> Notifier : Bandingkan telemetry dengan threshold
+Notifier -> Notifier : Tentukan severity (info/warning/urgent)
 
-Kit -> DB : Menyimpan notifikasi (alert / safe)
-activate DB
-DB -> DB : Eksekusi insert notifikasi
-DB --> Kit : Notifikasi tersimpan
-deactivate DB
-deactivate Kit
+alt Ada deviasi dari threshold
+  Notifier -> API : createNotification(userId, kitId, message, level)
+  activate API
+  API -> Backend : POST /notifications
+  activate Backend
+  Backend --> API : Notification created
+  deactivate Backend
+  API --> Notifier : Success
+  deactivate API
+end
+
+deactivate Notifier
 
 ' === User membuka halaman notifikasi ===
 User -> Form : Membuka halaman notifikasi
 activate Form
 
-Form -> Kit : Meminta data notifikasi
-activate Kit
-Kit -> DB : Mengambil notifikasi dari SQLite
-activate DB
-DB -> DB : Query SELECT notifikasi
-DB --> Kit : Data notifikasi terkirim
-deactivate DB
-Kit -> Form : Mengirim daftar notifikasi
-activate Form
-Form -> User : Menampilkan daftar notifikasi di UI
+Form -> Notifier : Load notifications
+activate Notifier
+
+Notifier -> API : getNotifications(userId, kitId)
+activate API
+API -> Backend : GET /notifications?userId={userId}&kitId={kitId}
+activate Backend
+Backend --> API : List<Notification> JSON
+deactivate Backend
+API --> Notifier : List<NotificationItem>
+deactivate API
+
+Notifier --> Form : List<NotificationItem>
+deactivate Notifier
+
+Form -> User : Menampilkan daftar notifikasi
 deactivate Form
-deactivate Kit
+
+' === User filter notifikasi ===
+User -> Form : Pilih filter (All / Warning / Urgent)
+activate Form
+Form -> Form : Filter list berdasarkan level
+Form -> User : Tampilkan hasil filter
+deactivate Form
+
+' === User mark as read ===
+User -> Form : Tap notifikasi
+activate Form
+Form -> Notifier : markRead(notificationId)
+activate Notifier
+Notifier -> API : updateNotification(id, isRead: true)
+activate API
+API -> Backend : PATCH /notifications/{id}
+activate Backend
+Backend --> API : Updated
+deactivate Backend
+deactivate API
+Notifier --> Form : Updated
+deactivate Notifier
+Form -> User : Update tampilan (notifikasi sudah dibaca)
+deactivate Form
 
 @enduml

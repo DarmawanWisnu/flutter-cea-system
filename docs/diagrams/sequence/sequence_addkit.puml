@@ -2,11 +2,10 @@
 title Sequence Diagram - Tambah Kit Baru
 
 actor "User" as User
-participant "Form Add Kit" as Form
-participant "Sistem" as System
-participant "MQTT Broker (Mosquitto)" as MQTT
-participant "Database (SQLite)" as DB
-participant "Halaman Home Aplikasi" as Home
+participant "Add Kit Screen" as Form
+participant "ApiKitsService" as API
+participant "Backend REST API" as Backend
+participant "Home Screen" as Home
 
 ' === Awal ===
 User -> Form : Membuka halaman tambah kit
@@ -23,37 +22,33 @@ deactivate Form
 User -> Form : Klik tombol Simpan
 activate Form
 
-' === Kirim ke sistem ===
-Form -> System : Mengirimkan data kit baru
-activate System
+' === Validasi input ===
+Form -> Form : Validasi data (ID dan nama tidak kosong)
 
-' === Kirim ke MQTT Broker ===
-System -> MQTT : Mengirim data kit untuk registrasi
-activate MQTT
-MQTT -> MQTT : Proses pairing / konfirmasi koneksi perangkat
-MQTT --> System : Status koneksi (berhasil / gagal)
-deactivate MQTT
+' === Kirim ke API ===
+Form -> API : addKit(id, name)
+activate API
 
-' === Simpan ke database lokal ===
-System -> DB : Simpan data kit baru ke SQLite
-activate DB
-DB -> DB : Eksekusi perintah insert
-DB --> System : Data berhasil disimpan
-deactivate DB
+API -> Backend : POST /kits {id, name}
+activate Backend
+Backend -> Backend : Simpan data kit ke database
+Backend --> API : Response 201 Created / Error
+deactivate Backend
 
-' === Hasil ke user ===
-System -> Form : Menampilkan notifikasi "Kit berhasil ditambahkan"
-activate Form
-Form -> User : Menampilkan pesan sukses
-deactivate Form
+' === Handling hasil ===
+alt Berhasil
+  API --> Form : Success
+  Form -> User : Menampilkan SnackBar "Kit berhasil ditambahkan"
+  Form -> Home : Navigate ke Home Screen
+  activate Home
+  Home -> User : Menampilkan daftar kit terbaru
+  deactivate Home
+else Gagal
+  API --> Form : Throw Exception
+  Form -> User : Menampilkan pesan error
+end
 
-' === Redirect ke Home ===
-System -> Home : Menampilkan halaman utama aplikasi
-activate Home
-Home -> User : Menampilkan daftar kit
-deactivate Home
-
-deactivate System
+deactivate API
 deactivate Form
 
 @enduml

@@ -1,13 +1,14 @@
-/// Monitor Screen Flow Integration Tests
-///
-/// End-to-end tests covering the complete monitor screen user journey.
-/// Tests use mock API and MQTT providers to avoid real network/broker calls.
-/// Covers:
-/// - Sensor gauge display (pH, TDS, Temperature, Humidity)
-/// - Kit selection and status
-/// - AUTO/MANUAL mode switching
-/// - Manual control button interactions
-/// - Complete user flow simulation
+// Monitor Screen Flow Integration Tests
+//
+// End-to-end tests covering the complete monitor screen user journey.
+// Tests use mock API and MQTT providers to avoid real network/broker calls.
+// Covers:
+// - Sensor gauge display (pH, TDS, Temperature, Humidity)
+// - Kit selection and status
+// - AUTO/MANUAL mode switching
+// - Manual control button interactions
+// - Complete user flow simulation
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -64,14 +65,20 @@ class MockMqttVM extends MqttVM {
   }
 
   @override
-  void enableAutoMode(String deviceId) {
+  Future<void> enableAutoMode(String deviceId) async {
     print('[Flutter] Mock enable auto mode');
   }
 
   @override
-  void disableAutoMode(String deviceId) {
+  Future<void> disableAutoMode(String deviceId) async {
     print('[Flutter] Mock disable auto mode');
   }
+
+  @override
+  bool isAutoMode(String deviceId) => false;
+
+  @override
+  Future<bool> loadAutoModeFromBackend(String deviceId) async => false;
 }
 
 void main() {

@@ -2,10 +2,10 @@
 title Sequence Diagram - Register
 
 actor "User" as User
-participant "Form Register" as Form
-participant "Sistem" as System
-participant "Database (Firebase Auth)" as DB
-participant "Halaman Home Aplikasi" as Home
+participant "Register Screen" as Form
+participant "AuthService" as Auth
+participant "Firebase Auth" as Firebase
+participant "Verify Screen" as Verify
 
 ' === Awal ===
 User -> Form : Membuka halaman register
@@ -14,7 +14,7 @@ Form -> User : Menampilkan form register
 deactivate Form
 
 ' === Input data ===
-User -> Form : Input data akun (email, password, nama)
+User -> Form : Input email dan password
 activate Form
 Form -> User : Menampilkan data inputan
 deactivate Form
@@ -22,30 +22,38 @@ deactivate Form
 User -> Form : Klik tombol Daftar
 activate Form
 
-' === Kirim ke sistem ===
-Form -> System : Mengirimkan data registrasi
-activate System
+' === Validasi input ===
+Form -> Form : Validasi format email dan password
 
-' === Validasi & simpan ke database ===
-System -> DB : Kirim data ke Firebase Auth
-activate DB
-DB -> DB : Proses pembuatan akun
-DB --> System : Akun berhasil dibuat
-deactivate DB
+' === Kirim ke AuthService ===
+Form -> Auth : registerWithEmailPassword(email, password)
+activate Auth
 
-' === Konfirmasi hasil ===
-System -> Form : Menampilkan pesan "Registrasi berhasil"
-activate Form
-Form -> User : Menampilkan notifikasi sukses
-deactivate Form
+' === Buat akun di Firebase ===
+Auth -> Firebase : createUserWithEmailAndPassword()
+activate Firebase
+Firebase -> Firebase : Proses pembuatan akun
+Firebase --> Auth : UserCredential / Error
+deactivate Firebase
 
-' === Arahkan ke Home ===
-System -> Home : Menampilkan halaman utama aplikasi
-activate Home
-Home -> User : Menampilkan menu home
-deactivate Home
+' === Kirim email verifikasi ===
+alt Registrasi berhasil
+  Auth -> Firebase : sendEmailVerification()
+  activate Firebase
+  Firebase --> Auth : Email terkirim
+  deactivate Firebase
+  
+  Auth --> Form : Return UserCredential
+  Form -> Verify : Navigate ke Verify Screen
+  activate Verify
+  Verify -> User : Menampilkan halaman verifikasi email
+  deactivate Verify
+else Registrasi gagal
+  Auth --> Form : Throw FirebaseAuthException
+  Form -> User : Menampilkan pesan error (email sudah terdaftar, dll)
+end
 
-deactivate System
+deactivate Auth
 deactivate Form
 
 @enduml

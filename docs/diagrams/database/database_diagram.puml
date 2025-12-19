@@ -1,0 +1,106 @@
+@startuml
+title Logical Database Design - Fountaine Hydroponic Monitoring
+
+' === Styling ===
+skinparam class {
+  BackgroundColor #FEFECE
+  BorderColor #333333
+  ArrowColor #333333
+}
+
+' === ENTITIES ===
+
+entity "kits" as kits {
+  *id : TEXT <<PK>>
+  --
+  name : TEXT
+  createdAt : TIMESTAMPTZ
+}
+
+entity "telemetry" as telemetry {
+  *rowId : TEXT <<PK>>
+  --
+  deviceId : TEXT <<FK>>
+  ingestTime : BIGINT
+  payloadJson : JSONB
+  ppm : FLOAT
+  ph : FLOAT
+  tempC : FLOAT
+  humidity : FLOAT
+  waterTemp : FLOAT
+  waterLevel : FLOAT
+  payloadHash : TEXT <<UNIQUE>>
+}
+
+entity "actuator_event" as actuator {
+  *id : SERIAL <<PK>>
+  --
+  deviceId : TEXT <<FK>>
+  ingestTime : BIGINT
+  phUp : INT
+  phDown : INT
+  nutrientAdd : INT
+  valueS : FLOAT
+  manual : INT
+  auto : INT
+  refill : INT
+}
+
+entity "actuator_cooldown" as cooldown {
+  *id : SERIAL <<PK>>
+  --
+  deviceId : TEXT <<FK>>
+  actionType : TEXT
+  lastTime : BIGINT
+  lastValue : FLOAT
+}
+
+entity "ml_prediction_log" as ml_log {
+  *id : SERIAL <<PK>>
+  --
+  deviceId : TEXT <<FK>>
+  predictTime : BIGINT
+  payloadJson : JSONB
+  predictJson : JSONB
+}
+
+entity "device_mode" as device_mode {
+  *id : SERIAL <<PK>>
+  --
+  userId : TEXT
+  deviceId : TEXT <<FK>>
+  autoMode : BOOLEAN
+  updatedAt : TIMESTAMPTZ
+}
+
+entity "user_preference" as user_pref {
+  *id : SERIAL <<PK>>
+  --
+  userId : TEXT <<UNIQUE>>
+  selectedKitId : TEXT <<FK>>
+  updatedAt : TIMESTAMPTZ
+}
+
+entity "notifications" as notifications {
+  *id : SERIAL <<PK>>
+  --
+  userId : TEXT
+  deviceId : TEXT <<FK>>
+  level : TEXT
+  title : TEXT
+  message : TEXT
+  isRead : BOOLEAN
+  createdAt : TIMESTAMPTZ
+}
+
+' === RELATIONSHIPS ===
+
+kits ||--o{ telemetry : "id = deviceId"
+kits ||--o{ actuator : "id = deviceId"
+kits ||--o{ cooldown : "id = deviceId"
+kits ||--o{ ml_log : "id = deviceId"
+kits ||--o{ device_mode : "id = deviceId"
+kits ||--o| user_pref : "id = selectedKitId"
+kits ||--o{ notifications : "id = deviceId"
+
+@enduml

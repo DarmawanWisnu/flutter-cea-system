@@ -6,24 +6,42 @@ start
 :Akses halaman Notification;
 
 |Sistem|
-:Mengambil daftar notifikasi dari database lokal (SQLite);
-:Menampilkan daftar notifikasi di UI;
+:Request daftar notifikasi dari Backend API;
+:GET /notifications?userId={userId}&kitId={kitId};
+
+if ("Ada notifikasi?") then (Ya)
+  :Menampilkan daftar notifikasi di UI;
+  :Grouped by level (Info, Warning, Urgent);
+else (Tidak)
+  :Menampilkan pesan "Tidak ada notifikasi";
+endif
 
 |User|
 :Melihat daftar notifikasi;
-
-if ("User memilih salah satu notifikasi?") then (Ya)
-  :Membuka detail notifikasi;
-endif
+:Pilih filter (All / Warning / Urgent);
 
 |Sistem|
-:Menampilkan detail notifikasi (waktu, pesan, status baca);
+:Filter notifikasi berdasarkan level;
+:Menampilkan hasil filter;
 
 |User|
-:Menandai notifikasi sebagai telah dibaca;
-
-|Sistem|
-:Memperbarui status notifikasi di database SQLite;
+if ("User tap salah satu notifikasi?") then (Ya)
+  :Menampilkan detail notifikasi;
+  
+  |Sistem|
+  :Mark notifikasi sebagai telah dibaca;
+  :PATCH /notifications/{id} {isRead: true};
+  :Update tampilan status baca;
+  
+  |User|
+  if ("Notifikasi terkait waktu tertentu?") then (Ya)
+    :Tap "Lihat di History";
+    
+    |Sistem|
+    :Navigate ke History Screen;
+    :Dengan parameter targetTime;
+  endif
+endif
 
 stop
 @enduml

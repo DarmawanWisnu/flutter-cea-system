@@ -2,10 +2,10 @@
 title Sequence Diagram - Login
 
 actor "User" as User
-participant "Form Login" as Form
-participant "Sistem" as System
-participant "Database" as DB
-participant "Halaman Home Aplikasi" as Home
+participant "Login Screen" as Form
+participant "AuthService" as Auth
+participant "Firebase Auth" as Firebase
+participant "Home Screen" as Home
 
 ' === Awal ===
 User -> Form : Membuka aplikasi
@@ -14,36 +14,38 @@ Form -> User : Menampilkan form login
 deactivate Form
 
 ' === Proses input ===
-User -> Form : Input username dan password
+User -> Form : Input email dan password
 activate Form
 Form -> User : Menampilkan inputan di form
 deactivate Form
 
-User -> Form : Klik Submit
+User -> Form : Klik tombol Login
 activate Form
 
-' === Kirim ke sistem ===
-Form -> System : Mengirimkan data username dan password
-activate System
+' === Kirim ke AuthService ===
+Form -> Auth : signInWithEmailPassword(email, password)
+activate Auth
 
-' === Validasi ke database ===
-System -> DB : Validasi data
-activate DB
-DB -> DB : Proses validasi data
-DB --> System : Hasil validasi (valid / tidak)
-deactivate DB
+' === Validasi ke Firebase ===
+Auth -> Firebase : signInWithEmailAndPassword()
+activate Firebase
+Firebase -> Firebase : Validasi kredensial
+Firebase --> Auth : UserCredential / Error
+deactivate Firebase
 
-' === Hasil validasi ===
-System -> Form : Menampilkan pesan username/password salah
-activate Form
-deactivate Form
+' === Handling hasil ===
+alt Login berhasil
+  Auth --> Form : Return UserCredential
+  Form -> Home : Navigate ke Home Screen
+  activate Home
+  Home -> User : Menampilkan halaman utama
+  deactivate Home
+else Login gagal
+  Auth --> Form : Throw FirebaseAuthException
+  Form -> User : Menampilkan pesan error
+end
 
-System -> Home : Menampilkan menu home
-activate Home
-Home -> User : Tampilkan halaman utama aplikasi
-deactivate Home
-
-deactivate System
+deactivate Auth
 deactivate Form
 
 @enduml

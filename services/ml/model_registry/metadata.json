@@ -1,8 +1,6 @@
 {
-  "version": "v20251204T063242Z",
-  "timestamp": "20251204T063242Z",
-  "training_samples": 40456,
-  "test_samples": 10114,
+  "version": "v20251215T203622Z",
+  "logic": "multi_variable_v1",
   "features": [
     "ppm",
     "ph",
@@ -17,30 +15,30 @@
     "nutrientAdd",
     "refill"
   ],
+  "interactions": [
+    "pH + Nutrient: skip if pH unstable",
+    "Temp + Nutrient: reduce at high temp",
+    "Humidity + WL: more refill at low humidity",
+    "WaterTemp: cooling refill"
+  ],
   "metrics": {
     "phUp": {
-      "test_mae": 0.013749646575740935,
-      "test_rmse": 0.13846865564258262,
-      "test_r2": 0.789401676151893
+      "mae": 3.7468792403900966,
+      "r2": 0.8724390040837787
     },
     "phDown": {
-      "test_mae": 0.021957601958582863,
-      "test_rmse": 0.10618442339603713,
-      "test_r2": 0.16815996159648117
+      "mae": 3.8886097684267815,
+      "r2": 0.8935533344293265
     },
     "nutrientAdd": {
-      "test_mae": 0.02105388300659089,
-      "test_rmse": 0.1035508423396915,
-      "test_r2": 0.8090429419747235
+      "mae": 5.444105915399519,
+      "r2": 0.5239711060096891
     },
     "refill": {
-      "test_mae": 0.023288252405571606,
-      "test_rmse": 0.10914237378357335,
-      "test_r2": 0.7198031465471928
+      "mae": 19.430384121966224,
+      "r2": 0.6346609647593531
     }
   },
-  "overall_test_mae": 0.020012345986621573,
-  "overall_test_rmse": 0.1151993219074942,
-  "logic_version": "priority_based_v1",
-  "conflicting_actions": 1022
+  "overall_mae": 8.127494761545655,
+  "training_samples": 40000
 }

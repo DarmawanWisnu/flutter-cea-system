@@ -1,11 +1,12 @@
-/// Mock MQTT ViewModel for Testing
-///
-/// Provides a mock implementation of MqttVM for widget and integration tests.
-/// This mock:
-/// - Maintains connected state
-/// - Provides empty telemetry and status maps
-/// - Provides no-op implementations for all MQTT operations
-/// - Can be used with Riverpod provider overrides
+// Mock MQTT ViewModel for Testing
+//
+// Provides a mock implementation of MqttVM for widget and integration tests.
+// This mock:
+// - Maintains connected state
+// - Provides empty telemetry and status maps
+// - Provides no-op implementations for all MQTT operations
+// - Can be used with Riverpod provider overrides
+
 import 'package:flutter/foundation.dart';
 import 'package:fountaine/providers/provider/mqtt_provider.dart';
 import 'package:fountaine/services/mqtt_service.dart';
@@ -34,13 +35,18 @@ class MockMqttVM extends ChangeNotifier implements MqttVM {
   }) async {}
 
   @override
-  void enableAutoMode(String deviceId) {}
+  Future<void> enableAutoMode(String deviceId) async {}
 
   @override
-  void disableAutoMode(String deviceId) {}
+  Future<void> disableAutoMode(String deviceId) async {}
 
   @override
   bool isAutoMode(String deviceId) {
+    return false;
+  }
+
+  @override
+  Future<bool> loadAutoModeFromBackend(String deviceId) async {
     return false;
   }
 

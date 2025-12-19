@@ -2,56 +2,85 @@
 title Sequence Diagram - Monitor Real-Time
 
 actor "User" as User
-participant "Halaman Monitor" as Form
-participant "Sistem" as System
-participant "MQTT Broker (Mosquitto)" as MQTT
-participant "Database (SQLite)" as DB
+participant "Monitor Screen" as Form
+participant "MqttVM" as MQTT
+participant "MQTT Broker" as Broker
+participant "ApiService" as API
+participant "Backend REST API" as Backend
 
 ' === Awal ===
 User -> Form : Membuka halaman monitor
 activate Form
-Form -> User : Menampilkan tampilan awal monitor (grafik kosong)
-deactivate Form
+Form -> User : Menampilkan tampilan awal (loading)
 
-' === Inisialisasi koneksi ===
-Form -> System : Meminta koneksi ke MQTT broker
-activate System
-
-System -> MQTT : Subscribe topic sensor
+' === Inisialisasi MQTT ===
+Form -> MQTT : init()
 activate MQTT
-MQTT -> System : Mengirim data sensor
+MQTT -> Broker : connect()
+activate Broker
+Broker --> MQTT : Connected
+MQTT -> Broker : subscribe("kit/+/telemetry")
+MQTT -> Broker : subscribe("kit/+/status")
+deactivate Broker
 deactivate MQTT
 
-' === Proses penerimaan data ===
-System -> DB : Menyimpan data sensor ke SQLite
-activate DB
-DB -> DB : Proses insert data sensor
-DB --> System : Data tersimpan
-deactivate DB
+' === Load auto mode state ===
+Form -> MQTT : loadAutoModeFromBackend(kitId)
+activate MQTT
+MQTT -> API : getDeviceMode(userId, kitId)
+activate API
+API -> Backend : GET /devices/{kitId}/mode
+activate Backend
+Backend --> API : {autoMode: true/false}
+deactivate Backend
+API --> MQTT : autoMode boolean
+deactivate API
+MQTT --> Form : Auto mode state
+deactivate MQTT
 
-System -> Form : Update tampilan data sensor (grafik & status)
+' === Real-time telemetry stream ===
+loop Setiap ada data baru
+  Broker -> MQTT : Publish telemetry data
+  activate MQTT
+  MQTT -> MQTT : Parse JSON to Telemetry
+  MQTT -> Form : notifyListeners()
+  activate Form
+  Form -> User : Update tampilan sensor (pH, PPM, Temp, dll)
+  deactivate Form
+  deactivate MQTT
+end
+
+' === User toggle auto/manual mode ===
+User -> Form : Toggle mode Auto/Manual
 activate Form
-Form -> User : Menampilkan nilai terbaru pada grafik
+Form -> MQTT : setAutoMode(kitId, enabled)
+activate MQTT
+MQTT -> API : setDeviceMode(userId, kitId, autoMode)
+activate API
+API -> Backend : POST /devices/{kitId}/mode
+activate Backend
+Backend --> API : Success
+deactivate Backend
+API --> MQTT : Success
+deactivate API
+MQTT --> Form : Mode updated
+deactivate MQTT
+Form -> User : Update tampilan mode
 deactivate Form
 
-' === Iterasi otomatis (tanpa loop block) ===
-MQTT -> System : Mengirim data sensor terbaru
-activate System
-System -> DB : Menyimpan data ke SQLite
-activate DB
-DB --> System : Data tersimpan
-deactivate DB
-System -> Form : Update grafik
-activate Form
-Form -> User : Menampilkan data terbaru
-deactivate Form
-deactivate System
-
-' === Akhiran ===
-User -> Form : Keluar dari halaman monitor
-Form -> System : Memutus koneksi MQTT
-System -> MQTT : Disconnect
-deactivate Form
-deactivate System
+' === User kontrol manual ===
+alt Mode Manual
+  User -> Form : Tekan tombol kontrol (pH Up, Nutrient, dll)
+  activate Form
+  Form -> MQTT : publishControl(cmd, data, kitId)
+  activate MQTT
+  MQTT -> Broker : Publish ke "kit/{kitId}/control"
+  activate Broker
+  Broker --> MQTT : Published
+  deactivate Broker
+  deactivate MQTT
+  Form -> User : Tampilkan feedback
+  deactivate Form
+end
 
 @enduml

@@ -9,19 +9,35 @@ start
 :Menampilkan form register;
 
 |User|
-:Input email, password, dan konfirmasi password;
+:Input email dan password;
+:Input konfirmasi password;
 :Klik tombol Register;
 
 |Sistem|
-:Validasi data input;
-if ("Data valid?") then (Ya)
-  :Membuat akun pengguna di Firebase Auth;
-  :Mengirim email verifikasi ke pengguna;
-  :Menampilkan notifikasi "registrasi berhasil, silakan verifikasi email";
-  :Menampilkan halaman verifikasi;
-  stop
+:Validasi format input;
+
+if ("Format valid?") then (Ya)
+  if ("Password match?") then (Ya)
+    :Kirim request ke Firebase Auth;
+    :createUserWithEmailAndPassword();
+    
+    if ("Registrasi berhasil?") then (Ya)
+      :Kirim email verifikasi;
+      :sendEmailVerification();
+      :Menampilkan notifikasi "Registrasi berhasil";
+      :Navigate ke Verify Screen;
+      stop
+    else (Tidak)
+      :Menampilkan pesan error;
+      :(Email sudah terdaftar / password lemah);
+      :Kembali ke form register;
+    endif
+  else (Tidak)
+    :Menampilkan pesan "Password tidak cocok";
+    :Kembali ke form register;
+  endif
 else (Tidak)
-  :Menampilkan pesan kesalahan (contoh: email tidak valid atau password tidak cocok);
-  :Kembali ke halaman register;
+  :Menampilkan pesan "Format email tidak valid";
+  :Kembali ke form register;
 endif
 @enduml

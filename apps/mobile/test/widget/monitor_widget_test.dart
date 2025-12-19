@@ -1,14 +1,16 @@
-/// Monitor Screen Widget Tests
-///
-/// Tests the MonitorScreen widget for proper rendering of sensor data and controls.
-/// Uses mock API and MQTT providers to isolate from external dependencies.
-/// Covers:
-/// - Sensor gauge display (pH, TDS, Humidity, Temperature)
-/// - Kit selection dropdown
-/// - Mode switching (AUTO/MANUAL)
-/// - Progress bar indicators
+// Monitor Screen Widget Tests
+//
+// Tests the MonitorScreen widget for proper rendering of sensor data and controls.
+// Uses mock API and MQTT providers to isolate from external dependencies.
+// Covers:
+// - Sensor gauge display (pH, TDS, Humidity, Temperature)
+// - Kit selection dropdown
+// - Mode switching (AUTO/MANUAL)
+// - Progress bar indicators
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/misc.dart';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fountaine/features/monitor/monitor_screen.dart';
@@ -65,7 +67,7 @@ class MockApiService extends ApiService {
 
 /// Mock MQTT ViewModel that provides no-op implementations for testing.
 class MockMqttVM extends MqttVM {
-  MockMqttVM(Ref ref) : super(ref);
+  MockMqttVM(super.ref);
 
   @override
   Future<void> init() async {}
@@ -78,13 +80,16 @@ class MockMqttVM extends MqttVM {
   }) async {}
 
   @override
-  void enableAutoMode(String deviceId) {}
+  Future<void> enableAutoMode(String deviceId) async {}
 
   @override
-  void disableAutoMode(String deviceId) {}
+  Future<void> disableAutoMode(String deviceId) async {}
 
   @override
   bool isAutoMode(String deviceId) => false;
+
+  @override
+  Future<bool> loadAutoModeFromBackend(String deviceId) async => false;
 }
 
 void main() {

@@ -6,24 +6,34 @@ start
 :Akses halaman History;
 
 |Sistem|
-:Menampilkan daftar kit atau pilihan periode data;
-:Mengambil data riwayat sensor dari database lokal (SQLite);
+:Ambil kitId dari shared state;
+:Menampilkan loading indicator;
+:Request data history ke Backend API;
+:GET /telemetry/{kitId}/history;
 
-|User|
-:Memilih kit atau periode waktu tertentu;
-
-|Sistem|
-:Menampilkan data history sensor (pH, PPM, Humidity, Temperature);
-:Menampilkan grafik tren perubahan nilai sensor;
-
-|User|
-:Melihat detail data sensor pada grafik;
-
-|Sistem|
-if ("Data terbaru tersedia?") then (Ya)
-  :Memperbarui data history di tampilan UI;
+if ("Data tersedia?") then (Ya)
+  :Menampilkan list data sensor;
+  :(pH, PPM, Temperature, Water Level);
 else (Tidak)
-  :Menampilkan pesan "Tidak ada data baru";
+  :Menampilkan pesan "Tidak ada data";
+endif
+
+|User|
+:Memilih filter waktu;
+:(1 jam / 6 jam / Semua);
+
+|Sistem|
+:Filter data lokal berdasarkan waktu;
+:Menampilkan data hasil filter;
+
+|User|
+:Memilih tanggal tertentu (opsional);
+
+|Sistem|
+if ("Tanggal dipilih?") then (Ya)
+  :Request data untuk tanggal terpilih;
+  :GET /telemetry/{kitId}/history?date=YYYY-MM-DD;
+  :Menampilkan data untuk tanggal tersebut;
 endif
 
 stop

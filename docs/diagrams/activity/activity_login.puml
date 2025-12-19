@@ -1,4 +1,6 @@
 @startuml
+title Activity Diagram - Login
+
 |User|
 start
 :Akses halaman login;
@@ -11,12 +13,27 @@ start
 :Klik tombol Login;
 
 |Sistem|
-:Validasi data login;
-if ("Data valid?") then (Ya)
-  :Menampilkan halaman utama aplikasi;
-  stop
+:Validasi format input;
+
+if ("Format valid?") then (Ya)
+  :Kirim request ke Firebase Auth;
+  :signInWithEmailAndPassword();
+  
+  if ("Kredensial valid?") then (Ya)
+    if ("Email sudah diverifikasi?") then (Ya)
+      :Navigate ke Home Screen;
+      stop
+    else (Tidak)
+      :Navigate ke Verify Screen;
+      :Tampilkan pesan "Silakan verifikasi email";
+      stop
+    endif
+  else (Tidak)
+    :Menampilkan pesan error;
+    :Kembali ke halaman login;
+  endif
 else (Tidak)
-  :Menampilkan pemberitahuan "data login salah";
+  :Menampilkan pesan "Format email/password tidak valid";
   :Kembali ke halaman login;
 endif
 @enduml

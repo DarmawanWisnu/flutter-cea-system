@@ -262,8 +262,15 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
 
             # FALLBACK TO RULE-BASED IF ML FAILS
             if not ml_success:
-                logger.info("[AUTO MODE] Using rule-based logic with priority system...")
+                logger.info("[AUTO MODE] Using P-control rule-based logic...")
                 AUTO_MODE_SOURCE = "rule"
+
+                # Constants
+                PH_MIN, PH_MAX = 5.5, 6.5
+                PPM_MIN, PPM_MAX = 560, 840
+                WL_MIN, WL_MAX = 1.2, 2.5
+                TANK_VOLUME_ML = 10000  # 10 Liters
+                PUMP_FLOW_MLS = 1.58  # ml per second
 
                 # Initialize all actions to 0
                 phUpSec = 0
@@ -271,59 +278,36 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
                 nutrientSec = 0
                 refillSec = 0
 
-                # PRIORITY SYSTEM (prevents conflicts)
+                # pH Control (P-control with Kp=1)
+                # 1 pH change = 50 seconds (~80ml @ 1.58ml/s)
+                if ph < PH_MIN:
+                    error = PH_MIN - ph
+                    phUpSec = min(50, error * 50)
+                    logger.info(f"[AUTO MODE] pH Low → pH Up {phUpSec:.1f}s")
+                elif ph > PH_MAX:
+                    error = ph - PH_MAX
+                    phDownSec = min(50, error * 50)
+                    logger.info(f"[AUTO MODE] pH High → pH Down {phDownSec:.1f}s")
                 
-                # PRIORITY 1: Critical Water Level (Safety First)
-                # If water is critically low, ONLY refill (skip other actions)
-                if wl < 1.2:
-                    refillSec = max(0, min(25, (1.2 - wl) * 20))
-                    logger.info(f"[AUTO MODE] Priority 1: Critical water level → Refill only")
+                # Nutrient Addition (100 ppm = 63 seconds)
+                if ppm < PPM_MIN:
+                    error = PPM_MIN - ppm
+                    nutrientSec = min(63, (error / 100) * 63)
+                    logger.info(f"[AUTO MODE] PPM Low → Nutrient {nutrientSec:.1f}s")
                 
-                # PRIORITY 2: High PPM Dilution
-                # If PPM is high AND water level allows, dilute (skip pH/nutrient)
-                elif ppm > 840 and wl < 2.5:
-                    refillSec = max(0, min(15, (ppm - 840) / 20))
-                    logger.info(f"[AUTO MODE] Priority 2: High PPM → Dilute (skip pH/nutrient)")
+                # Refill / Dilution Control
+                if wl < WL_MIN:
+                    # Critical water level - fixed 60 seconds
+                    refillSec = 60
+                    logger.info(f"[AUTO MODE] Water Low → Refill {refillSec}s")
+                elif ppm > PPM_MAX and wl < WL_MAX:
+                    # PPM too high - use dilution formula: V_air = V × (C_i/C_f - 1)
+                    v_air_ml = TANK_VOLUME_ML * ((ppm / PPM_MAX) - 1)
+                    refillSec = min(120, v_air_ml / PUMP_FLOW_MLS)
+                    logger.info(f"[AUTO MODE] PPM High → Dilute {refillSec:.1f}s")
                 
-                # PRIORITY 3: pH Adjustment
-                # Only adjust pH if water is stable and PPM is not critical
-                elif ph < 5.5 or ph > 6.5:
-                    if ph < 5.5:
-                        phUpSec = max(0, min(12, (5.5 - ph) * 8))
-                        logger.info(f"[AUTO MODE] Priority 3: Low pH → pH Up")
-                    elif ph > 6.5:
-                        phDownSec = max(0, min(12, (ph - 6.5) * 8))
-                        logger.info(f"[AUTO MODE] Priority 3: High pH → pH Down")
-                
-                # PRIORITY 4: Nutrient Addition
-                # Only add nutrients if pH is stable (5.5-6.5) and PPM is low
-                elif ppm < 560:
-                    nutrientSec = max(0, min(20, (560 - ppm) / 20))
-                    logger.info(f"[AUTO MODE] Priority 4: Low PPM → Add Nutrient")
-                
-                # PRIORITY 5: Micro-adjustments (fine-tuning)
-                # Only apply if no major action was taken
-                else:
-                    # Micro pH adjustments (when pH is slightly off but within range)
-                    if 5.5 <= ph < 5.7:
-                        phUpSec = 1
-                        logger.info(f"[AUTO MODE] Priority 5: Micro pH Up")
-                    elif 6.3 < ph <= 6.5:
-                        phDownSec = 1
-                        logger.info(f"[AUTO MODE] Priority 5: Micro pH Down")
-                    
-                    # Micro nutrient (when PPM is slightly low but within range)
-                    elif 560 <= ppm < 650:
-                        nutrientSec = 1
-                        logger.info(f"[AUTO MODE] Priority 5: Micro Nutrient")
-                    
-                    # Micro refill (when water is slightly low but not critical)
-                    elif 1.2 <= wl < 1.5:
-                        refillSec = 1
-                        logger.info(f"[AUTO MODE] Priority 5: Micro Refill")
-                    
-                    else:
-                        logger.info(f"[AUTO MODE] All parameters stable → No action")
+                if phUpSec == 0 and phDownSec == 0 and nutrientSec == 0 and refillSec == 0:
+                    logger.info(f"[AUTO MODE] All parameters stable → No action")
 
                 # Set final values
                 data.phUp = int(phUpSec)

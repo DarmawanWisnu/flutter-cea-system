@@ -40,11 +40,13 @@ rectangle "Firebase Auth" as Firebase {
 }
 rectangle "MQTT Broker (Mosquitto)" as MQTT {
   usecase "Kirim / Terima Data Sensor" as UC_MQTTData
-  usecase "Kirim Perintah Pompa" as UC_MQTTPump
+  usecase "Kirim Perintah Aktuator" as UC_MQTTPump
 }
-rectangle "SQLite Database" as SQLite {
-  usecase "Simpan Notifikasi Lokal" as UC_SQLiteNotif
-  usecase "Simpan & Ambil Data History" as UC_SQLiteData
+rectangle "Backend REST API" as Backend {
+  usecase "Simpan & Ambil Notifikasi" as UC_BackendNotif
+  usecase "Simpan & Ambil Data History" as UC_BackendData
+  usecase "Kelola Data Kit" as UC_BackendKit
+  usecase "Kelola Mode Auto/Manual" as UC_BackendMode
 }
 
 ' === Relasi User ===
@@ -82,9 +84,10 @@ UC_Verify --> UC_Firebase
 UC_Sensor --> UC_MQTTData
 UC_Monitor --> UC_MQTTData
 UC_Control --> UC_MQTTPump
-UC_AddKit --> UC_MQTTData
+UC_Control --> UC_BackendMode
 
-UC_Notify --> UC_SQLiteNotif
-UC_History --> UC_SQLiteData
+UC_Notify --> UC_BackendNotif
+UC_History --> UC_BackendData
+UC_AddKit --> UC_BackendKit
 
 @enduml

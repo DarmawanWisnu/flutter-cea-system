@@ -9,18 +9,29 @@ start
 :Menampilkan form input Kit;
 
 |User|
-:Input nama kit, ID kit, dan konfigurasi sensor;
+:Input ID kit;
+:Input nama kit;
 :Klik tombol Simpan;
 
 |Sistem|
 :Validasi data input;
+
 if ("Data valid?") then (Ya)
-  :Menyimpan data Kit ke database lokal (SQLite);
-  :Sinkronisasi Kit baru ke sistem MQTT;
-  :Menampilkan notifikasi "Kit berhasil ditambahkan";
-  stop
+  :Kirim request ke Backend API;
+  :POST /kits {id, name};
+  
+  if ("Request berhasil?") then (Ya)
+    :Menampilkan SnackBar "Kit berhasil ditambahkan";
+    :Navigate ke Home Screen;
+    stop
+  else (Tidak)
+    :Menampilkan pesan error;
+    :(ID Kit sudah terdaftar / network error);
+    :Kembali ke form Add Kit;
+  endif
 else (Tidak)
-  :Menampilkan pesan kesalahan (contoh: ID Kit sudah terdaftar);
+  :Menampilkan pesan kesalahan validasi;
+  :(ID atau nama kosong);
   :Kembali ke form Add Kit;
 endif
 @enduml

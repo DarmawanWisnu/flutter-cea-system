@@ -2,51 +2,58 @@
 title Sequence Diagram - Lihat History Data Sensor
 
 actor "User" as User
-participant "Halaman History" as Form
-participant "Sistem" as System
-participant "Database (SQLite)" as DB
+participant "History Screen" as Form
+participant "ApiService" as API
+participant "Backend REST API" as Backend
 
 ' === Awal ===
 User -> Form : Membuka halaman history
 activate Form
-Form -> User : Menampilkan tampilan awal (kosong)
+Form -> User : Menampilkan tampilan awal (loading)
 deactivate Form
 
-' === Permintaan data ===
-Form -> System : Meminta data history sensor
-activate System
+' === Load kit dari shared state ===
+Form -> Form : Ambil kitId dari currentKitIdProvider
 
-System -> DB : Mengambil data dari SQLite
-activate DB
-DB -> DB : Eksekusi query SELECT
-DB --> System : Mengirim data hasil query
-deactivate DB
+' === Permintaan data history ===
+Form -> API : getTelemetryHistory(kitId, limit)
+activate API
+
+API -> Backend : GET /telemetry/{kitId}/history?limit=N
+activate Backend
+Backend -> Backend : Query data telemetry dari database
+Backend --> API : List<Telemetry> JSON
+deactivate Backend
+
+API --> Form : List<Telemetry>
+deactivate API
 
 ' === Tampilkan data ke user ===
-System -> Form : Mengirim data history
 activate Form
-Form -> User : Menampilkan tabel / grafik data sensor
+Form -> User : Menampilkan list data sensor (pH, PPM, Temp, dll)
 deactivate Form
 
-' === User aksi tambahan (opsional) ===
-User -> Form : Memilih filter atau rentang tanggal
+' === User filter data ===
+User -> Form : Memilih filter waktu (1 jam / 6 jam / semua)
 activate Form
-Form -> System : Meminta data baru berdasarkan filter
-activate System
-System -> DB : Query data sesuai filter
-activate DB
-DB --> System : Hasil filter dikirim
-deactivate DB
-System -> Form : Menampilkan hasil filter
-activate Form
-Form -> User : Menampilkan data terbaru
+Form -> Form : Filter data lokal berdasarkan waktu
+Form -> User : Menampilkan data hasil filter
 deactivate Form
-deactivate System
 
-' === Akhiran ===
-User -> Form : Keluar dari halaman history
-Form -> System : Menutup koneksi ke database
+' === User pilih tanggal ===
+User -> Form : Memilih tanggal tertentu
+activate Form
+
+Form -> API : getTelemetryHistory(kitId, date)
+activate API
+API -> Backend : GET /telemetry/{kitId}/history?date=YYYY-MM-DD
+activate Backend
+Backend --> API : List<Telemetry> untuk tanggal tersebut
+deactivate Backend
+API --> Form : List<Telemetry>
+deactivate API
+
+Form -> User : Menampilkan data untuk tanggal terpilih
 deactivate Form
-deactivate System
 
 @enduml

@@ -4,42 +4,42 @@ title Class Diagram - Arsitektur Sistem Fountaine Hydroponic Monitoring
 ' =================== UI LAYER ===================
 package "UI Layer" {
   class AuthGate
+  class HomeScreen
   class MonitorScreen
   class HistoryScreen
   class NotificationScreen
   class AddKitScreen
-  class HomeScreen
+  class SettingsScreen
+  class ProfileScreen
 }
 
 ' =================== PROVIDER LAYER ===================
 package "Providers" {
-  class AuthNotifier {
-    - _authService : AuthService
-    + signIn()
-    + register()
-    + signOut()
-  }
-
   class MqttVM {
-    - _mqttService : MqttService
-    + connect()
-    + reconnect()
-    + disconnect()
-  }
-
-  class KitListNotifier {
-    - _mqttService : MqttService
-    - _dbService : DatabaseService
-    + fetchTelemetry()
-    + saveTelemetry()
-    + checkThresholds()
+    - _svc : MqttService
+    - _autoModeDevices : Set<String>
+    + telemetryMap : Map<String, Telemetry>
+    + statusMap : Map<String, DeviceStatus>
+    + init()
+    + publishActuator()
+    + enableAutoMode()
+    + disableAutoMode()
+    + isAutoMode()
+    + loadAutoModeFromBackend()
   }
 
   class NotificationListNotifier {
-    - _kitNotifier : KitListNotifier
-    - _dbService : DatabaseService
+    - _ref : Ref
     + fetchNotifications()
-    + addNotification()
+    + markRead()
+    + markAllRead()
+    + delete()
+    + clearAll()
+  }
+
+  class MonitorTelemetryProvider {
+    + data : Telemetry
+    + lastUpdated : DateTime
   }
 }
 
@@ -52,42 +52,52 @@ package "Services" {
     + signOut()
     + sendEmailVerification()
     + sendPasswordReset()
+    + reloadUser()
   }
 
   class MqttService {
     - _client : MqttServerClient
-    - _kitId : String
+    + connectionState$ : Stream
+    + telemetry$ : Stream
+    + status$ : Stream
     + connect()
-    + publish()
+    + publishControl()
     + disconnect()
-    + telemetry$() : Stream
-    + status$() : Stream
   }
 
-  class DatabaseService {
-    - _db : Database
-    + init()
-    + insertTelemetry()
-    + getTelemetry()
-    + insertNotification()
+  class ApiService {
+    - baseUrl : String
+    + getLatestTelemetry()
+    + getTelemetryHistory()
+    + getLatestActuatorEvent()
+    + setDeviceMode()
+    + getDeviceMode()
     + getNotifications()
+    + markNotificationRead()
+    + deleteNotification()
+  }
+
+  class ApiKitsService {
+    + getKits()
+    + addKit()
+    + deleteKit()
   }
 }
 
 ' =================== MODEL LAYER ===================
 package "Models" {
   class Telemetry {
+    + id : int?
+    + ingestTime : int?
     + ppm : double
     + ph : double
     + tempC : double
     + humidity : double
     + waterTemp : double
     + waterLevel : double
-    + pHReducer : bool
-    + addWater : bool
-    + nutrientsAdder : bool
-    + humidifier : bool
-    + exFan : bool
+    + fromJson()
+    + toJson()
+    + copyWith()
   }
 
   class DeviceStatus {
@@ -95,41 +105,38 @@ package "Models" {
     + lastSeen : DateTime
   }
 
-  class AppNotification {
-    + id : int
-    + title : String
+  class Kit {
+    + id : String
+    + name : String
+    + createdAt : DateTime
+  }
+
+  class NotificationItem {
+    + id : String
+    + kitId : String
+    + level : String
     + message : String
     + timestamp : DateTime
     + isRead : bool
   }
 
   class HistoryRouteArgs {
-    + targetTime : DateTime
-    + kitName : String
-    + reason : String
+    + targetTime : DateTime?
+    + kitName : String?
+    + kitId : String?
+    + reason : String?
   }
 
   class NotificationRouteArgs {
-    + initialFilter : String
-  }
-
-  class MonitorArgs {
-    + kitId : String
-    + simulated : bool
-  }
-
-  class HistoryArgs {
-    + kitId : String
+    + initialFilter : String?
   }
 }
 
 ' =================== CORE LAYER ===================
 package "Core" {
   class AppConst {
-    + rollupMinutes : int
     + defaultKitId : String
-    + simulatedMode : bool
-    + formatDateTime() : String
+    + formatDateTime()
   }
 
   class MqttConst {
@@ -137,58 +144,47 @@ package "Core" {
     + port : int
     + username : String
     + password : String
+    + tTelemetry()
+    + tStatus()
+    + tControl()
   }
 
-  class MembershipFunction {
-    + mu(x: double) : double
-  }
-
-  class TriangularMF {
-    + a, b, c : double
-    + mu(x: double) : double
-  }
-
-  class TrapezoidalMF {
-    + a, b, c, d : double
-    + mu(x: double) : double
-  }
-
-  class FuzzyVariable {
-    + name : String
-    + minX : double
-    + maxX : double
-    + terms : Map<String, MembershipFunction>
+  class ThresholdConst {
+    + ppmMin : double
+    + ppmMax : double
+    + phMin : double
+    + phMax : double
+    + tempMin : double
+    + tempMax : double
+    + wlMin : double
+    + wlMax : double
   }
 }
 
 ' =================== RELATIONSHIPS ===================
 ' --- UI Relations ---
-AuthGate --> AuthNotifier
-MonitorScreen --> KitListNotifier
-HistoryScreen --> KitListNotifier
-NotificationScreen --> NotificationListNotifier
-AddKitScreen --> KitListNotifier
+AuthGate --> AuthService
 HomeScreen --> MqttVM
+MonitorScreen --> MqttVM
+MonitorScreen --> MonitorTelemetryProvider
+HistoryScreen --> ApiService
+NotificationScreen --> NotificationListNotifier
+AddKitScreen --> ApiKitsService
+SettingsScreen --> ApiService
+ProfileScreen --> AuthService
 
 ' --- Provider Relations ---
-AuthNotifier --> AuthService
 MqttVM --> MqttService
-KitListNotifier --> MqttService
-KitListNotifier --> DatabaseService
-KitListNotifier --> AppConst
-NotificationListNotifier --> KitListNotifier
-NotificationListNotifier --> DatabaseService
-NotificationListNotifier --> AppNotification
+MqttVM --> ApiService
+NotificationListNotifier --> ApiService
+NotificationListNotifier --> ThresholdConst
 
 ' --- Service Relations ---
 MqttService --> MqttConst
-DatabaseService --> Telemetry
-DatabaseService --> AppNotification
-AuthService --> FirebaseAuth
-
-' --- Core Relations ---
-FuzzyVariable --> MembershipFunction
-TriangularMF -|> MembershipFunction
-TrapezoidalMF -|> MembershipFunction
+MqttService --> Telemetry
+MqttService --> DeviceStatus
+ApiService --> Telemetry
+ApiKitsService --> Kit
+AuthService ..> FirebaseAuth
 
 @enduml
