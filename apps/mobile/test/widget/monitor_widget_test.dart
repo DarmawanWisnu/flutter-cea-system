@@ -20,6 +20,7 @@ import 'package:fountaine/services/api_service.dart';
 import 'package:fountaine/domain/telemetry.dart';
 
 import '../helpers/test_overflow_handler.dart';
+import '../helpers/mock_providers.dart';
 
 /// Mock API Service that returns static telemetry data for testing.
 class MockApiService extends ApiService {
@@ -105,6 +106,7 @@ void main() {
         ];
       }),
       mqttProvider.overrideWith((ref) => MockMqttVM(ref)),
+      ...createUrlOverrides(),
     ];
   }
 

@@ -14,6 +14,7 @@ import 'package:fountaine/features/history/history_screen.dart';
 import 'package:fountaine/providers/provider/api_provider.dart';
 
 import '../helpers/test_overflow_handler.dart';
+import '../helpers/mock_providers.dart';
 
 /// Creates wrapper with ProviderScope for testing HistoryScreen.
 Widget wrapHistoryForTest(Widget child, List<Override> overrides) {
@@ -28,6 +29,7 @@ void main() {
   createTestOverrides() {
     return <Override>[
       apiBaseUrlProvider.overrideWith((ref) => 'http://localhost:8000'),
+      ...createUrlOverrides(),
     ];
   }
 

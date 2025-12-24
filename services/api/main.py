@@ -9,8 +9,33 @@ import hashlib
 import time
 import json
 import threading
+import logging
 from datetime import datetime
 from services.api import actuator
+
+# Custom formatter to show level only for ERROR
+class CustomFormatter(logging.Formatter):
+    def format(self, record):
+        if record.levelno == logging.ERROR:
+            # Show ERROR level
+            return f"{self.formatTime(record, self.datefmt)} | ERROR | {record.getMessage()}"
+        else:
+            # Hide level for INFO/WARNING
+            return f"{self.formatTime(record, self.datefmt)} | {record.getMessage()}"
+
+# Configure logging with custom formatter
+handler_console = logging.StreamHandler()
+handler_file = logging.FileHandler('api.log')
+
+formatter = CustomFormatter(datefmt='%Y-%m-%d %H:%M:%S')
+handler_console.setFormatter(formatter)
+handler_file.setFormatter(formatter)
+
+logging.basicConfig(
+    level=logging.INFO,
+    handlers=[handler_console, handler_file]
+)
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
@@ -40,7 +65,7 @@ _auto_mode_running = True
 
 def _auto_mode_scheduler():
     """Background thread that triggers auto mode for enabled devices every 30s."""
-    print(f"[AUTO MODE] Scheduler started (interval: {AUTO_MODE_INTERVAL}s)")
+    logger.info(f"[AUTO MODE] Scheduler started (interval: {AUTO_MODE_INTERVAL}s)")
     
     while _auto_mode_running:
         try:
@@ -61,13 +86,13 @@ def _auto_mode_scheduler():
             if devices:
                 t = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 device_ids = [d[0] for d in devices]
-                print(f"\n[AUTO MODE] 🤖 {t} - Triggering for {len(devices)} device(s): {device_ids}")
+                logger.info(f"\n[AUTO MODE] 🤖 {t} - Triggering for {len(devices)} device(s): {device_ids}")
                 
                 for device_id, user_id in devices:
                     _trigger_auto_actuator(device_id, user_id)
                     
         except Exception as e:
-            print(f"[AUTO MODE] Error in scheduler: {e}")
+            logger.error(f"[AUTO MODE] Error in scheduler: {e}", exc_info=True)
         
         # Sleep in small increments
         for _ in range(AUTO_MODE_INTERVAL * 10):
@@ -75,7 +100,7 @@ def _auto_mode_scheduler():
                 break
             time.sleep(0.1)
     
-    print("[AUTO MODE] Scheduler stopped")
+    logger.info("[AUTO MODE] Scheduler stopped")
 
 
 def _trigger_auto_actuator(device_id: str, user_id: str):
@@ -86,7 +111,7 @@ def _trigger_auto_actuator(device_id: str, user_id: str):
         # Call actuator endpoint via HTTP
         payload = {"phUp": 0, "phDown": 0, "nutrientAdd": 0, "valueS": 0, "manual": 0, "auto": 1, "refill": 0}
         r = requests.post(
-            f"http://localhost:8000/actuator/event?deviceId={device_id}",
+            f"http://localhost:8000/actuator/event?deviceId={device_id}&userId={user_id}",
             json=payload,
             timeout=10
         )
@@ -95,7 +120,7 @@ def _trigger_auto_actuator(device_id: str, user_id: str):
             result = r.json()
             data = result.get("data", {})
         else:
-            print(f"[AUTO MODE] ✗ {device_id} → Status {r.status_code}: {r.text}")
+            logger.warning(f"[AUTO MODE] ✗ {device_id} → Status {r.status_code}: {r.text}")
             return
         
         # Build action summary
@@ -109,7 +134,7 @@ def _trigger_auto_actuator(device_id: str, user_id: str):
         if data.get('refill', 0) > 0:
             actions.append(f"Refill: {data['refill']}s")
         
-        print(f"[AUTO MODE] ✓ {device_id} → phUp:{data.get('phUp')}, phDown:{data.get('phDown')}, nutrient:{data.get('nutrientAdd')}, refill:{data.get('refill')}")
+        logger.info(f"[AUTO MODE] ✓ {device_id} → phUp:{data.get('phUp')}, phDown:{data.get('phDown')}, nutrient:{data.get('nutrientAdd')}, refill:{data.get('refill')}")
         
         # Create notification
         if user_id:
@@ -122,16 +147,16 @@ def _trigger_auto_actuator(device_id: str, user_id: str):
                     VALUES (%s, %s, %s, %s, %s, NOW());
                 """, (user_id, device_id, "info", "Auto Mode", msg))
                 conn.commit()
-                print(f"[AUTO MODE] 📢 Notification created for {user_id}")
+                logger.info(f"[AUTO MODE] 📢 Notification created for {user_id}")
             except Exception as ne:
                 conn.rollback()
-                print(f"[AUTO MODE] Failed to create notification: {ne}")
+                logger.error(f"[AUTO MODE] Failed to create notification: {ne}")
             finally:
                 cur.close()
                 release_connection(conn)
                 
     except Exception as e:
-        print(f"[AUTO MODE] ✗ {device_id} → Error: {e}")
+        logger.error(f"[AUTO MODE] ✗ {device_id} → Error: {e}", exc_info=True)
 
 
 @app.on_event("startup")
@@ -143,7 +168,7 @@ async def startup_event():
     # Start auto mode scheduler in background thread
     scheduler_thread = threading.Thread(target=_auto_mode_scheduler, daemon=True)
     scheduler_thread.start()
-    print("[STARTUP] Auto mode scheduler started")
+    logger.info("[STARTUP] Auto mode scheduler started")
 
 class TelemetryPayload(BaseModel):
     ppm: float
@@ -204,28 +229,6 @@ def get_kits():
         release_connection(conn)
 
 
-@app.get("/kits/{kit_id}")
-def get_kit(kit_id: str):
-    conn = get_connection()
-    cur = conn.cursor()
-
-    try:
-        cur.execute('SELECT id, name, "createdAt" FROM kits WHERE id = %s;', (kit_id,))
-        row = cur.fetchone()
-
-        if not row:
-            raise HTTPException(404, "Kit not found")
-
-        return {"id": row[0], "name": row[1], "createdAt": row[2]}
-
-    except Exception as e:
-        raise HTTPException(500, str(e))
-
-    finally:
-        cur.close()
-        release_connection(conn)
-
-
 @app.get("/kits/with-latest")
 def get_kits_with_latest():
     conn = get_connection()
@@ -264,6 +267,28 @@ def get_kits_with_latest():
             })
 
         return results
+
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
+    finally:
+        cur.close()
+        release_connection(conn)
+
+
+@app.get("/kits/{kit_id}")
+def get_kit(kit_id: str):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    try:
+        cur.execute('SELECT id, name, "createdAt" FROM kits WHERE id = %s;', (kit_id,))
+        row = cur.fetchone()
+
+        if not row:
+            raise HTTPException(404, "Kit not found")
+
+        return {"id": row[0], "name": row[1], "createdAt": row[2]}
 
     except Exception as e:
         raise HTTPException(500, str(e))

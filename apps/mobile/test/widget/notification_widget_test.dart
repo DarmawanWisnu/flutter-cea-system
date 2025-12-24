@@ -14,27 +14,42 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fountaine/features/notifications/notification_screen.dart';
 import 'package:fountaine/providers/provider/notification_provider.dart';
 
+import '../helpers/mock_providers.dart';
+
+/// Creates test overrides for notification tests.
+List<Override> createNotificationOverrides() {
+  return [
+    notificationListProvider.overrideWith((ref) {
+      ref.keepAlive();
+      return NotificationListNotifier(ref);
+    }),
+    ...createUrlOverrides(),
+  ];
+}
+
+/// Wraps NotificationScreen with ProviderScope for testing.
+Widget wrapNotificationForTest() {
+  return ProviderScope(
+    overrides: createNotificationOverrides(),
+    child: const MaterialApp(home: NotificationScreen()),
+  );
+}
+
+/// Helper to setup test viewport.
+void setupTestViewport(WidgetTester tester) {
+  tester.view.physicalSize = const Size(1200, 1800);
+  tester.view.devicePixelRatio = 1.0;
+  addTearDown(tester.view.reset);
+}
+
 void main() {
   group('Notification Screen Widget Tests', () {
     /// Verifies Notification title is displayed in AppBar.
     testWidgets('should display Notification title in AppBar', (
       WidgetTester tester,
     ) async {
-      tester.view.physicalSize = const Size(1200, 1800);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            notificationListProvider.overrideWith((ref) {
-              ref.keepAlive();
-              return NotificationListNotifier(ref);
-            }),
-          ],
-          child: const MaterialApp(home: NotificationScreen()),
-        ),
-      );
+      setupTestViewport(tester);
+      await tester.pumpWidget(wrapNotificationForTest());
       await tester.pump();
 
       expect(find.text('Notification'), findsOneWidget);
@@ -42,21 +57,8 @@ void main() {
 
     /// Verifies all filter chips are displayed.
     testWidgets('should display filter chips', (WidgetTester tester) async {
-      tester.view.physicalSize = const Size(1200, 1800);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            notificationListProvider.overrideWith((ref) {
-              ref.keepAlive();
-              return NotificationListNotifier(ref);
-            }),
-          ],
-          child: const MaterialApp(home: NotificationScreen()),
-        ),
-      );
+      setupTestViewport(tester);
+      await tester.pumpWidget(wrapNotificationForTest());
       await tester.pump();
 
       expect(find.text('All'), findsOneWidget);
@@ -69,21 +71,8 @@ void main() {
     testWidgets('should display empty state when no notifications', (
       WidgetTester tester,
     ) async {
-      tester.view.physicalSize = const Size(1200, 1800);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            notificationListProvider.overrideWith((ref) {
-              ref.keepAlive();
-              return NotificationListNotifier(ref);
-            }),
-          ],
-          child: const MaterialApp(home: NotificationScreen()),
-        ),
-      );
+      setupTestViewport(tester);
+      await tester.pumpWidget(wrapNotificationForTest());
       await tester.pump();
 
       expect(find.byIcon(Icons.inbox_rounded), findsOneWidget);
@@ -95,21 +84,8 @@ void main() {
     testWidgets('should display more options menu', (
       WidgetTester tester,
     ) async {
-      tester.view.physicalSize = const Size(1200, 1800);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            notificationListProvider.overrideWith((ref) {
-              ref.keepAlive();
-              return NotificationListNotifier(ref);
-            }),
-          ],
-          child: const MaterialApp(home: NotificationScreen()),
-        ),
-      );
+      setupTestViewport(tester);
+      await tester.pumpWidget(wrapNotificationForTest());
       await tester.pump();
 
       expect(find.byIcon(Icons.more_vert), findsOneWidget);
@@ -119,21 +95,8 @@ void main() {
     testWidgets('should open popup menu when more options tapped', (
       WidgetTester tester,
     ) async {
-      tester.view.physicalSize = const Size(1200, 1800);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            notificationListProvider.overrideWith((ref) {
-              ref.keepAlive();
-              return NotificationListNotifier(ref);
-            }),
-          ],
-          child: const MaterialApp(home: NotificationScreen()),
-        ),
-      );
+      setupTestViewport(tester);
+      await tester.pumpWidget(wrapNotificationForTest());
       await tester.pump();
 
       await tester.tap(find.byIcon(Icons.more_vert));
@@ -147,21 +110,8 @@ void main() {
     testWidgets('should switch to All filter when Show All tapped', (
       WidgetTester tester,
     ) async {
-      tester.view.physicalSize = const Size(1200, 1800);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            notificationListProvider.overrideWith((ref) {
-              ref.keepAlive();
-              return NotificationListNotifier(ref);
-            }),
-          ],
-          child: const MaterialApp(home: NotificationScreen()),
-        ),
-      );
+      setupTestViewport(tester);
+      await tester.pumpWidget(wrapNotificationForTest());
       await tester.pump();
 
       await tester.tap(find.text('Show All'));
@@ -174,21 +124,8 @@ void main() {
     testWidgets('should display filter chip icons', (
       WidgetTester tester,
     ) async {
-      tester.view.physicalSize = const Size(1200, 1800);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            notificationListProvider.overrideWith((ref) {
-              ref.keepAlive();
-              return NotificationListNotifier(ref);
-            }),
-          ],
-          child: const MaterialApp(home: NotificationScreen()),
-        ),
-      );
+      setupTestViewport(tester);
+      await tester.pumpWidget(wrapNotificationForTest());
       await tester.pump();
 
       expect(find.byIcon(Icons.campaign_rounded), findsOneWidget);
@@ -200,21 +137,8 @@ void main() {
     testWidgets('should switch filter when chip tapped', (
       WidgetTester tester,
     ) async {
-      tester.view.physicalSize = const Size(1200, 1800);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            notificationListProvider.overrideWith((ref) {
-              ref.keepAlive();
-              return NotificationListNotifier(ref);
-            }),
-          ],
-          child: const MaterialApp(home: NotificationScreen()),
-        ),
-      );
+      setupTestViewport(tester);
+      await tester.pumpWidget(wrapNotificationForTest());
       await tester.pump();
 
       await tester.tap(find.text('Warning'));

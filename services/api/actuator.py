@@ -6,8 +6,25 @@ import time
 import httpx
 import logging
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
+# Custom formatter to show level only for ERROR
+class CustomFormatter(logging.Formatter):
+    def format(self, record):
+        if record.levelno == logging.ERROR:
+            # Show ERROR level
+            return f"{self.formatTime(record, self.datefmt)} | ERROR | {record.getMessage()}"
+        else:
+            # Hide level for INFO/WARNING
+            return f"{self.formatTime(record, self.datefmt)} | {record.getMessage()}"
+
+# Configure logging with custom formatter
+handler = logging.StreamHandler()
+formatter = CustomFormatter(datefmt='%Y-%m-%d %H:%M:%S')
+handler.setFormatter(formatter)
+
+logging.basicConfig(
+    level=logging.INFO,
+    handlers=[handler]
+)
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
@@ -73,17 +90,22 @@ def is_critical(ph, ppm, water_level):
     """Check if telemetry values are in critical range (bypass cooldown)."""
     critical = False
     
+    reasons = []
+    
     if ph < CRITICAL_THRESHOLDS["ph"]["min"] or ph > CRITICAL_THRESHOLDS["ph"]["max"]:
         critical = True
-        logger.warning(f"[COOLDOWN] ⚠️ Critical pH detected: {ph} - Bypassing cooldown")
+        reasons.append(f"pH={ph:.2f}")
     
     if ppm < CRITICAL_THRESHOLDS["ppm"]["min"] or ppm > CRITICAL_THRESHOLDS["ppm"]["max"]:
         critical = True
-        logger.warning(f"[COOLDOWN] ⚠️ Critical PPM detected: {ppm} - Bypassing cooldown")
+        reasons.append(f"PPM={ppm:.1f}")
     
     if water_level < CRITICAL_THRESHOLDS["waterLevel"]["min"]:
         critical = True
-        logger.warning(f"[COOLDOWN] ⚠️ Critical water level detected: {water_level} - Bypassing cooldown")
+        reasons.append(f"WL={water_level:.1f}")
+    
+    if critical:
+        logger.warning(f"CRITICAL_BYPASS | {', '.join(reasons)}")
     
     return critical
 
@@ -98,7 +120,7 @@ def check_cooldown(device_id, predictions):
     
     current_time = int(time.time() * 1000)
     result = predictions.copy()
-    cooldown_active = False
+    blocked_actions = []
     
     try:
         for action_type in ["phUp", "phDown", "nutrientAdd", "refill"]:
@@ -117,17 +139,19 @@ def check_cooldown(device_id, predictions):
                     if time_diff_sec < COOLDOWN_SECONDS:
                         # Cooldown still active - block this action
                         result[action_type] = 0
-                        cooldown_active = True
                         remaining = int(COOLDOWN_SECONDS - time_diff_sec)
-                        logger.info(f"[COOLDOWN] 🚫 {action_type} blocked - {remaining}s remaining")
+                        blocked_actions.append(f"{action_type}:{remaining}s")
     
     except Exception as e:
-        logger.error(f"[COOLDOWN] Error checking cooldown: {e}")
+        logger.error(f"COOLDOWN_ERROR | error={str(e)}")
     finally:
         cur.close()
         release_connection(conn)
     
-    if cooldown_active:
+    # Log all blocked actions in one line
+    if blocked_actions:
+        logger.info(f"COOLDOWN_BLOCK | {' '.join(blocked_actions)}")
+        
         # Recalculate valueS based on remaining actions
         result["valueS"] = float(max(
             result.get("phUp", 0),
@@ -163,7 +187,7 @@ def update_cooldown(device_id, predictions):
     
     except Exception as e:
         conn.rollback()
-        logger.error(f"[COOLDOWN] Error updating cooldown: {e}")
+        logger.error(f"COOLDOWN_UPDATE_ERROR | error={str(e)}")
     finally:
         cur.close()
         release_connection(conn)
@@ -191,7 +215,7 @@ class ActuatorEvent(BaseModel):
 
 # INSERT ACTUATOR EVENT
 @router.post("/event")
-async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: BackgroundTasks):
+async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: BackgroundTasks, userId: str = None):
     global AUTO_MODE_SOURCE
     deviceId = deviceId.strip()
 
@@ -206,11 +230,9 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
     try:
         # AUTO MODE
         if data.auto == 1:
-            logger.info(f"\n[AUTO MODE] Triggered for device: {deviceId}")
-
             # Ambil telemetry terbaru
             cur.execute("""
-                SELECT ppm, ph, "tempC", humidity, "waterLevel"
+                SELECT ppm, ph, "tempC", humidity, "waterTemp", "waterLevel"
                 FROM telemetry
                 WHERE "deviceId" = %s
                 ORDER BY "ingestTime" DESC
@@ -219,11 +241,11 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
             t = cur.fetchone()
 
             if t:
-                ppm, ph, tempC, humidity, wl = t
-                logger.info(f"[AUTO MODE] Telemetry - pH:{ph}, PPM:{ppm}, Temp:{tempC}°C, Humidity:{humidity}%, WaterLevel:{wl} (0-3 scale)")
+                ppm, ph, tempC, humidity, waterTemp, wl = t
+                logger.info(f"AUTO_MODE | pH={ph:.2f} PPM={ppm:.1f} temp={tempC:.1f}C water_level={wl:.1f}")
             else:
-                ppm, ph, tempC, humidity, wl = (0, 0, 0, 0, 0)
-                logger.warning("[AUTO MODE] WARNING: No telemetry found, using zeros")
+                ppm, ph, tempC, humidity, waterTemp, wl = (0, 0, 0, 0, 0, 0)
+                logger.warning(f"AUTO_MODE | status=no_telemetry_data")
 
             # TRY MACHINE LEARNING FIRST (SYNCHRONOUS WITH TIMEOUT)
             ml_success = False
@@ -233,11 +255,10 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
                     "ph": ph,
                     "tempC": tempC,
                     "humidity": humidity,
-                    "waterTemp": 0.0,
+                    "waterTemp": waterTemp,
                     "waterLevel": wl
                 }
                 
-                logger.info("[AUTO MODE] Attempting ML prediction...")
                 async with httpx.AsyncClient(timeout=2.0) as client:
                     r = await client.post("http://127.0.0.1:8000/ml/predict", json=ml_payload)
                 
@@ -251,18 +272,17 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
                     
                     AUTO_MODE_SOURCE = "ml"
                     ml_success = True
-                    logger.info(f"[AUTO MODE] ✓ ML SUCCESS → phUp:{data.phUp}, phDown:{data.phDown}, nutrient:{data.nutrientAdd}, refill:{data.refill}, model:{ml.get('model_version', 'unknown')}")
+                    logger.info(f"ML_PREDICT | phUp={data.phUp}s phDown={data.phDown}s nutrient={data.nutrientAdd}s refill={data.refill}s")
                 else:
-                    logger.warning(f"[AUTO MODE] ML service returned status {r.status_code}")
+                    logger.warning(f"ML_ERROR | http_status={r.status_code}")
                     
-            except (httpx.TimeoutException, httpx.ConnectError) as e:
-                logger.warning(f"[AUTO MODE] ML timeout/connection error: {e}")
+            except (httpx.TimeoutException, httpx.ConnectError):
+                logger.warning(f"ML_TIMEOUT | fallback=rule_based")
             except Exception as e:
-                logger.error(f"[AUTO MODE] ML prediction failed: {e}")
+                logger.error(f"ML_ERROR | error={str(e)}")
 
             # FALLBACK TO RULE-BASED IF ML FAILS
             if not ml_success:
-                logger.info("[AUTO MODE] Using P-control rule-based logic...")
                 AUTO_MODE_SOURCE = "rule"
 
                 # Constants
@@ -277,37 +297,40 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
                 phDownSec = 0
                 nutrientSec = 0
                 refillSec = 0
+                actions_taken = []
 
                 # pH Control (P-control with Kp=1)
                 # 1 pH change = 50 seconds (~80ml @ 1.58ml/s)
                 if ph < PH_MIN:
                     error = PH_MIN - ph
                     phUpSec = min(50, error * 50)
-                    logger.info(f"[AUTO MODE] pH Low → pH Up {phUpSec:.1f}s")
+                    actions_taken.append(f"UP:{phUpSec:.0f}s")
                 elif ph > PH_MAX:
                     error = ph - PH_MAX
                     phDownSec = min(50, error * 50)
-                    logger.info(f"[AUTO MODE] pH High → pH Down {phDownSec:.1f}s")
+                    actions_taken.append(f"DN:{phDownSec:.0f}s")
                 
                 # Nutrient Addition (100 ppm = 63 seconds)
                 if ppm < PPM_MIN:
                     error = PPM_MIN - ppm
                     nutrientSec = min(63, (error / 100) * 63)
-                    logger.info(f"[AUTO MODE] PPM Low → Nutrient {nutrientSec:.1f}s")
+                    actions_taken.append(f"NUT:{nutrientSec:.0f}s")
                 
                 # Refill / Dilution Control
                 if wl < WL_MIN:
                     # Critical water level - fixed 60 seconds
                     refillSec = 60
-                    logger.info(f"[AUTO MODE] Water Low → Refill {refillSec}s")
+                    actions_taken.append(f"REF:{refillSec}s")
                 elif ppm > PPM_MAX and wl < WL_MAX:
                     # PPM too high - use dilution formula: V_air = V × (C_i/C_f - 1)
                     v_air_ml = TANK_VOLUME_ML * ((ppm / PPM_MAX) - 1)
                     refillSec = min(120, v_air_ml / PUMP_FLOW_MLS)
-                    logger.info(f"[AUTO MODE] PPM High → Dilute {refillSec:.1f}s")
+                    actions_taken.append(f"REF:{refillSec:.0f}s")
                 
-                if phUpSec == 0 and phDownSec == 0 and nutrientSec == 0 and refillSec == 0:
-                    logger.info(f"[AUTO MODE] All parameters stable → No action")
+                if actions_taken:
+                    logger.info(f"RULE_BASED | {' '.join(actions_taken)}")
+                else:
+                    logger.info(f"RULE_BASED | status=stable no_action_needed")
 
                 # Set final values
                 data.phUp = int(phUpSec)
@@ -315,8 +338,6 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
                 data.nutrientAdd = int(nutrientSec)
                 data.refill = int(refillSec)
                 data.valueS = float(max(phUpSec, phDownSec, nutrientSec, refillSec))
-                
-                logger.info(f"[AUTO MODE] Final → phUp:{data.phUp}, phDown:{data.phDown}, nutrient:{data.nutrientAdd}, refill:{data.refill}, valueS:{data.valueS}")
 
             # APPLY COOLDOWN
             bypass_cooldown = is_critical(ph, ppm, wl)
@@ -340,8 +361,7 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
                 data.nutrientAdd = int(filtered["nutrientAdd"])
                 data.refill = int(filtered["refill"])
                 data.valueS = float(filtered["valueS"])
-            else:
-                logger.info(f"[COOLDOWN] ⚡ Bypassing cooldown due to critical conditions")
+            # No need to log bypass here, already logged in is_critical()
 
             # Update cooldown timestamps for executed actions
             cooldown_updates = {
@@ -354,8 +374,6 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
 
 
         # INSERT FINAL ACTUATOR EVENT
-        logger.info(f"[ACTUATOR] Inserting to DB - auto:{data.auto}, manual:{data.manual}")
-        
         # Retry logic for sequence issues
         max_retries = 2
         for attempt in range(max_retries):
@@ -375,7 +393,13 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
 
                 new_id = cur.fetchone()[0]
                 conn.commit()
-                logger.info(f"[ACTUATOR] ✓ Inserted successfully with ID: {new_id}")
+                
+                # Log final result with source  
+                if data.auto == 1:
+                    source = "ml" if AUTO_MODE_SOURCE == "ml" else "rule_based"
+                    user_info = f"user={userId}" if userId else "user=unknown"
+                    logger.info(f"EXECUTED | device={deviceId} {user_info} source={source} event_id={new_id}")
+                    logger.info(f"{'='*60}")
                 
                 return {
                     "status": "ok", 
@@ -395,7 +419,7 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
                 # Check if it's a unique violation (sequence issue)
                 if "UniqueViolation" in str(type(insert_error).__name__) or "duplicate key" in str(insert_error):
                     if attempt < max_retries - 1:
-                        logger.warning(f"[ACTUATOR] Sequence issue detected, fixing and retrying... (attempt {attempt + 1}/{max_retries})")
+                        logger.debug(f"[DB] Sequence issue - retrying (attempt {attempt + 1}/{max_retries})")
                         conn.rollback()
                         
                         # Fix the sequence
@@ -408,9 +432,8 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
                                 );
                             """)
                             conn.commit()
-                            logger.info(f"[ACTUATOR] ✓ Sequence reset successfully")
                         except Exception as seq_error:
-                            logger.error(f"[ACTUATOR] Failed to reset sequence: {seq_error}")
+                            logger.error(f"[DB] Sequence reset failed: {seq_error}")
                             conn.rollback()
                         
                         # Retry the insert
@@ -424,9 +447,7 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
 
     except Exception as e:
         conn.rollback()
-        logger.error(f"[ACTUATOR ERROR] Database insert failed: {type(e).__name__}: {str(e)}")
-        import traceback
-        logger.error(f"[ACTUATOR ERROR] Traceback:\n{traceback.format_exc()}")
+        logger.error(f"[DB] Insert failed for {deviceId}: {type(e).__name__}: {str(e)}")
         raise HTTPException(500, f"Database error: {str(e)}")
 
     finally:
@@ -484,19 +505,19 @@ async def try_ml_prediction_and_update(deviceId: str, ppm: float, ph: float,
                 conn.commit()
                 
                 AUTO_MODE_SOURCE = "ml"
-                logger.info(f"[ML] Successfully updated actuator event for {deviceId} with ML predictions")
+                logger.debug(f"[ML] Background update completed for {deviceId}")
                 
             except Exception as e:
                 conn.rollback()
-                logger.error(f"[ML] Failed to update actuator event: {e}")
+                logger.error(f"[ML] Background update failed for {deviceId}: {e}")
             finally:
                 cur.close()
                 release_connection(conn)
 
-    except (httpx.TimeoutException, httpx.ConnectError) as e:
-        logger.warning(f"[ML Background] Timeout/Connection error: {e}")
+    except (httpx.TimeoutException, httpx.ConnectError):
+        logger.debug(f"[ML] Background connection timeout for {deviceId}")
     except Exception as e:
-        logger.error(f"[ML Background] Unexpected error: {e}")
+        logger.error(f"[ML] Background error for {deviceId}: {e}")
 
 # GET LATEST ACTUATOR EVENT
 @router.get("/latest")

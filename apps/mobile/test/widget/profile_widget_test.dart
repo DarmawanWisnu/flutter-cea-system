@@ -19,6 +19,7 @@ import 'package:fountaine/services/auth_services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../helpers/test_overflow_handler.dart';
+import '../helpers/mock_providers.dart';
 
 /// Mock AuthService that doesn't require Firebase initialization.
 class MockAuthService extends AuthService {
@@ -67,6 +68,7 @@ void main() {
         ];
       }),
       ...createAuthOverrides(),
+      ...createUrlOverrides(),
     ];
   }
 

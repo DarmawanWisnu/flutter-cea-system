@@ -134,3 +134,48 @@ Tabel ini menyimpan notifikasi yang dihasilkan sistem berdasarkan kondisi sensor
 ## Relasi Antar Tabel
 
 Tabel **kits** menjadi entitas utama yang berelasi dengan seluruh tabel lainnya melalui kolom `deviceId`. Relasi yang terbentuk adalah *one-to-many* di mana satu kit dapat memiliki banyak data telemetry, actuator event, cooldown record, ML prediction log, device mode setting, dan notifications. Relasi *one-to-one* terbentuk antara **user_preference** dan **kits** di mana satu user hanya dapat memiliki satu kit yang dipilih pada satu waktu.
+
+---
+
+## Tabel Endpoint API Aplikasi Fountaine Hydroponic Monitoring
+
+Berikut adalah daftar endpoint REST API yang tersedia pada backend aplikasi **Fountaine Hydroponic Monitoring**:
+
+| No | Endpoint | Method | Body / Parameters |
+|----|----------|--------|-------------------|
+| 1 | `/health` | GET | - |
+| 2 | `/kits` | POST | `id`, `name` |
+| 3 | `/kits` | GET | - |
+| 4 | `/kits/{kit_id}` | GET | `kit_id` (path) |
+| 5 | `/kits/with-latest` | GET | - |
+| 6 | `/kits/{kit_id}` | DELETE | `kit_id` (path) |
+| 7 | `/telemetry?deviceId=` | POST | `deviceId` (query), `ppm`, `ph`, `tempC`, `humidity`, `waterTemp`, `waterLevel` |
+| 8 | `/telemetry/latest?deviceId=` | GET | `deviceId` (query) |
+| 9 | `/telemetry/history?deviceId=` | GET | `deviceId`, `days`, `limit` (query) |
+| 10 | `/device/mode` | POST | `userId`, `deviceId`, `autoMode` |
+| 11 | `/device/mode?userId=&deviceId=` | GET | `userId`, `deviceId` (query) |
+| 12 | `/device/auto-enabled` | GET | - |
+| 13 | `/user/preference` | POST | `userId`, `selectedKitId` |
+| 14 | `/user/preference?userId=` | GET | `userId` (query) |
+| 15 | `/notifications` | POST | `userId`, `deviceId`, `level`, `title`, `message` |
+| 16 | `/notifications?userId=` | GET | `userId`, `level`, `days`, `limit` (query) |
+| 17 | `/notifications/{notification_id}/read` | PUT | `notification_id` (path) |
+| 18 | `/notifications/mark-all-read?userId=` | PUT | `userId` (query) |
+| 19 | `/notifications/{notification_id}` | DELETE | `notification_id` (path) |
+| 20 | `/notifications?userId=` | DELETE | `userId` (query) |
+| 21 | `/actuator/event?deviceId=` | POST | `deviceId` (query), `phUp`, `phDown`, `nutrientAdd`, `valueS`, `manual`, `auto`, `refill` |
+| 22 | `/actuator/latest?deviceId=` | GET | `deviceId` (query) |
+| 23 | `/actuator/history?deviceId=` | GET | `deviceId`, `limit` (query) |
+| 24 | `/actuator/all?deviceId=` | GET | `deviceId` (query) |
+| 25 | `/ml/predict` | POST | `ppm`, `ph`, `tempC`, `humidity`, `waterTemp`, `waterLevel` |
+
+### Keterangan Endpoint
+
+- **Health Check** (`/health`): Endpoint untuk memeriksa konektivitas server.
+- **Kits CRUD**: Endpoint untuk mengelola data kit hidroponik (Create, Read, Update, Delete).
+- **Telemetry**: Endpoint untuk menyimpan dan mengambil data sensor secara berkala.
+- **Device Mode**: Endpoint untuk mengatur mode kontrol (Auto/Manual) per perangkat.
+- **User Preference**: Endpoint untuk menyimpan preferensi pengguna seperti kit yang dipilih.
+- **Notifications**: Endpoint untuk mengelola notifikasi sistem.
+- **Actuator**: Endpoint untuk mencatat dan mengambil riwayat aktivasi aktuator.
+- **ML Predict**: Endpoint untuk mendapatkan prediksi durasi aktuator dari model Machine Learning.

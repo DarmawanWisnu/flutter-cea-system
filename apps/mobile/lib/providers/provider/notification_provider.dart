@@ -269,8 +269,11 @@ class NotificationListNotifier extends StateNotifier<List<NotificationItem>> {
     final message = violations.join(', ');
 
     if (isAuto) {
-      // AUTO MODE: Fetch latest actuator event and show what was done
-      await _emitAutoModeNotification(kitId, message);
+      // AUTO MODE: Backend creates notifications every 30s with actuator actions
+      // Provider only loads from backend (already done in _loadFromBackend)
+      // Don't create duplicate local notification
+      print('[Notification] AUTO mode - skipping local notification (backend handles this)');
+      return;
     } else {
       // MANUAL MODE: Determine severity based on deviation
       final severity = _determineSeverity(phDev, ppmDev, tempDev, wlDev);
