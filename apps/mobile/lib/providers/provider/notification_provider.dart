@@ -95,8 +95,8 @@ class NotificationListNotifier extends StateNotifier<List<NotificationItem>> {
       }
     });
 
-    // Periodic refresh from backend + evaluate every 1 minute
-    _timer = Timer.periodic(const Duration(minutes: 1), (_) async {
+    // Periodic refresh from backend + evaluate every 30 seconds (sync with backend auto mode)
+    _timer = Timer.periodic(const Duration(seconds: 30), (_) async {
       final user = ref.read(authProvider);
       final api = ref.read(apiServiceProvider);
       final kitId = ref.read(currentKitIdProvider);

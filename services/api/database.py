@@ -136,7 +136,11 @@ def run_migrations():
             "deviceId" TEXT NOT NULL,
             "autoMode" BOOLEAN DEFAULT FALSE,
             "updatedAt" TIMESTAMPTZ DEFAULT NOW(),
-            UNIQUE ("userId", "deviceId")
+            UNIQUE ("userId", "deviceId"),
+            CHECK (LENGTH("userId") >= 8),
+            CHECK (LENGTH("deviceId") >= 5),
+            CHECK ("userId" != ''),
+            CHECK ("deviceId" != '')
         );
     """)
 

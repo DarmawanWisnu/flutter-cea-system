@@ -185,6 +185,16 @@ class KitPayload(BaseModel):
 # KITS CRUD
 @app.post("/kits")
 def add_kit(payload: KitPayload):
+    # Validation: deviceId must be at least 5 characters
+    device_id = payload.id.strip()
+    name = payload.name.strip()
+    
+    if not device_id or len(device_id) < 5:
+        raise HTTPException(400, "Invalid Kit ID: must be at least 5 characters")
+    
+    if not name or len(name) < 3:
+        raise HTTPException(400, "Invalid Kit Name: must be at least 3 characters")
+    
     conn = get_connection()
     cur = conn.cursor()
 
@@ -193,7 +203,7 @@ def add_kit(payload: KitPayload):
             INSERT INTO kits (id, name)
             VALUES (%s, %s)
             ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name;
-        """, (payload.id.strip(), payload.name.strip()))
+        """, (device_id, name))
 
         conn.commit()
         return {"status": "ok"}
@@ -486,6 +496,21 @@ class DeviceModePayload(BaseModel):
 @app.post("/device/mode")
 def set_device_mode(payload: DeviceModePayload):
     """Set auto/manual mode for a user's device."""
+    # Validation: userId and deviceId must not be empty
+    user_id = payload.userId.strip()
+    device_id = payload.deviceId.strip()
+    
+    if not user_id or len(user_id) < 8:
+        raise HTTPException(400, "Invalid userId: must be at least 8 characters")
+    
+    if not device_id or len(device_id) < 5:
+        raise HTTPException(400, "Invalid deviceId: must be at least 5 characters")
+    
+    # Prevent test/placeholder userIds
+    forbidden_patterns = ['test', 'firebase_user', 'dummy', 'example', 'placeholder']
+    if any(pattern in user_id.lower() for pattern in forbidden_patterns):
+        raise HTTPException(400, f"Invalid userId: cannot contain test/placeholder patterns")
+    
     conn = get_connection()
     cur = conn.cursor()
 
@@ -495,7 +520,7 @@ def set_device_mode(payload: DeviceModePayload):
             VALUES (%s, %s, %s, NOW())
             ON CONFLICT ("userId", "deviceId")
             DO UPDATE SET "autoMode" = EXCLUDED."autoMode", "updatedAt" = NOW();
-        """, (payload.userId.strip(), payload.deviceId.strip(), payload.autoMode))
+        """, (user_id, device_id, payload.autoMode))
 
         conn.commit()
         return {"status": "ok", "autoMode": payload.autoMode}
@@ -507,6 +532,7 @@ def set_device_mode(payload: DeviceModePayload):
     finally:
         cur.close()
         release_connection(conn)
+
 
 
 @app.get("/device/mode")
