@@ -425,7 +425,7 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
     );
   }
 
-  // KIT DROPDOWN SELECTOR
+  // KIT DROPDOWN SELECTOR with long-press delete
   Widget _kitSelector(double s) {
     final kitsAsync = ref.watch(apiKitsListProvider);
 
@@ -443,64 +443,218 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
         if (kits.isEmpty)
           return Text("No kits", style: TextStyle(fontSize: 12 * s));
 
-        return DropdownButtonHideUnderline(
-          child: DropdownButton<String>(
-            isDense: true,
-            value: kitId,
-            icon: Icon(
-              Icons.keyboard_arrow_down_rounded,
-              color: _kPrimary,
-              size: 20 * s,
-            ),
-            items: kits.map<DropdownMenuItem<String>>((k) {
-              final id = k["id"] as String;
-              return DropdownMenuItem(
-                value: id,
-                child: Text(
-                  id,
-                  style: TextStyle(
-                    fontSize: 14 * s,
-                    fontWeight: FontWeight.w600,
-                    color: _kPrimary,
-                  ),
+        return GestureDetector(
+          onTap: () => _showKitSelector(s, kits),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                kitId ?? 'Select Kit',
+                style: TextStyle(
+                  fontSize: 14 * s,
+                  fontWeight: FontWeight.w600,
+                  color: _kPrimary,
                 ),
-              );
-            }).toList(),
-            onChanged: (v) async {
-              if (v != null && v != kitId) {
-                setState(() {
-                  kitId = v;
-                });
-                
-                // Load auto mode from backend for the newly selected kit
-                final loadedAutoMode = await ref
-                    .read(mqttProvider.notifier)
-                    .loadAutoModeFromBackend(v);
-                
-                if (mounted) {
-                  setState(() {
-                    isAuto = loadedAutoMode;
-                  });
-                }
-                
-                // Update shared kit ID for notifications
-                ref.read(currentKitIdProvider.notifier).state = v;
-                
-                // Save kit preference to backend
-                final user = ref.read(authProvider);
-                if (user != null) {
-                  final api = ref.read(apiServiceProvider);
-                  await api.setUserPreference(
-                    userId: user.uid,
-                    selectedKitId: v,
-                  );
-                }
-              }
-            },
+              ),
+              SizedBox(width: 4 * s),
+              Icon(
+                Icons.keyboard_arrow_down_rounded,
+                color: _kPrimary,
+                size: 20 * s,
+              ),
+            ],
           ),
         );
       },
     );
+  }
+
+  void _showKitSelector(double s, List<Map<String, dynamic>> kits) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20 * s)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header
+            Padding(
+              padding: EdgeInsets.all(16 * s),
+              child: Row(
+                children: [
+                  Text(
+                    'Select Kit',
+                    style: TextStyle(
+                      fontSize: 18 * s,
+                      fontWeight: FontWeight.w700,
+                      color: _kPrimary,
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    'Long press to delete',
+                    style: TextStyle(
+                      fontSize: 11 * s,
+                      color: Colors.grey,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Divider(height: 1, color: Colors.grey.shade200),
+            
+            // Kit list
+            ...kits.map((k) {
+              final id = k["id"] as String;
+              final isSelected = id == kitId;
+              
+              return InkWell(
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _selectKit(id);
+                },
+                onLongPress: () {
+                  Navigator.pop(ctx);
+                  _confirmDeleteKit(s, id);
+                },
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 16 * s, vertical: 14 * s),
+                  decoration: BoxDecoration(
+                    color: isSelected ? _kPrimary.withOpacity(0.1) : null,
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 10 * s,
+                        height: 10 * s,
+                        decoration: BoxDecoration(
+                          color: isSelected ? _kGreen : Colors.grey.shade300,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      SizedBox(width: 12 * s),
+                      Text(
+                        id,
+                        style: TextStyle(
+                          fontSize: 15 * s,
+                          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                          color: _kPrimary,
+                        ),
+                      ),
+                      if (isSelected) ...[
+                        const Spacer(),
+                        Icon(Icons.check, color: _kGreen, size: 20 * s),
+                      ],
+                    ],
+                  ),
+                ),
+              );
+            }),
+            SizedBox(height: 16 * s),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _selectKit(String v) async {
+    if (v != kitId) {
+      setState(() {
+        kitId = v;
+      });
+      
+      // Load auto mode from backend for the newly selected kit
+      final loadedAutoMode = await ref
+          .read(mqttProvider.notifier)
+          .loadAutoModeFromBackend(v);
+      
+      if (mounted) {
+        setState(() {
+          isAuto = loadedAutoMode;
+        });
+      }
+      
+      // Update shared kit ID for notifications
+      ref.read(currentKitIdProvider.notifier).state = v;
+      
+      // Save kit preference to backend
+      final user = ref.read(authProvider);
+      if (user != null) {
+        final api = ref.read(apiServiceProvider);
+        await api.setUserPreference(
+          userId: user.uid,
+          selectedKitId: v,
+        );
+      }
+    }
+  }
+
+  void _confirmDeleteKit(double s, String id) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: const Text('Delete Kit'),
+        content: Text('Are you sure you want to remove "$id" from your kit list?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await _deleteKit(id);
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _deleteKit(String id) async {
+    final user = ref.read(authProvider);
+    if (user == null) return;
+    
+    try {
+      final kitsApi = ref.read(apiKitsProvider);
+      await kitsApi.deleteKit(id: id, userId: user.uid);
+      
+      // Refresh kit list
+      ref.invalidate(apiKitsListProvider);
+      
+      // If deleted current kit, switch to first available
+      if (id == kitId) {
+        final kits = await ref.read(apiKitsListProvider.future);
+        if (kits.isNotEmpty) {
+          await _selectKit(kits.first["id"] as String);
+        } else {
+          // No kits left, redirect to add kit
+          if (mounted) {
+            Navigator.pushReplacementNamed(context, "/addkit");
+          }
+        }
+      }
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Kit "$id" removed from your list')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to delete kit: $e')),
+        );
+      }
+    }
   }
 
   // NEW SENSOR CARD with loading bar
