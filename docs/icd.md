@@ -291,13 +291,88 @@ When `mode: "auto"` is active:
 
 ---
 
-## 📚 **9. Version History**
+## 🌐 **11. REST API Endpoints**
+
+### **11.1 Kit Management**
+
+| Endpoint | Method | Description | Auth Required |
+|----------|--------|-------------|---------------|
+| `/kits?userId={uid}` | GET | Get user's kits | Yes |
+| `/kits` | POST | Add kit to user | Yes |
+| `/kits/{id}?userId={uid}` | DELETE | Unlink kit from user | Yes |
+| `/kits/all` | GET | Get all kits (for publisher) | No |
+| `/kits/with-latest?userId={uid}` | GET | Get kits with latest telemetry | Yes |
+
+**POST /kits Request:**
+```json
+{
+  "id": "CEA-01",
+  "name": "Kebun A",
+  "userId": "firebase_uid"
+}
+```
+
+> [!IMPORTANT]
+> The `/kits` DELETE only removes the user-kit link, not the global kit record. This allows multiple users to share the same kit.
+
+---
+
+### **11.2 User Preferences**
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/user/preference?userId={uid}` | GET | Get selected kit preference |
+| `/user/preference` | POST | Set selected kit preference |
+
+**POST /user/preference Request:**
+```json
+{
+  "userId": "firebase_uid",
+  "selectedKitId": "CEA-01"
+}
+```
+
+---
+
+### **11.3 Notifications**
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/notifications?userId={uid}&days=7` | GET | Get notifications (filtered) |
+| `/notifications` | POST | Create notification |
+| `/notifications/{id}/read` | PUT | Mark notification as read |
+| `/notifications/mark-all-read?userId={uid}` | PUT | Mark all as read |
+| `/notifications/{id}` | DELETE | Delete notification |
+| `/notifications?userId={uid}` | DELETE | Clear all notifications |
+
+**POST /notifications Request (Manual Mode):**
+```json
+{
+  "userId": "firebase_uid",
+  "deviceId": "CEA-01",
+  "level": "warning",
+  "title": "Warning",
+  "message": "pH Low: 5.2, PPM Low: 450"
+}
+```
+
+**Notification Levels:**
+| Level | Description |
+|-------|-------------|
+| `info` | Informational (all parameters OK) |
+| `warning` | Parameters outside threshold |
+| `urgent` | Critical deviation requiring action |
+
+---
+
+## 📚 **12. Version History**
 
 | Version | Date | Description |
 |---------|------|-------------|
 | **v1.0** | 2025-10-16 | Initial draft for thesis integration |
 | **v1.1** | 2025-11-23 | Added humidity and water temp sensors |
 | **v2.0** | 2025-12-02 | Added ML auto mode, priority-based logic |
+| **v2.1** | 2025-12-27 | Added per-user kit management, notification persistence |
 
 ---
 

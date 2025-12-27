@@ -4,21 +4,72 @@ Dokumen ini mencatat fitur-fitur dan perbaikan yang direncanakan untuk pengemban
 
 ---
 
-## 1. Exception Handling - No Silent Failures
+## ✅ Completed in v2.1 (2025-12-27)
 
-**Status:** Belum diimplementasi  
+### Print Statements Cleanup
+**Status:** ✅ Selesai  
+Debug print statements telah dihapus dari:
+- `monitor_screen.dart`
+- `history_screen.dart`
+- `notification_provider.dart`
+
+### Manual Mode Notification Persistence
+**Status:** ✅ Selesai  
+Manual mode notifications sekarang disimpan ke backend database.
+
+### Delete Kit UI
+**Status:** ✅ Selesai  
+Long-press di kit selector untuk menghapus kit dari list user.
+
+---
+
+## 📋 Planned Improvements
+
+### 1. Per-User Kit Nickname
+
+**Priority:** Medium  
+**Effort:** 1-2 jam
+
+**Current:** Kit name bersifat global (first user yang add menentukan nama).
+
+**Enhancement:**
+```sql
+ALTER TABLE user_kits ADD COLUMN nickname TEXT;
+```
+
+Setiap user bisa punya display name berbeda untuk kit yang sama.
+
+---
+
+### 2. Kit Removal Detection for Publisher
+
+**Priority:** Low  
+**Effort:** 30 menit
+
+**Current:** Publisher terus publish ke kit yang sudah dihapus sampai restart.
+
+**Enhancement:** Detect kit removal dari database dan stop publishing.
+
+---
+
+### 3. MQTT Instant Kit Notification
+
+**Priority:** Low  
+**Effort:** 1 jam
+
+**Current:** Publisher poll setiap 3 detik untuk kit baru.
+
+**Enhancement:** Backend publish ke topic `system/kit-added`, publisher subscribe untuk instant detection.
+
+---
+
+### 4. Exception Handling - No Silent Failures
+
 **Priority:** Medium  
 **Effort:** 2-3 jam
 
 **Masalah:**
 Error pada API calls di-catch dan return value kosong tanpa feedback ke user.
-
-```dart
-} catch (e, s) {
-  debugPrint('getLatestTelemetry error: $e\n$s');
-  return null;  // User tidak tahu ada error
-}
-```
 
 **Solusi:**
 - Buat custom `ApiException` class
@@ -27,32 +78,12 @@ Error pada API calls di-catch dan return value kosong tanpa feedback ke user.
 
 ---
 
-## 2. Code Quality Issues (Flutter Analyze)
+### 5. Deprecated `withOpacity()` 
 
-**Status:** Belum diperbaiki  
 **Priority:** Low  
-**Effort:** 15-30 menit
+**Effort:** 15 menit
 
-### 2.1 Print Statements in Production
-
-| File | Line | Issue |
-|------|------|-------|
-| `lib/features/monitor/monitor_screen.dart` | 120, 147, 191, 195 | `print()` harus diganti `debugPrint()` |
-| `lib/utils/firebase_error_handler.dart` | 20 | `print()` harus diganti `debugPrint()` |
-
-**Solusi:**
-```diff
-- print('Debug message');
-+ debugPrint('Debug message');
-```
-
-### 2.2 Deprecated `withOpacity()`
-
-| File | Line |
-|------|------|
-| `lib/features/home/home_screen.dart` | 398 |
-| `lib/features/monitor/monitor_screen.dart` | 340, 373 |
-| `lib/features/auth/forgot_password_screen.dart` | 121 |
+Multiple files menggunakan deprecated `color.withOpacity(0.5)`.
 
 **Solusi:**
 ```diff
@@ -60,26 +91,9 @@ Error pada API calls di-catch dan return value kosong tanpa feedback ke user.
 + color.withValues(alpha: 0.5)
 ```
 
-### 2.3 Local Variable Naming
-
-| File | Line | Issue |
-|------|------|-------|
-| `lib/features/monitor/monitor_screen.dart` | 202 | `_kitId` → `kitId` |
-| `lib/features/monitor/monitor_screen.dart` | 410 | Unnecessary underscores |
-
-**Solusi:**
-Hilangkan underscore prefix untuk local variables.
-
 ---
 
-## 3. Test File Warnings
+## 📝 Notes
 
-**Status:** Bisa diabaikan  
-**Priority:** Low  
-
-| Category | Files | Issue |
-|----------|-------|-------|
-| `dangling_library_doc_comments` | 15+ test files | Doc comment tanpa target |
-| Type arguments | `mock_providers.dart` | Non-type as type argument |
-
-**Note:** Ini hanya info-level warnings dan tidak mempengaruhi functionality.
+- Test file warnings (dangling_library_doc_comments) bisa diabaikan
+- Local variable naming (_kitId) bisa diperbaiki saat refactoring

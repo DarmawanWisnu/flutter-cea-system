@@ -278,6 +278,22 @@ class NotificationListNotifier extends StateNotifier<List<NotificationItem>> {
     } else {
       // MANUAL MODE: Determine severity based on deviation
       final severity = _determineSeverity(phDev, ppmDev, tempDev, wlDev);
+      
+      // Save to backend for persistence
+      final user = ref.read(authProvider);
+      if (user != null) {
+        final api = ref.read(apiServiceProvider);
+        final title = severity == 'urgent' ? 'Urgent' : (severity == 'warning' ? 'Warning' : 'Info');
+        await api.createNotification(
+          userId: user.uid,
+          deviceId: kitId,
+          level: severity,
+          title: title,
+          message: message,
+        );
+      }
+      
+      // Also emit locally for immediate display
       _emit(kitId, severity, message);
     }
   }

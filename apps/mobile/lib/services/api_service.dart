@@ -236,6 +236,29 @@ class ApiService {
     }
   }
 
+  /// CREATE notification (for manual mode)
+  Future<int?> createNotification({
+    required String userId,
+    required String deviceId,
+    required String level,
+    required String title,
+    required String message,
+  }) async {
+    try {
+      final res = await postJson('/notifications', {
+        'userId': userId,
+        'deviceId': deviceId,
+        'level': level,
+        'title': title,
+        'message': message,
+      });
+      return res['id'] as int?;
+    } catch (e) {
+      debugPrint('createNotification error: $e');
+      return null;
+    }
+  }
+
   /// MARK notification as read
   Future<bool> markNotificationRead(int id) async {
     try {
