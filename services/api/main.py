@@ -10,8 +10,12 @@ import time
 import json
 import threading
 import logging
+import os
 from datetime import datetime
 from services.api import actuator
+
+# Environment configuration
+API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000")
 
 # Custom formatter to show level only for ERROR
 class CustomFormatter(logging.Formatter):
@@ -40,9 +44,13 @@ logger = logging.getLogger(__name__)
 app = FastAPI()
 
 # CORS middleware for ngrok and mobile app compatibility
+# Configurable origins via environment variable (comma-separated)
+_cors_origins = os.getenv("CORS_ORIGINS", "*")
+CORS_ORIGINS = ["*"] if _cors_origins == "*" else [o.strip() for o in _cors_origins.split(",")]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -111,7 +119,7 @@ def _trigger_auto_actuator(device_id: str, user_id: str):
         # Call actuator endpoint via HTTP
         payload = {"phUp": 0, "phDown": 0, "nutrientAdd": 0, "valueS": 0, "manual": 0, "auto": 1, "refill": 0}
         r = requests.post(
-            f"http://localhost:8000/actuator/event?deviceId={device_id}&userId={user_id}",
+            f"{API_BASE_URL}/actuator/event?deviceId={device_id}&userId={user_id}",
             json=payload,
             timeout=10
         )
@@ -181,29 +189,43 @@ class TelemetryPayload(BaseModel):
 class KitPayload(BaseModel):
     id: str
     name: str
+    userId: str
 
 # KITS CRUD
 @app.post("/kits")
 def add_kit(payload: KitPayload):
-    # Validation: deviceId must be at least 5 characters
+    """Add kit to user's list. Creates kit if not exists, then links to user."""
     device_id = payload.id.strip()
     name = payload.name.strip()
+    user_id = payload.userId.strip()
     
+    # Validation
     if not device_id or len(device_id) < 5:
         raise HTTPException(400, "Invalid Kit ID: must be at least 5 characters")
     
     if not name or len(name) < 3:
         raise HTTPException(400, "Invalid Kit Name: must be at least 3 characters")
     
+    if not user_id or len(user_id) < 8:
+        raise HTTPException(400, "Invalid userId: must be at least 8 characters")
+    
     conn = get_connection()
     cur = conn.cursor()
 
     try:
+        # 1. Insert kit if not exists (global registry)
         cur.execute("""
             INSERT INTO kits (id, name)
             VALUES (%s, %s)
-            ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name;
+            ON CONFLICT (id) DO NOTHING;
         """, (device_id, name))
+        
+        # 2. Link user to kit (junction table)
+        cur.execute("""
+            INSERT INTO user_kits ("userId", "kitId", "addedAt")
+            VALUES (%s, %s, NOW())
+            ON CONFLICT ("userId", "kitId") DO NOTHING;
+        """, (user_id, device_id))
 
         conn.commit()
         return {"status": "ok"}
@@ -218,7 +240,42 @@ def add_kit(payload: KitPayload):
 
 
 @app.get("/kits")
-def get_kits():
+def get_kits(userId: str):
+    """Get kits for a specific user (via junction table)."""
+    user_id = userId.strip()
+    
+    if not user_id or len(user_id) < 8:
+        raise HTTPException(400, "Invalid userId: must be at least 8 characters")
+    
+    conn = get_connection()
+    cur = conn.cursor()
+
+    try:
+        cur.execute("""
+            SELECT k.id, k.name, k."createdAt"
+            FROM kits k
+            JOIN user_kits uk ON k.id = uk."kitId"
+            WHERE uk."userId" = %s
+            ORDER BY uk."addedAt" DESC;
+        """, (user_id,))
+        rows = cur.fetchall()
+
+        return [
+            {"id": r[0], "name": r[1], "createdAt": r[2]}
+            for r in rows
+        ]
+
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
+    finally:
+        cur.close()
+        release_connection(conn)
+
+
+@app.get("/kits/all")
+def get_all_kits():
+    """Get all kits from global registry (no user filter). For publisher/simulator use."""
     conn = get_connection()
     cur = conn.cursor()
 
@@ -240,12 +297,24 @@ def get_kits():
 
 
 @app.get("/kits/with-latest")
-def get_kits_with_latest():
+def get_kits_with_latest(userId: str):
+    """Get kits with latest telemetry for a specific user."""
+    user_id = userId.strip()
+    
+    if not user_id or len(user_id) < 8:
+        raise HTTPException(400, "Invalid userId: must be at least 8 characters")
+    
     conn = get_connection()
     cur = conn.cursor()
 
     try:
-        cur.execute('SELECT id, name, "createdAt" FROM kits ORDER BY "createdAt" DESC;')
+        cur.execute("""
+            SELECT k.id, k.name, k."createdAt"
+            FROM kits k
+            JOIN user_kits uk ON k.id = uk."kitId"
+            WHERE uk."userId" = %s
+            ORDER BY uk."addedAt" DESC;
+        """, (user_id,))
         kits = cur.fetchall()
 
         results = []
@@ -309,12 +378,23 @@ def get_kit(kit_id: str):
 
 
 @app.delete("/kits/{kit_id}")
-def delete_kit(kit_id: str):
+def delete_kit(kit_id: str, userId: str):
+    """Remove kit from user's list (unlink, does not delete kit from registry)."""
+    user_id = userId.strip()
+    device_id = kit_id.strip()
+    
+    if not user_id or len(user_id) < 8:
+        raise HTTPException(400, "Invalid userId: must be at least 8 characters")
+    
     conn = get_connection()
     cur = conn.cursor()
 
     try:
-        cur.execute("DELETE FROM kits WHERE id = %s;", (kit_id,))
+        # Only delete from junction table (unlink user from kit)
+        cur.execute("""
+            DELETE FROM user_kits 
+            WHERE "userId" = %s AND "kitId" = %s;
+        """, (user_id, device_id))
         conn.commit()
 
         return {"status": "deleted"}

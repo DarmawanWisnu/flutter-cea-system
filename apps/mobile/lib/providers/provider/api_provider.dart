@@ -4,6 +4,7 @@ import 'package:fountaine/domain/telemetry.dart';
 import 'package:fountaine/services/api_service.dart';
 import 'package:fountaine/models/kit.dart';
 import 'package:fountaine/providers/provider/url_settings_provider.dart';
+import 'package:fountaine/providers/provider/auth_provider.dart';
 
 /// BASE URL BACKEND (now uses dynamic URL from SharedPreferences)
 final apiBaseUrlProvider = Provider<String>((ref) {
@@ -54,33 +55,47 @@ class ApiKitsService {
 
   ApiKitsService(this._api);
 
-  /// GET all kits (returns List<Kit>)
-  Future<List<Kit>> getKits() async {
-    final res = await _api.getJson("/kits");
+  /// GET all kits for a user (returns List<Kit>)
+  Future<List<Kit>> getKits({required String userId}) async {
+    final res = await _api.getJson("/kits?userId=$userId");
     final list = (res as List).cast<Map<String, dynamic>>();
 
     return list.map((e) => Kit.fromJson(e)).toList();
   }
 
-  /// ADD KIT
-  Future<void> addKit({required String id, required String name}) async {
-    await _api.postJson("/kits", {"id": id, "name": name});
+  /// ADD KIT (link user to kit)
+  Future<void> addKit({
+    required String id,
+    required String name,
+    required String userId,
+  }) async {
+    await _api.postJson("/kits", {"id": id, "name": name, "userId": userId});
   }
 
-  /// DELETE KIT
-  Future<void> deleteKit(String id) async {
-    await _api.deleteJson("/kits/$id");
+  /// DELETE KIT (unlink user from kit)
+  Future<void> deleteKit({required String id, required String userId}) async {
+    await _api.deleteJson("/kits/$id?userId=$userId");
   }
 }
 
-/// RAW KIT LIST
+/// RAW KIT LIST (requires userId from authProvider)
 final apiKitsListProvider =
     FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
       final api = ref.read(apiServiceProvider);
-      final res = await api.getJson("/kits");
+      final user = ref.watch(authProvider);
+      
+      if (user == null) {
+        print("[API] No user logged in, returning empty kit list");
+        return [];  // Not logged in, return empty list
+      }
+      
+      print("[API] Fetching kits for userId: ${user.uid}");
+      final res = await api.getJson("/kits?userId=${user.uid}");
+      print("[API] Got ${(res as List).length} kits");
 
-      return (res as List).cast<Map<String, dynamic>>();
+      return res.cast<Map<String, dynamic>>();
     });
 
 /// CURRENT KIT ID (shared between monitor and notifications)
 final currentKitIdProvider = StateProvider<String?>((ref) => null);
+

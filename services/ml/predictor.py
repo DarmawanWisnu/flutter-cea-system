@@ -1,9 +1,12 @@
 import os
 import joblib
 import numpy as np
+import logging
 from threading import Lock
 import json
 import warnings
+
+logger = logging.getLogger(__name__)
 
 # Suppress sklearn feature names warning
 warnings.filterwarnings('ignore', message='X does not have valid feature names')
@@ -58,7 +61,7 @@ def _load_latest():
                 if os.path.exists(direct_model):
                     version_dir = MODEL_REGISTRY
                     version = "direct"
-                    print("[predictor] Using model files directly from model_registry/")
+                    logger.info("Using model files directly from model_registry/")
                 else:
                     raise RuntimeError("No model found in registry.")
 
@@ -77,7 +80,7 @@ def _load_latest():
         _scaler = joblib.load(scaler_path) if os.path.exists(scaler_path) else None
         _model_meta = json.load(open(meta_path)) if os.path.exists(meta_path) else {"version": version}
 
-        print(f"[predictor] loaded model {version}")
+        logger.info(f"Loaded model {version}")
 
 def predict_from_dict(payload: dict, clamp_limits=None):
     if _model is None or _scaler is None:

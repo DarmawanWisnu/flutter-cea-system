@@ -10,10 +10,11 @@ def handle_signal(signum, frame):
 signal.signal(signal.SIGINT, handle_signal)
 signal.signal(signal.SIGTERM, handle_signal)
 
-BROKER = "localhost"  # MQTT broker jalan lokal
-PORT = 1883
+# Environment configuration
+BROKER = os.getenv("MQTT_BROKER", "localhost")
+PORT = int(os.getenv("MQTT_PORT", "1883"))
+BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000/kits/all")
 CSV_PATH = os.path.join(os.path.dirname(__file__), "data.csv")
-BACKEND_URL = "http://localhost:8000/kits"
 QOS = 1
 RETAIN = False
 
@@ -120,8 +121,29 @@ def main():
             for kit in device_ids
         }
 
+        # Track last refresh time for auto-refresh
+        last_refresh = time.time()
+        REFRESH_INTERVAL = 3  # seconds
+
         while RUNNING:
             now = time.time()
+
+            # Auto-refresh: check for new kits every 3 seconds
+            if IS_MULTI and (now - last_refresh >= REFRESH_INTERVAL):
+                new_ids = fetch_device_ids()
+                for new_kit in new_ids:
+                    if new_kit not in device_ids:
+                        print(f"\n[NEW] Detected new kit: {new_kit}")
+                        # Add to device list
+                        device_ids.append(new_kit)
+                        # Create MQTT client
+                        clients[new_kit] = create_client(f"pub-{new_kit}")
+                        # Initialize state
+                        device_state[new_kit] = {s: 0.0 for s in INTERVALS.keys()}
+                        device_timer[new_kit] = {s: now - INTERVALS[s] for s in INTERVALS.keys()}
+                        device_row_idx[new_kit] = random.randint(0, len(rows) - 1)
+                        print(f"[NEW] Started publishing to {new_kit}\n")
+                last_refresh = now
 
             for kit in device_ids:
                 client = clients[kit]
@@ -132,10 +154,6 @@ def main():
                 for sensor in INTERVALS:
                     elapsed = now - device_timer[kit][sensor]
                     
-                    # Debug: Show pH timer status
-                    if sensor == "ph" and elapsed >= INTERVALS[sensor] - 1:
-                        print(f"[DEBUG] {kit} pH timer: {elapsed:.1f}s / {INTERVALS[sensor]}s")
-                    
                     if elapsed >= INTERVALS[sensor]:
                         # Pick a random row for THIS sensor update
                         row = rows[random.randint(0, len(rows) - 1)]
@@ -144,7 +162,6 @@ def main():
                             value = pick(row, "TDS", "tds")
                         elif sensor == "ph":
                             value = pick(row, "pH", "ph")
-                            print(f"[DEBUG] {kit} pH TRIGGERED! Value: {value}")
                         elif sensor == "tempC":
                             value = pick(row, "DHT_temp", "dht_temp", "tempC")
                         elif sensor == "humidity":

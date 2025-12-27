@@ -214,6 +214,11 @@ class ProfileScreen extends ConsumerWidget {
                 label: 'Logout',
                 onTap: () async {
                   await ref.read(authProvider.notifier).signOut();
+                  
+                  // Reset kit state to prevent data leak between accounts
+                  ref.read(currentKitIdProvider.notifier).state = null;
+                  ref.invalidate(apiKitsListProvider);
+                  
                   if (context.mounted) {
                     Navigator.pushNamedAndRemoveUntil(
                       context,

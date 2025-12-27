@@ -65,37 +65,43 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           final api = ref.read(apiServiceProvider);
           final user = ref.read(authProvider);
           
-          // Try backend preference first
-          if (user != null) {
+          // Get user's kit list first (filtered by userId)
+          List<Map<String, dynamic>> userKits = [];
+          try {
+            userKits = await ref.read(apiKitsListProvider.future);
+          } catch (_) {
+            // Error loading kits
+          }
+          
+          final kitIds = userKits.map((k) => k["id"] as String).toList();
+
+          
+          // Try backend preference first (but validate it exists in user's kit list)
+          if (user != null && kitIds.isNotEmpty) {
             try {
               final savedKit = await api.getUserPreference(userId: user.uid);
-              if (savedKit != null) {
+              if (savedKit != null && kitIds.contains(savedKit)) {
                 kitToLoad = savedKit;
                 ref.read(currentKitIdProvider.notifier).state = savedKit;
-                print("[History] Loaded kit from backend preference: $savedKit");
+
               }
-            } catch (e) {
-              print("[History] Failed to load user preference: $e");
+            } catch (_) {
+              // Error loading preference
             }
           }
           
-          // Fallback to first kit from API
-          if (kitToLoad == null) {
-            try {
-              final kits = await ref.read(apiKitsListProvider.future);
-              if (kits.isNotEmpty) {
-                kitToLoad = kits.first["id"] as String;
-                ref.read(currentKitIdProvider.notifier).state = kitToLoad;
-                print("[History] Using first kit: $kitToLoad");
-              }
-            } catch (e) {
-              print("[History] Failed to load kits: $e");
-            }
+          // Fallback to first kit from user's list
+          if (kitToLoad == null && kitIds.isNotEmpty) {
+            kitToLoad = kitIds.first;
+            ref.read(currentKitIdProvider.notifier).state = kitToLoad;
+
           }
         }
         
         if (kitToLoad != null) {
           await _loadData(kitToLoad, days: 1);
+        } else {
+
         }
       }
 
@@ -124,11 +130,15 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     setState(() => _isLoading = true);
     final limit = days == 1 ? 2880 : 20160;
 
+
+
     try {
       final api = ref.read(apiServiceProvider);
       final res = await api.getJson(
         "/telemetry/history?deviceId=$kitId&days=$days&limit=$limit",
       );
+
+
 
       final List items = res["items"] ?? [];
       _entries = items.map((e) {
@@ -136,7 +146,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         final ts = e["ingestTime"] as int;
         return {"t": t, "ts": ts};
       }).toList();
-    } catch (e) {
+      
+
+    } catch (_) {
       _entries = [];
     }
 
@@ -159,6 +171,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     final now = DateTime.now();
     final targetDate = selectedDate ?? DateTime(now.year, now.month, now.day);
 
+
+    
+
+
     // First filter by date
     var filtered = _entries.where((e) {
       final ts = e['ts'] as int;
@@ -167,6 +183,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           d.month == targetDate.month &&
           d.day == targetDate.day;
     }).toList();
+    
+
 
     // Then filter by time (only for today)
     if (selectedDate == null && _timeFilter != TimeFilter.all) {

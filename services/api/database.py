@@ -168,12 +168,31 @@ def run_migrations():
         );
     """)
     
-    # Indexes for efficient querying
     cur.execute("""
         CREATE INDEX IF NOT EXISTS idx_notif_user ON notifications("userId");
     """)
     cur.execute("""
         CREATE INDEX IF NOT EXISTS idx_notif_time ON notifications("createdAt" DESC);
+    """)
+
+    # USER_KITS JUNCTION TABLE (many-to-many: user <-> kit)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS user_kits (
+            "userId" TEXT NOT NULL,
+            "kitId" TEXT NOT NULL REFERENCES kits(id) ON DELETE CASCADE,
+            "addedAt" TIMESTAMPTZ DEFAULT NOW(),
+            PRIMARY KEY ("userId", "kitId"),
+            CHECK (LENGTH("userId") >= 8),
+            CHECK (LENGTH("kitId") >= 5)
+        );
+    """)
+    
+    # Indexes for user_kits
+    cur.execute("""
+        CREATE INDEX IF NOT EXISTS idx_user_kits_user ON user_kits("userId");
+    """)
+    cur.execute("""
+        CREATE INDEX IF NOT EXISTS idx_user_kits_kit ON user_kits("kitId");
     """)
 
     conn.commit()

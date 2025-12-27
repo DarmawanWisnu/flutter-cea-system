@@ -31,6 +31,10 @@ class SettingsScreen extends ConsumerWidget {
 
               try {
                 await ref.read(authProvider.notifier).signOut();
+                
+                // Reset kit state to prevent data leak between accounts
+                ref.read(currentKitIdProvider.notifier).state = null;
+                ref.invalidate(apiKitsListProvider);
               } catch (_) {}
 
               if (context.mounted) {

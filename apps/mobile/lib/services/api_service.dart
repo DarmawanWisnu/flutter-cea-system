@@ -34,11 +34,6 @@ class ApiService {
 
     for (int attempt = 0; attempt <= retry; attempt++) {
       try {
-        if (kDebugMode) {
-          print('[API] $method $url (try ${attempt + 1})');
-          if (body != null) print('[API] body: $body');
-        }
-
         switch (method) {
           case 'POST':
             res = await http

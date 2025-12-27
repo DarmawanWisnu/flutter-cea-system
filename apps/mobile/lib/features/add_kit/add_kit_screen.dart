@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fountaine/app/routes.dart';
 import 'package:fountaine/providers/provider/api_provider.dart';
+import 'package:fountaine/providers/provider/auth_provider.dart';
 
 class AddKitScreen extends ConsumerStatefulWidget {
   const AddKitScreen({super.key});
@@ -37,8 +38,21 @@ class _AddKitScreenState extends ConsumerState<AddKitScreen> {
     setState(() => _loading = true);
 
     try {
-      // POST
-      await ref.read(apiKitsProvider).addKit(id: id, name: name);
+      // Get current user
+      final user = ref.read(authProvider);
+      if (user == null) {
+        throw Exception('You must be logged in to add a kit');
+      }
+      
+      // POST with userId
+      await ref.read(apiKitsProvider).addKit(
+        id: id,
+        name: name,
+        userId: user.uid,
+      );
+      
+      // Invalidate kit list to refresh on home screen
+      ref.invalidate(apiKitsListProvider);
 
       if (!mounted) return;
 

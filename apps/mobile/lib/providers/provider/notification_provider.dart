@@ -41,11 +41,9 @@ class NotificationItem {
 
 class NotificationListNotifier extends StateNotifier<List<NotificationItem>> {
   NotificationListNotifier(this.ref) : super([]) {
-    print('[Notification] ===== INITIALIZED =====');
     
     // Listen to current kit ID changes
     _kitIdSub = ref.listen(currentKitIdProvider, (prev, next) {
-      print('[Notification] Kit changed: $prev -> $next');
       if (next != null) {
         _fetchAndEvaluate(next);
       }
@@ -62,31 +60,40 @@ class NotificationListNotifier extends StateNotifier<List<NotificationItem>> {
         await _loadFromBackend(user.uid, api);
       }
       
-      // If no kit selected, try to load from backend preference first
+      // If no kit selected, try to load from user's kit list first
       if (kitId == null && user != null) {
+        // Get user's kit list first (filtered by userId)
+        List<Map<String, dynamic>> userKits = [];
+        try {
+          userKits = await ref.read(apiKitsListProvider.future);
+        } catch (_) {
+          // Error loading kits
+        }
+        
+        final kitIds = userKits.map((k) => k["id"] as String).toList();
+        
+        // If user has no kits, don't try to load anything
+        if (kitIds.isEmpty) {
+          return;
+        }
+        
+        // Try backend preference (but validate it exists in user's kit list)
         try {
           final savedKit = await api.getUserPreference(userId: user.uid);
-          if (savedKit != null) {
+          if (savedKit != null && kitIds.contains(savedKit)) {
             kitId = savedKit;
             ref.read(currentKitIdProvider.notifier).state = savedKit;
-            print('[Notification] Loaded kit from backend preference: $savedKit');
+
           }
-        } catch (e) {
-          print('[Notification] Failed to load user preference: $e');
+        } catch (_) {
+          // Error loading preference
         }
-      }
-      
-      // Fallback to first kit from API
-      if (kitId == null) {
-        try {
-          final kits = await ref.read(apiKitsListProvider.future);
-          if (kits.isNotEmpty) {
-            kitId = kits.first["id"] as String;
-            ref.read(currentKitIdProvider.notifier).state = kitId;
-            print('[Notification] Using first kit: $kitId');
-          }
-        } catch (e) {
-          print('[Notification] Failed to load kits: $e');
+        
+        // Fallback to first kit from user's list
+        if (kitId == null && kitIds.isNotEmpty) {
+          kitId = kitIds.first;
+          ref.read(currentKitIdProvider.notifier).state = kitId;
+
         }
       }
       
@@ -106,7 +113,7 @@ class NotificationListNotifier extends StateNotifier<List<NotificationItem>> {
         await _loadFromBackend(user.uid, api);
       }
       
-      print('[Notification] ===== PERIODIC (1m) kit=$kitId =====');
+      
       if (kitId != null) {
         _fetchAndEvaluate(kitId);
       }
@@ -136,10 +143,9 @@ class NotificationListNotifier extends StateNotifier<List<NotificationItem>> {
       
       if (newItems.isNotEmpty || loaded.length != state.length) {
         state = [...loaded];
-        print('[Notification] Loaded ${loaded.length} from backend');
       }
-    } catch (e) {
-      print('[Notification] Failed to load from backend: $e');
+    } catch (_) {
+      // Error loading from backend
     }
   }
 
@@ -215,13 +221,12 @@ class NotificationListNotifier extends StateNotifier<List<NotificationItem>> {
       final t = await api.getLatestTelemetry(kitId);
       
       if (t == null) {
-        print('[Notification] No telemetry for $kitId');
         return;
       }
       
       await _evaluate(kitId, t);
-    } catch (e) {
-      print('[Notification] Error: $e');
+    } catch (_) {
+      // Error evaluating
     }
   }
 
@@ -236,8 +241,7 @@ class NotificationListNotifier extends StateNotifier<List<NotificationItem>> {
     
     final hasViolation = phDev > 0 || ppmDev > 0 || tempDev > 0 || wlDev > 0;
     
-    print('[Notification] isAuto=$isAuto, hasViolation=$hasViolation');
-    print('[Notification] Deviations: ph=${phDev.toStringAsFixed(1)}%, ppm=${ppmDev.toStringAsFixed(1)}%, temp=${tempDev.toStringAsFixed(1)}%, wl=${wlDev.toStringAsFixed(1)}%');
+
 
     // CASE 1: No violation
     if (!hasViolation) {
@@ -250,7 +254,7 @@ class NotificationListNotifier extends StateNotifier<List<NotificationItem>> {
       if (!hasRecentIssue) {
         _emit(kitId, 'info', 'All Parameters Within Safe Limits');
       } else {
-        print('[Notification] Skip "All Safe" - recent issues exist');
+
       }
       return;
     }
@@ -269,15 +273,11 @@ class NotificationListNotifier extends StateNotifier<List<NotificationItem>> {
     final message = violations.join(', ');
 
     if (isAuto) {
-      // AUTO MODE: Backend creates notifications every 30s with actuator actions
-      // Provider only loads from backend (already done in _loadFromBackend)
-      // Don't create duplicate local notification
-      print('[Notification] AUTO mode - skipping local notification (backend handles this)');
+      // AUTO MODE: Backend creates notifications, skip local
       return;
     } else {
       // MANUAL MODE: Determine severity based on deviation
       final severity = _determineSeverity(phDev, ppmDev, tempDev, wlDev);
-      print('[Notification] MANUAL - severity=$severity');
       _emit(kitId, severity, message);
     }
   }
@@ -304,7 +304,6 @@ class NotificationListNotifier extends StateNotifier<List<NotificationItem>> {
         
         if (actions.isNotEmpty) {
           final msg = 'Auto adjustment: ${actions.join(', ')}';
-          print('[Notification] AUTO - $msg');
           _emit(kitId, 'info', msg);
           return;
         }
@@ -312,8 +311,7 @@ class NotificationListNotifier extends StateNotifier<List<NotificationItem>> {
       
       // Fallback if no action found
       _emit(kitId, 'info', 'Auto mode: Monitoring $fallbackMsg');
-    } catch (e) {
-      print('[Notification] Error fetching actuator: $e');
+    } catch (_) {
       _emit(kitId, 'info', 'Auto mode active');
     }
   }
@@ -325,7 +323,6 @@ class NotificationListNotifier extends StateNotifier<List<NotificationItem>> {
     // Cooldown check
     final last = _cooldowns[key];
     if (last != null && now.difference(last) < _cooldown) {
-      print('[Notification] Cooldown: $key');
       return;
     }
     _cooldowns[key] = now;
@@ -339,7 +336,6 @@ class NotificationListNotifier extends StateNotifier<List<NotificationItem>> {
       kitName: kitId,
     );
 
-    print('[Notification] ADDED: level=$level, message=$message');
     state = [n, ...state];
   }
 

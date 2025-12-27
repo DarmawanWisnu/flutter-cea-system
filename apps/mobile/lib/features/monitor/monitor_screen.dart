@@ -116,8 +116,8 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
       try {
         // Start MQTT connection (may fail in tests)
         await ref.read(mqttProvider.notifier).init();
-      } catch (e) {
-        print("[Monitor] MQTT init error (continuing without MQTT): $e");
+      } catch (_) {
+        // MQTT init failed, continue without MQTT
       }
 
       // Load kits regardless of MQTT status
@@ -144,7 +144,7 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
           final savedKitFromBackend = await api.getUserPreference(userId: userId);
           if (savedKitFromBackend != null && kitIds.contains(savedKitFromBackend)) {
             initial = savedKitFromBackend;
-            print("[Monitor] Loaded kit from backend: $initial");
+
           } else if (widget.selectedKit != null && kitIds.contains(widget.selectedKit)) {
             // Priority 2: Use kit passed via widget
             initial = widget.selectedKit!;
@@ -188,11 +188,11 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
           // Save to backend if this was a new preference
           if (shouldSavePreference && userId != null) {
             await api.setUserPreference(userId: userId, selectedKitId: initial);
-            print("[Monitor] Saved kit preference to backend: $initial");
+
           }
         }
-      } catch (e) {
-        print("[Monitor] Kit loading error: $e");
+      } catch (_) {
+        // Kit loading error
       }
     });
   }
@@ -494,7 +494,6 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
                     userId: user.uid,
                     selectedKitId: v,
                   );
-                  print("[Monitor] Kit preference saved: $v");
                 }
               }
             },

@@ -1,16 +1,4 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:intl/intl.dart';
-
-class AppConst {
-  // Kit default
-  static String get defaultKitId => dotenv.env['DEFAULT_KIT_ID'] ?? 'devkit-01';
-
-  // Format datetime
-  static String formatDateTime(DateTime? dt) {
-    if (dt == null) return "-";
-    return DateFormat("yyyy-MM-dd HH:mm:ss").format(dt.toLocal());
-  }
-}
 
 /// MQTT CONFIGURATION
 class MqttConst {
@@ -32,9 +20,7 @@ class MqttConst {
   // MQTT non-TLS
   static const bool tls = false;
 
-  // Topic
-  static String tTelemetry(String kitId) => "kit/$kitId/telemetry";
-  static String tStatus(String kitId) => "kit/$kitId/status";
+  // Topic helper
   static String tControl(String kitId) => "kit/$kitId/control";
 }
 
@@ -52,8 +38,4 @@ class ThresholdConst {
   // Water level thresholds (0-3 scale: 0=empty, 1=low, 2=medium, 3=high)
   static const double wlMin = 1.2;
   static const double wlMax = 2.5;
-
-  static const double hysteresisPercent = 5.0;
-  static const int confirmSamples = 3;
-  static const int alertCooldownMin = 5;
 }

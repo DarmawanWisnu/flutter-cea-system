@@ -2,9 +2,13 @@ from fastapi import APIRouter, HTTPException
 from fastapi import BackgroundTasks
 from pydantic import BaseModel, Field
 from services.api.database import get_connection, release_connection
+import os
 import time
 import httpx
 import logging
+
+# Environment configuration
+ML_PREDICT_URL = os.getenv("ML_PREDICT_URL", "http://127.0.0.1:8000/ml/predict")
 
 # Custom formatter to show level only for ERROR
 class CustomFormatter(logging.Formatter):
@@ -28,7 +32,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
-AUTO_MODE_SOURCE = "rule"
 
 # COOLDOWN SETTINGS
 COOLDOWN_SECONDS = 180
@@ -62,7 +65,6 @@ def run_actuator_migration():
                 "refill" INT DEFAULT 0
             );
         """)
-        conn.commit()
         conn.commit()
         logger.info("[DB] actuator_event migration executed (from actuator.py).")
     except Exception as e:
@@ -216,8 +218,8 @@ class ActuatorEvent(BaseModel):
 # INSERT ACTUATOR EVENT
 @router.post("/event")
 async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: BackgroundTasks, userId: str = None):
-    global AUTO_MODE_SOURCE
     deviceId = deviceId.strip()
+    source = "rule"  # Local variable instead of global
 
     if not is_valid_device(deviceId):
         raise HTTPException(400, "Invalid deviceId. Register device using /kits.")
@@ -260,7 +262,7 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
                 }
                 
                 async with httpx.AsyncClient(timeout=2.0) as client:
-                    r = await client.post("http://127.0.0.1:8000/ml/predict", json=ml_payload)
+                    r = await client.post(ML_PREDICT_URL, json=ml_payload)
                 
                 if r.status_code == 200:
                     ml = r.json()
@@ -270,7 +272,7 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
                     data.refill = int(ml.get("refill", 0))
                     data.valueS = float(max(data.phUp, data.phDown, data.nutrientAdd, data.refill))
                     
-                    AUTO_MODE_SOURCE = "ml"
+                    source = "ml"
                     ml_success = True
                     logger.info(f"ML_PREDICT | phUp={data.phUp}s phDown={data.phDown}s nutrient={data.nutrientAdd}s refill={data.refill}s")
                 else:
@@ -283,7 +285,7 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
 
             # FALLBACK TO RULE-BASED IF ML FAILS
             if not ml_success:
-                AUTO_MODE_SOURCE = "rule"
+                source = "rule"
 
                 # Constants
                 PH_MIN, PH_MAX = 5.5, 6.5
@@ -396,9 +398,9 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
                 
                 # Log final result with source  
                 if data.auto == 1:
-                    source = "ml" if AUTO_MODE_SOURCE == "ml" else "rule_based"
+                    source_label = source if source == "ml" else "rule_based"
                     user_info = f"user={userId}" if userId else "user=unknown"
-                    logger.info(f"EXECUTED | device={deviceId} {user_info} source={source} event_id={new_id}")
+                    logger.info(f"EXECUTED | device={deviceId} {user_info} source={source_label} event_id={new_id}")
                     logger.info(f"{'='*60}")
                 
                 return {
@@ -463,7 +465,6 @@ async def try_ml_prediction_and_update(deviceId: str, ppm: float, ph: float,
     This runs in the background and won't block the main response.
     If ML succeeds, it updates the actuator event that was just created.
     """
-    global AUTO_MODE_SOURCE
     
     try:
         ml_payload = {
@@ -477,7 +478,7 @@ async def try_ml_prediction_and_update(deviceId: str, ppm: float, ph: float,
 
         # Increased timeout since this is non-blocking now
         async with httpx.AsyncClient(timeout=5.0) as client:
-            r = await client.post("http://127.0.0.1:8000/ml/predict", json=ml_payload)
+            r = await client.post(ML_PREDICT_URL, json=ml_payload)
 
         if r.status_code == 200:
             ml = r.json()
@@ -504,7 +505,6 @@ async def try_ml_prediction_and_update(deviceId: str, ppm: float, ph: float,
                 ))
                 conn.commit()
                 
-                AUTO_MODE_SOURCE = "ml"
                 logger.debug(f"[ML] Background update completed for {deviceId}")
                 
             except Exception as e:

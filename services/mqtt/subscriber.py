@@ -15,8 +15,10 @@ def handle_signal(signum, frame):
 signal.signal(signal.SIGINT, handle_signal)
 signal.signal(signal.SIGTERM, handle_signal)
 
-BROKER = "localhost"  # MQTT broker jalan lokal
-PORT = 1883
+# Environment configuration
+BROKER = os.getenv("MQTT_BROKER", "localhost")
+PORT = int(os.getenv("MQTT_PORT", "1883"))
+BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000/telemetry")
 
 KIT_ID = os.getenv("KIT_ID")
 IS_MULTI = KIT_ID is None
@@ -26,7 +28,6 @@ if IS_MULTI:
 else:
     TOPIC = f"kit/{KIT_ID}/telemetry"
 
-BACKEND_URL = "http://localhost:8000/telemetry"
 QOS = 1
 
 CLIENT_ID = f"csv-subscriber-{KIT_ID}"
@@ -58,7 +59,7 @@ def send_snapshot(kit_id):
     with state_lock:
         payload = STATE.get(kit_id, {})
 
-    print("\n📤 Sending Snapshot to Backend...")
+    print(f"\n[SEND] Sending Snapshot to Backend...")
     print(f"POST /telemetry?deviceId={kit_id}")
     print(pretty_json(payload))
 
@@ -68,7 +69,7 @@ def send_snapshot(kit_id):
             json=payload,
             timeout=5
         )
-        print(f"Backend Status → {r.status_code} | {r.text}")
+        print(f"[RESP] Backend Status: {r.status_code} | {r.text}")
     except Exception as e:
         print("[ERR] Backend error:", e)
 
@@ -80,10 +81,10 @@ def on_connect(client, userdata, flags, reason_code, properties):
 def on_message(client, userdata, msg):
     t = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    print("\n──────────────────────────────────────────────")
-    print("📥 MQTT MESSAGE RECEIVED")
-    print(f"🕒 {t}")
-    print(f"📡 Topic: {msg.topic}")
+    print("\n" + "=" * 50)
+    print("[RECV] MQTT MESSAGE RECEIVED")
+    print(f"[TIME] {t}")
+    print(f"[TOPIC] {msg.topic}")
 
     try:
         data = json.loads(msg.payload.decode())
@@ -94,8 +95,8 @@ def on_message(client, userdata, msg):
         else:
             kit_id = KIT_ID
 
-        print(f"🔧 Device ID: {kit_id}")
-        print("──────────────────────────────────────────────\n")
+        print(f"[DEVICE] {kit_id}")
+        print("=" * 50 + "\n")
 
         print("Payload:")
         print(pretty_json(data))
@@ -128,20 +129,20 @@ def on_message(client, userdata, msg):
         all_updated = all(sensor_updated[kit_id].values())
         
         if all_updated:
-            print("✅ All sensors updated, sending to backend...")
+            print("[OK] All sensors updated, sending to backend...")
             send_snapshot(kit_id)
             # Reset the tracking
             sensor_updated[kit_id] = {s: False for s in REQUIRED_SENSORS}
         else:
             pending = [s for s, updated in sensor_updated[kit_id].items() if not updated]
-            print(f"⏳ Waiting for: {', '.join(pending)}")
+            print(f"[WAIT] Pending: {', '.join(pending)}")
 
-        print("──────────────────────────────────────────────")
+        print("=" * 50)
 
     except Exception as e:
         print("[ERR] Failed to parse MQTT:", e)
         print("[RAW]", msg.payload)
-        print("──────────────────────────────────────────────")
+        print("=" * 50)
 
 def main():
     client = mqtt.Client(
