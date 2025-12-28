@@ -1,4 +1,6 @@
 @startuml
+scale 3
+skinparam monochrome true
 title Activity Diagram - Register
 
 |User|
@@ -9,35 +11,30 @@ start
 :Menampilkan form register;
 
 |User|
+:Input nama;
 :Input email dan password;
-:Input konfirmasi password;
-:Klik tombol Register;
+:Input lokasi;
+:Klik tombol Sign Up;
 
 |Sistem|
 :Validasi format input;
 
 if ("Format valid?") then (Ya)
-  if ("Password match?") then (Ya)
-    :Kirim request ke Firebase Auth;
-    :createUserWithEmailAndPassword();
-    
-    if ("Registrasi berhasil?") then (Ya)
-      :Kirim email verifikasi;
-      :sendEmailVerification();
-      :Menampilkan notifikasi "Registrasi berhasil";
-      :Navigate ke Verify Screen;
-      stop
-    else (Tidak)
-      :Menampilkan pesan error;
-      :(Email sudah terdaftar / password lemah);
-      :Kembali ke form register;
-    endif
+  :Kirim request ke Firebase Auth;
+  :createUserWithEmailAndPassword();
+  
+  if ("Registrasi berhasil?") then (Ya)
+    :Kirim email verifikasi;
+    :sendEmailVerification();
+    :Navigate ke Verify Screen;
+    stop
   else (Tidak)
-    :Menampilkan pesan "Password tidak cocok";
+    :Menampilkan pesan error;
+    :(Email sudah terdaftar / password lemah);
     :Kembali ke form register;
   endif
 else (Tidak)
-  :Menampilkan pesan "Format email tidak valid";
+  :Menampilkan pesan "Format input tidak valid";
   :Kembali ke form register;
 endif
 @enduml

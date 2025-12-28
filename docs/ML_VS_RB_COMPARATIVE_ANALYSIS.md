@@ -2,7 +2,7 @@
 
 > **Dokumentasi komprehensif tentang perbedaan Machine Learning dan Rule-Based system untuk sistem hidroponik CEA**
 >
-> **Tanggal:** 22-23 Desember 2024  
+> **Tanggal:** 22-23 Desember 2025  
 > **Tujuan:** Justifikasi akademik untuk thesis defense
 
 ---
@@ -893,7 +893,7 @@ Pendekatan hybrid ML+RB menawarkan **best of both worlds**: performance ML denga
 ---
 
 **Document Version:** 1.0  
-**Last Updated:** 23 Desember 2024  
+**Last Updated:** 23 Desember 2025  
 **Author:** Wisnu Darmawan  
 **Project:** CEA Hydroponics Control System  
 **Status:** Ready for Thesis Defense ✅

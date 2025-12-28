@@ -1,5 +1,7 @@
 @startuml
-title Sequence Diagram - Tambah Kit Baru
+scale 3
+skinparam monochrome true
+title Sequence Diagram - Add Kit
 
 actor "User" as User
 participant "Add Kit Screen" as Form
@@ -23,13 +25,13 @@ User -> Form : Klik tombol Simpan
 activate Form
 
 ' === Validasi input ===
-Form -> Form : Validasi data (ID dan nama tidak kosong)
+Form -> Form : Validasi data (ID >= 5 char, nama tidak kosong)
 
 ' === Kirim ke API ===
 Form -> API : addKit(id, name)
 activate API
 
-API -> Backend : POST /kits {id, name}
+API -> Backend : POST /kits {id, name, userId}
 activate Backend
 Backend -> Backend : Simpan data kit ke database
 Backend --> API : Response 201 Created / Error
@@ -38,14 +40,14 @@ deactivate Backend
 ' === Handling hasil ===
 alt Berhasil
   API --> Form : Success
-  Form -> User : Menampilkan SnackBar "Kit berhasil ditambahkan"
+  Form -> User : Menampilkan Dialog Sukses
   Form -> Home : Navigate ke Home Screen
   activate Home
   Home -> User : Menampilkan daftar kit terbaru
   deactivate Home
 else Gagal
   API --> Form : Throw Exception
-  Form -> User : Menampilkan pesan error
+  Form -> User : Menampilkan Dialog Error
 end
 
 deactivate API

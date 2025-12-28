@@ -1,93 +1,37 @@
 @startuml
-' === Atur arah jadi horizontal ===
+scale 2
+skinparam monochrome true
+skinparam shadowing false
 left to right direction
 skinparam actorStyle stick
-skinparam rectangle {
-  BorderColor black
-  BackgroundColor white
-}
-skinparam usecase {
-  BackgroundColor white
-  BorderColor black
-}
 
-actor "User" as User
+actor User
 
-' === Kotak Sistem Utama ===
-rectangle "Sistem Aplikasi Fountaine Hydroponic Monitoring" {
-  rectangle "Feature" as Main {
-    usecase "Lihat Data Sensor" as UC_Sensor
-    usecase "Monitor Real-Time" as UC_Monitor
-    usecase "Tambah Kit Baru" as UC_AddKit
-    usecase "Kendali Pompa\n(Manual / Otomatis)" as UC_Control
-    usecase "Lihat Notifikasi" as UC_Notify
-    usecase "Lihat History" as UC_History
-  }
-
-  rectangle "Auth" as Support {
-    usecase "Login" as UC_Login
-    usecase "Register" as UC_Register
-    usecase "Forgot Password" as UC_Forgot
-    usecase "Verify Email" as UC_Verify
-    usecase "Home" as UC_Home
-    usecase "Logout" as UC_Logout
-  }
+rectangle System {
+  usecase UC1 as "Lihat Sensor"
+  usecase UC2 as "Monitor"
+  usecase UC3 as "Tambah Kit"
+  usecase UC4 as "Kendali Pompa"
+  usecase UC5 as "Notifikasi"
+  usecase UC6 as "History"
+  usecase UC7 as "Login"
+  usecase UC8 as "Register"
 }
 
-' === Sistem Eksternal ===
-rectangle "Firebase Auth" as Firebase {
-  usecase "Autentikasi Pengguna" as UC_Firebase
-}
-rectangle "MQTT Broker (Mosquitto)" as MQTT {
-  usecase "Kirim / Terima Data Sensor" as UC_MQTTData
-  usecase "Kirim Perintah Aktuator" as UC_MQTTPump
-}
-rectangle "Backend REST API" as Backend {
-  usecase "Simpan & Ambil Notifikasi" as UC_BackendNotif
-  usecase "Simpan & Ambil Data History" as UC_BackendData
-  usecase "Kelola Data Kit" as UC_BackendKit
-  usecase "Kelola Mode Auto/Manual" as UC_BackendMode
-}
+User --> UC1
+User --> UC2
+User --> UC3
+User --> UC4
+User --> UC5
+User --> UC6
+User --> UC7
+User --> UC8
 
-' === Relasi User ===
-User --> UC_Sensor
-User --> UC_Monitor
-User --> UC_AddKit
-User --> UC_Control
-User --> UC_Notify
-User --> UC_History
-User --> UC_Home
-User --> UC_Logout
-User --> UC_Login
-User --> UC_Register
-User --> UC_Forgot
-User --> UC_Verify
-
-' === Include ke Login (arah ke kanan) ===
-UC_Sensor -[dotted]-> UC_Login : <<include>>
-UC_AddKit -[dotted]-> UC_Login : <<include>>
-UC_Monitor -[dotted]-> UC_Login : <<include>>
-UC_Control -[dotted]-> UC_Login : <<include>>
-UC_Notify -[dotted]-> UC_Login : <<include>>
-UC_History -[dotted]-> UC_Login : <<include>>
-
-' === Extend relationships ===
-UC_Control -[dashed]-> UC_Monitor : <<extend>>
-UC_History -[dashed]-> UC_Sensor : <<extend>>
-
-' === Koneksi ke sistem eksternal ===
-UC_Login --> UC_Firebase
-UC_Register --> UC_Firebase
-UC_Forgot --> UC_Firebase
-UC_Verify --> UC_Firebase
-
-UC_Sensor --> UC_MQTTData
-UC_Monitor --> UC_MQTTData
-UC_Control --> UC_MQTTPump
-UC_Control --> UC_BackendMode
-
-UC_Notify --> UC_BackendNotif
-UC_History --> UC_BackendData
-UC_AddKit --> UC_BackendKit
+UC1 ..> UC7 : include
+UC2 ..> UC7 : include
+UC3 ..> UC7 : include
+UC4 ..> UC7 : include
+UC5 ..> UC7 : include
+UC6 ..> UC7 : include
 
 @enduml

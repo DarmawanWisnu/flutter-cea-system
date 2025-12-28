@@ -29,7 +29,13 @@ class CustomFormatter(logging.Formatter):
 
 # Configure logging with custom formatter
 handler_console = logging.StreamHandler()
-handler_file = logging.FileHandler('api.log')
+
+# Use absolute path for log file (relative to project root)
+import pathlib
+_PROJECT_ROOT = pathlib.Path(__file__).parent.parent.parent
+_LOG_PATH = _PROJECT_ROOT / "logs" / "api.log"
+_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+handler_file = logging.FileHandler(_LOG_PATH)
 
 formatter = CustomFormatter(datefmt='%Y-%m-%d %H:%M:%S')
 handler_console.setFormatter(formatter)

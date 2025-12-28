@@ -147,10 +147,8 @@ The system uses a **priority-based approach** to prevent conflicting actions:
 
 ### **Control Rules**
 
-- **Hysteresis:** ±5% from threshold to prevent oscillation
-- **Consensus:** Status change valid after 2 consecutive samples
-- **Cooldown:** 5 minutes between automatic actions per sensor
-- **Rate Limit:** Maximum 3 automatic actions per 30 minutes per sensor
+- **Cooldown:** 3 minutes (180 seconds) between automatic actions per actuator type
+- **Critical Bypass:** Cooldown bypassed when parameters reach critical levels (pH <5.0 or >7.0, PPM <400 or >1200, WL <1.0)
 - **Manual Priority:** Manual mode disables all automatic actions
 
 ---
@@ -365,6 +363,68 @@ When `mode: "auto"` is active:
 
 ---
 
+### **11.4 Telemetry**
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/telemetry?deviceId={id}` | POST | Insert new telemetry data |
+| `/telemetry/latest?deviceId={id}` | GET | Get latest telemetry for device |
+| `/telemetry/history?deviceId={id}&days=7` | GET | Get telemetry history |
+
+---
+
+### **11.5 Actuator Control**
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/actuator/event?deviceId={id}` | POST | Trigger actuator action |
+| `/actuator/latest?deviceId={id}` | GET | Get latest actuator event |
+| `/actuator/history?deviceId={id}&limit=50` | GET | Get actuator history |
+| `/actuator/all?deviceId={id}` | GET | Get all actuator events |
+
+---
+
+### **11.6 Device Mode**
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/device/mode` | POST | Set auto/manual mode |
+| `/device/mode?userId={uid}&deviceId={id}` | GET | Get current mode |
+| `/device/auto-enabled` | GET | Get all auto-enabled devices |
+
+---
+
+### **11.7 Machine Learning**
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/ml/predict` | POST | Get ML prediction for actuator durations |
+
+**POST /ml/predict Request:**
+```json
+{
+  "ppm": 750.0,
+  "ph": 6.1,
+  "tempC": 22.5,
+  "humidity": 68.0,
+  "waterTemp": 21.0,
+  "waterLevel": 2.0
+}
+```
+
+**Response:**
+```json
+{
+  "phUp": 0,
+  "phDown": 0,
+  "nutrientAdd": 0,
+  "refill": 0,
+  "model_version": "v3"
+}
+```
+
+---
+
 ## 📚 **12. Version History**
 
 | Version | Date | Description |
@@ -373,6 +433,7 @@ When `mode: "auto"` is active:
 | **v1.1** | 2025-11-23 | Added humidity and water temp sensors |
 | **v2.0** | 2025-12-02 | Added ML auto mode, priority-based logic |
 | **v2.1** | 2025-12-27 | Added per-user kit management, notification persistence |
+| **v2.2** | 2025-12-28 | Documentation sync, fixed diagram discrepancies |
 
 ---
 
@@ -394,7 +455,7 @@ When `mode: "auto"` is active:
 For questions or clarifications about this ICD:
 - **Project:** CEA Hydroponic System
 - **Author:** Wisnu Darmawan
-- **Last Updated:** 2025-12-02
+- **Last Updated:** 2025-12-28
 
 ---
 

@@ -1,4 +1,6 @@
 @startuml
+scale 3
+skinparam monochrome true
 title Activity Diagram - History
 
 |User|
@@ -9,7 +11,7 @@ start
 :Ambil kitId dari shared state;
 :Menampilkan loading indicator;
 :Request data history ke Backend API;
-:GET /telemetry/{kitId}/history;
+:GET /telemetry/history?deviceId={kitId};
 
 if ("Data tersedia?") then (Ya)
   :Menampilkan list data sensor;
@@ -32,9 +34,12 @@ endif
 |Sistem|
 if ("Tanggal dipilih?") then (Ya)
   :Request data untuk tanggal terpilih;
-  :GET /telemetry/{kitId}/history?date=YYYY-MM-DD;
+  :GET /telemetry/history?deviceId={kitId}&days=1;
   :Menampilkan data untuk tanggal tersebut;
 endif
 
 stop
 @enduml
+
+
+

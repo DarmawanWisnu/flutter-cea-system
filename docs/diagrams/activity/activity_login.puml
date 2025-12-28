@@ -1,4 +1,6 @@
 @startuml
+scale 3
+skinparam monochrome true
 title Activity Diagram - Login
 
 |User|
@@ -20,14 +22,8 @@ if ("Format valid?") then (Ya)
   :signInWithEmailAndPassword();
   
   if ("Kredensial valid?") then (Ya)
-    if ("Email sudah diverifikasi?") then (Ya)
-      :Navigate ke Home Screen;
-      stop
-    else (Tidak)
-      :Navigate ke Verify Screen;
-      :Tampilkan pesan "Silakan verifikasi email";
-      stop
-    endif
+    :Navigate ke Home Screen;
+    stop
   else (Tidak)
     :Menampilkan pesan error;
     :Kembali ke halaman login;

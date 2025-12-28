@@ -1,4 +1,6 @@
 @startuml
+scale 3
+skinparam monochrome true
 title Sequence Diagram - Register
 
 actor "User" as User
@@ -11,28 +13,19 @@ participant "Verify Screen" as Verify
 User -> Form : Membuka halaman register
 activate Form
 Form -> User : Menampilkan form register
-deactivate Form
 
 ' === Input data ===
-User -> Form : Input email dan password
-activate Form
+User -> Form : Input nama, email, password, lokasi
 Form -> User : Menampilkan data inputan
-deactivate Form
 
-User -> Form : Klik tombol Daftar
-activate Form
-
-' === Validasi input ===
-Form -> Form : Validasi format email dan password
-
-' === Kirim ke AuthService ===
+User -> Form : Klik tombol Sign Up
 Form -> Auth : registerWithEmailPassword(email, password)
 activate Auth
 
-' === Buat akun di Firebase ===
+' === Validasi ke Firebase ===
 Auth -> Firebase : createUserWithEmailAndPassword()
 activate Firebase
-Firebase -> Firebase : Proses pembuatan akun
+Firebase -> Firebase : Validasi kredensial
 Firebase --> Auth : UserCredential / Error
 deactivate Firebase
 

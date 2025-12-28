@@ -1,52 +1,50 @@
 @startuml
+scale 2
+skinparam monochrome true
+skinparam shadowing false
 left to right direction
 skinparam actorStyle stick
-skinparam rectangle {
-  BorderColor black
-  BackgroundColor white
-}
-skinparam usecase {
-  BackgroundColor white
-  BorderColor black
-}
 
 actor "User" as User
 
-rectangle "Sistem Aplikasi Fountaine Hydroponic Monitoring" {
-
-  rectangle "Fitur Utama" as Main {
+rectangle "Sistem Flutter CEA System" {
+  rectangle "Features" {
     usecase "Lihat Data Sensor" as UC_Sensor
     usecase "Monitor Real-Time" as UC_Monitor
     usecase "Tambah Kit Baru" as UC_AddKit
-    usecase "Kendali Pompa\n(Manual / Otomatis)" as UC_Control
+    usecase "Kendali Pompa" as UC_Control
     usecase "Lihat Notifikasi" as UC_Notify
     usecase "Lihat History" as UC_History
+    usecase "Settings" as UC_Settings
+    usecase "Profile" as UC_Profile
   }
-
-  rectangle "Autentikasi" as Auth {
+  
+  rectangle "Auth" {
     usecase "Login" as UC_Login
+    usecase "Register" as UC_Register
+    usecase "Logout" as UC_Logout
   }
 }
 
-' === Relasi User ===
 User --> UC_Sensor
 User --> UC_Monitor
 User --> UC_AddKit
 User --> UC_Control
 User --> UC_Notify
 User --> UC_History
+User --> UC_Settings
+User --> UC_Profile
 User --> UC_Login
+User --> UC_Register
+User --> UC_Logout
 
-' === Semuanya harus login dulu ===
-UC_Sensor -[dotted]-> UC_Login : <<include>>
-UC_Monitor -[dotted]-> UC_Login : <<include>>
-UC_AddKit -[dotted]-> UC_Login : <<include>>
-UC_Control -[dotted]-> UC_Login : <<include>>
-UC_Notify -[dotted]-> UC_Login : <<include>>
-UC_History -[dotted]-> UC_Login : <<include>>
-
-' === Extend opsional ===
-UC_Control -[dashed]-> UC_Monitor : <<extend>>
-UC_History -[dashed]-> UC_Sensor : <<extend>>
+UC_Sensor ..> UC_Login : include
+UC_Monitor ..> UC_Login : include
+UC_AddKit ..> UC_Login : include
+UC_Control ..> UC_Login : include
+UC_Notify ..> UC_Login : include
+UC_History ..> UC_Login : include
+UC_Settings ..> UC_Login : include
+UC_Profile ..> UC_Login : include
 
 @enduml

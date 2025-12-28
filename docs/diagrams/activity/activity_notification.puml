@@ -1,4 +1,6 @@
 @startuml
+scale 3
+skinparam monochrome true
 title Activity Diagram - Notification
 
 |User|
@@ -6,35 +8,31 @@ start
 :Akses halaman Notification;
 
 |Sistem|
-:Request daftar notifikasi dari Backend API;
-:GET /notifications?userId={userId}&kitId={kitId};
+:Load notifikasi dari Backend API;
+:GET /notifications?userId={userId};
 
 if ("Ada notifikasi?") then (Ya)
-  :Menampilkan daftar notifikasi di UI;
+  :Menampilkan daftar notifikasi;
   :Grouped by level (Info, Warning, Urgent);
 else (Tidak)
-  :Menampilkan pesan "Tidak ada notifikasi";
+  :Menampilkan "Tidak ada notifikasi";
 endif
 
 |User|
-:Melihat daftar notifikasi;
 :Pilih filter (All / Warning / Urgent);
 
 |Sistem|
 :Filter notifikasi berdasarkan level;
-:Menampilkan hasil filter;
+:Tampilkan hasil filter;
 
 |User|
-if ("User tap salah satu notifikasi?") then (Ya)
-  :Menampilkan detail notifikasi;
-  
+if ("User tap notifikasi?") then (Ya)
   |Sistem|
-  :Mark notifikasi sebagai telah dibaca;
-  :PATCH /notifications/{id} {isRead: true};
-  :Update tampilan status baca;
+  :Mark as read;
+  :PUT /notifications/{id}/read;
   
   |User|
-  if ("Notifikasi terkait waktu tertentu?") then (Ya)
+  if ("Ada link ke History?") then (Ya)
     :Tap "Lihat di History";
     
     |Sistem|

@@ -1,9 +1,14 @@
 @startuml
-title Class Diagram - Arsitektur Sistem Fountaine Hydroponic Monitoring
+scale 3240*1710
+skinparam monochrome true
+skinparam ranksep 50
+skinparam nodesep 30
+title Class Diagram - Arsitektur Sistem Flutter CEA System
 
 ' =================== UI LAYER ===================
 package "UI Layer" {
   class AuthGate
+  class SplashScreen
   class HomeScreen
   class MonitorScreen
   class HistoryScreen
@@ -40,6 +45,23 @@ package "Providers" {
   class MonitorTelemetryProvider {
     + data : Telemetry
     + lastUpdated : DateTime
+  }
+
+  class ApiProvider {
+    + kits : List<Kit>
+    + fetchKits()
+    + addKit()
+    + deleteKit()
+  }
+
+  class AuthProvider {
+    + user : User?
+    + isLoading : bool
+  }
+
+  class UrlSettingsProvider {
+    + baseUrl : String
+    + updateBaseUrl()
   }
 }
 
@@ -188,3 +210,6 @@ ApiKitsService --> Kit
 AuthService ..> FirebaseAuth
 
 @enduml
+
+
+

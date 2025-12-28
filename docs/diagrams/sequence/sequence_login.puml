@@ -1,4 +1,6 @@
 @startuml
+scale 3
+skinparam monochrome true
 title Sequence Diagram - Login
 
 actor "User" as User
@@ -49,3 +51,6 @@ deactivate Auth
 deactivate Form
 
 @enduml
+
+
+

@@ -8,7 +8,44 @@ Pada tahap ini penulis melakukan perancangan terhadap database untuk aplikasi Fo
 
 ## Penjelasan Diagram
 
-Pada gambar di atas, dihasilkan **8 (delapan) entitas** pada perancangan database untuk aplikasi Fountaine Hydroponic Monitoring. Entitas tersebut meliputi **kits**, **telemetry**, **actuator_event**, **actuator_cooldown**, **ml_prediction_log**, **device_mode**, **user_preference**, dan **notifications**.
+Diagram database (`database_diagram.puml`) menggambarkan **9 (sembilan) entitas** pada perancangan database untuk aplikasi Fountaine Hydroponic Monitoring:
+
+### Daftar Entitas
+
+| No | Entitas | Keterangan |
+|----|---------|------------|
+| 1 | `kits` | Registry global kit hidroponik |
+| 2 | `telemetry` | Data sensor yang dikirim dari perangkat IoT |
+| 3 | `actuator_event` | Riwayat aktivasi aktuator (pompa pH, nutrisi, refill) |
+| 4 | `actuator_cooldown` | Tracking waktu cooldown per aksi aktuator |
+| 5 | `device_mode` | Mode kontrol (Auto/Manual) per user per device |
+| 6 | `user_preference` | Preferensi user (kit yang sedang dipilih) |
+| 7 | `notifications` | Notifikasi sistem untuk user |
+| 8 | `ml_prediction_log` | Log prediksi dari model Machine Learning |
+| 9 | `user_kits` | Relasi many-to-many antara user dan kit |
+
+### Notasi Diagram
+
+| Simbol | Arti |
+|--------|------|
+| `<<PK>>` | Primary Key - identifier unik untuk setiap record |
+| `<<FK>>` | Foreign Key - referensi ke tabel lain |
+| `<<UNIQUE>>` | Constraint unik - nilai tidak boleh duplikat |
+| `||--o{` | Relasi one-to-many (satu ke banyak) |
+| `||--o|` | Relasi one-to-one (satu ke satu) |
+
+### Hubungan Antar Entitas
+
+```
+kits (1) ──────< telemetry (*)         : Satu kit memiliki banyak data telemetry
+kits (1) ──────< actuator_event (*)    : Satu kit memiliki banyak event aktuator
+kits (1) ──────< actuator_cooldown (*) : Satu kit memiliki banyak record cooldown
+kits (1) ──────< device_mode (*)       : Satu kit bisa diakses oleh banyak user
+kits (1) ──────o user_preference (1)   : Satu kit bisa dipilih oleh satu user
+kits (1) ──────< notifications (*)     : Satu kit memiliki banyak notifikasi
+kits (1) ──────< ml_prediction_log (*) : Satu kit memiliki banyak log prediksi
+kits (1) ──────< user_kits (*)         : Satu kit bisa dimiliki banyak user
+```
 
 Pada masing-masing entitas memiliki *primary key* dan atribut. *Primary key* digunakan untuk merujuk pada tabel yang lainnya atau untuk dijadikan sebagai *foreign key* pada tabel lainnya agar tabel lain dapat mengakses data yang dibutuhkan pada entitas awal atau saling berelasi.
 
@@ -133,7 +170,18 @@ Tabel ini menyimpan notifikasi yang dihasilkan sistem berdasarkan kondisi sensor
 
 ## Relasi Antar Tabel
 
-Tabel **kits** menjadi entitas utama yang berelasi dengan seluruh tabel lainnya melalui kolom `deviceId`. Relasi yang terbentuk adalah *one-to-many* di mana satu kit dapat memiliki banyak data telemetry, actuator event, cooldown record, ML prediction log, device mode setting, dan notifications. Relasi *one-to-one* terbentuk antara **user_preference** dan **kits** di mana satu user hanya dapat memiliki satu kit yang dipilih pada satu waktu.
+Tabel **kits** menjadi entitas utama yang berelasi dengan seluruh tabel lainnya melalui kolom `deviceId` atau `kitId`. Relasi yang terbentuk adalah *one-to-many* di mana satu kit dapat memiliki banyak data telemetry, actuator event, cooldown record, ML prediction log, device mode setting, notifications, dan user_kits. Tabel **user_kits** memungkinkan relasi *many-to-many* di mana satu user dapat memiliki banyak kit, dan satu kit dapat dimiliki oleh banyak user. Relasi *one-to-one* terbentuk antara **user_preference** dan **kits** di mana satu user hanya dapat memiliki satu kit yang dipilih pada satu waktu.
+
+---
+
+### 9. Tabel `user_kits`
+Tabel ini menyimpan relasi antara pengguna dan kit yang mereka miliki. Memungkinkan satu user memiliki banyak kit dan satu kit dimiliki oleh banyak user.
+
+| Kolom | Tipe Data | Keterangan |
+|-------|-----------|------------|
+| userId | TEXT | Primary Key, ID pengguna dari Firebase Auth |
+| kitId | TEXT | Primary Key, Foreign Key ke tabel kits |
+| addedAt | TIMESTAMPTZ | Waktu penambahan kit ke user |
 
 ---
 
@@ -144,30 +192,31 @@ Berikut adalah daftar endpoint REST API yang tersedia pada backend aplikasi **Fo
 | No | Endpoint | Method | Body / Parameters |
 |----|----------|--------|-------------------|
 | 1 | `/health` | GET | - |
-| 2 | `/kits` | POST | `id`, `name` |
-| 3 | `/kits` | GET | - |
-| 4 | `/kits/{kit_id}` | GET | `kit_id` (path) |
-| 5 | `/kits/with-latest` | GET | - |
-| 6 | `/kits/{kit_id}` | DELETE | `kit_id` (path) |
-| 7 | `/telemetry?deviceId=` | POST | `deviceId` (query), `ppm`, `ph`, `tempC`, `humidity`, `waterTemp`, `waterLevel` |
-| 8 | `/telemetry/latest?deviceId=` | GET | `deviceId` (query) |
-| 9 | `/telemetry/history?deviceId=` | GET | `deviceId`, `days`, `limit` (query) |
-| 10 | `/device/mode` | POST | `userId`, `deviceId`, `autoMode` |
-| 11 | `/device/mode?userId=&deviceId=` | GET | `userId`, `deviceId` (query) |
-| 12 | `/device/auto-enabled` | GET | - |
-| 13 | `/user/preference` | POST | `userId`, `selectedKitId` |
-| 14 | `/user/preference?userId=` | GET | `userId` (query) |
-| 15 | `/notifications` | POST | `userId`, `deviceId`, `level`, `title`, `message` |
-| 16 | `/notifications?userId=` | GET | `userId`, `level`, `days`, `limit` (query) |
-| 17 | `/notifications/{notification_id}/read` | PUT | `notification_id` (path) |
-| 18 | `/notifications/mark-all-read?userId=` | PUT | `userId` (query) |
-| 19 | `/notifications/{notification_id}` | DELETE | `notification_id` (path) |
-| 20 | `/notifications?userId=` | DELETE | `userId` (query) |
-| 21 | `/actuator/event?deviceId=` | POST | `deviceId` (query), `phUp`, `phDown`, `nutrientAdd`, `valueS`, `manual`, `auto`, `refill` |
-| 22 | `/actuator/latest?deviceId=` | GET | `deviceId` (query) |
-| 23 | `/actuator/history?deviceId=` | GET | `deviceId`, `limit` (query) |
-| 24 | `/actuator/all?deviceId=` | GET | `deviceId` (query) |
-| 25 | `/ml/predict` | POST | `ppm`, `ph`, `tempC`, `humidity`, `waterTemp`, `waterLevel` |
+| 2 | `/kits` | POST | `id`, `name`, `userId` |
+| 3 | `/kits?userId=` | GET | `userId` (query) |
+| 4 | `/kits/all` | GET | - |
+| 5 | `/kits/{kit_id}` | GET | `kit_id` (path) |
+| 6 | `/kits/with-latest?userId=` | GET | `userId` (query) |
+| 7 | `/kits/{kit_id}?userId=` | DELETE | `kit_id` (path), `userId` (query) |
+| 8 | `/telemetry?deviceId=` | POST | `deviceId` (query), `ppm`, `ph`, `tempC`, `humidity`, `waterTemp`, `waterLevel` |
+| 9 | `/telemetry/latest?deviceId=` | GET | `deviceId` (query) |
+| 10 | `/telemetry/history?deviceId=` | GET | `deviceId`, `days`, `limit` (query) |
+| 11 | `/device/mode` | POST | `userId`, `deviceId`, `autoMode` |
+| 12 | `/device/mode?userId=&deviceId=` | GET | `userId`, `deviceId` (query) |
+| 13 | `/device/auto-enabled` | GET | - |
+| 14 | `/user/preference` | POST | `userId`, `selectedKitId` |
+| 15 | `/user/preference?userId=` | GET | `userId` (query) |
+| 16 | `/notifications` | POST | `userId`, `deviceId`, `level`, `title`, `message` |
+| 17 | `/notifications?userId=` | GET | `userId`, `level`, `days`, `limit` (query) |
+| 18 | `/notifications/{notification_id}/read` | PUT | `notification_id` (path) |
+| 19 | `/notifications/mark-all-read?userId=` | PUT | `userId` (query) |
+| 20 | `/notifications/{notification_id}` | DELETE | `notification_id` (path) |
+| 21 | `/notifications?userId=` | DELETE | `userId` (query) |
+| 22 | `/actuator/event?deviceId=` | POST | `deviceId` (query), `phUp`, `phDown`, `nutrientAdd`, `valueS`, `manual`, `auto`, `refill` |
+| 23 | `/actuator/latest?deviceId=` | GET | `deviceId` (query) |
+| 24 | `/actuator/history?deviceId=` | GET | `deviceId`, `limit` (query) |
+| 25 | `/actuator/all?deviceId=` | GET | `deviceId` (query) |
+| 26 | `/ml/predict` | POST | `ppm`, `ph`, `tempC`, `humidity`, `waterTemp`, `waterLevel` |
 
 ### Keterangan Endpoint
 

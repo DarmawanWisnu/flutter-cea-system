@@ -1,6 +1,8 @@
 # GLOBAL OS TRASH
 .DS_Store
 Thumbs.db
+plantuml.jar
+
 
 # GLOBAL PYTHON ENV
 **/__pycache__/

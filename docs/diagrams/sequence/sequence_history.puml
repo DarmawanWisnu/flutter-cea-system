@@ -1,5 +1,7 @@
 @startuml
-title Sequence Diagram - Lihat History Data Sensor
+scale 3
+skinparam monochrome true
+title Sequence Diagram - History
 
 actor "User" as User
 participant "History Screen" as Form
@@ -19,7 +21,7 @@ Form -> Form : Ambil kitId dari currentKitIdProvider
 Form -> API : getTelemetryHistory(kitId, limit)
 activate API
 
-API -> Backend : GET /telemetry/{kitId}/history?limit=N
+API -> Backend : GET /telemetry/history?deviceId={kitId}&limit=N
 activate Backend
 Backend -> Backend : Query data telemetry dari database
 Backend --> API : List<Telemetry> JSON
@@ -46,7 +48,7 @@ activate Form
 
 Form -> API : getTelemetryHistory(kitId, date)
 activate API
-API -> Backend : GET /telemetry/{kitId}/history?date=YYYY-MM-DD
+API -> Backend : GET /telemetry/history?deviceId={kitId}&days=1
 activate Backend
 Backend --> API : List<Telemetry> untuk tanggal tersebut
 deactivate Backend
@@ -57,3 +59,6 @@ Form -> User : Menampilkan data untuk tanggal terpilih
 deactivate Form
 
 @enduml
+
+
+

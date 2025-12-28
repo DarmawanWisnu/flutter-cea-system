@@ -1,59 +1,57 @@
 @startuml
-title Activity Diagram - Alur Penelitian (Metode Waterfall)
+scale 3
+skinparam monochrome true
+title Activity Diagram - Alur Penelitian
 
 start
 :Perumusan Masalah;
-:Teknik Pengumpulan Data;
 :Kajian Pustaka;
 
-partition "Metode Waterfall" {
-
-  partition "Kebutuhan Sistem" {
-    split
-      :Menentukan Deskripsi Software, Fitur, Modul;
-    split again
-      :Analisis Kebutuhan Pengguna dan Sistem;
-    end split
-  }
-
-  partition "Perancangan" {
-    split
-      :Perancangan Sistem\n(UML Diagram: Use Case, Activity, Sequence, Class);
-    split again
-      :Perancangan Database\n(Logical dan Physical = MySQL);
-    split again
-      :Perancangan Desain UI\n(Prototyping Tools = Figma);
-    end split
-  }
-
-  partition "Implementasi Sistem" {
-    split
-      :Koding Aplikasi Mobile\n(Bahasa Pemrograman Dart);
-    split again
-      :Membuat Backend\n(Bahasa Pemrograman Dart);
-    end split
-  }
-
-  partition "Pengujian" {
-    split
-      :Unit Testing;
-    split again
-      :Blackbox Testing;
-    split again
-      :User Acceptance Testing (UAT);
-    end split
-  }
-
-  partition "Pemeliharaan" {
-    split
-      :Maintenance Aplikasi;
-    split again
-      :Deploy ke dalam bentuk APK;
-    end split
-  }
-
-  :System Usability Scale (SUS);
+partition "Kebutuhan Sistem" {
+  split
+    :Menentukan Deskripsi Software, Fitur, Modul;
+  split again
+    :Analisis Kebutuhan Pengguna dan Sistem;
+  end split
 }
+
+partition "Perancangan" {
+  split
+    :Perancangan Sistem\n(UML Diagram: Use Case, Activity, Sequence, Class);
+  split again
+    :Perancangan Database\n(Logical dan Physical = PostgreSQL);
+  split again
+    :Perancangan Desain UI\n(Prototyping Tools = Figma);
+  end split
+}
+
+partition "Implementasi Sistem" {
+  split
+    :Koding Aplikasi Mobile\n(Bahasa Pemrograman Dart);
+  split again
+    :Membuat Backend\n(Python + FastAPI);
+  end split
+}
+
+partition "Pengujian" {
+  split
+    :Unit Testing;
+  split again
+    :Blackbox Testing;
+  split again
+    :User Acceptance Testing (UAT);
+  end split
+}
+
+partition "Pemeliharaan" {
+  split
+    :Maintenance Aplikasi;
+  split again
+    :Deploy ke dalam bentuk APK;
+  end split
+}
+
+:System Usability Scale (SUS);
 
 stop
 @enduml

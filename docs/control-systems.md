@@ -392,7 +392,7 @@ Every 30 seconds:
    b. Attempt ML prediction
    c. If ML fails, use RB fallback
    d. Execute actuator commands
-   e. Generate user notifications (via Fuzzy Logic)
+   e. Generate user notifications (via threshold-based severity)
 ```
 
 > [!TIP]

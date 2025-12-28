@@ -1,5 +1,7 @@
 @startuml
-title Sequence Diagram - Notifikasi Sensor
+scale 3
+skinparam monochrome true
+title Sequence Diagram - Notification
 
 actor "User" as User
 participant "Notification Screen" as Form
@@ -10,31 +12,43 @@ participant "MqttVM" as MQTT
 participant "ThresholdConst" as Const
 
 ' === Background: Proses generate notifikasi ===
-note over MQTT, Notifier: Proses ini berjalan di background saat app aktif
+note over MQTT, Notifier: Proses ini berjalan di background setiap 30 detik
 
-MQTT -> Notifier : Telemetry stream update
-activate Notifier
+' === Cek mode dan evaluasi ===
+Notifier -> API : getDeviceMode(userId, kitId)
+activate API
+API -> Backend : GET /device/mode?userId={userId}&deviceId={kitId}
+Backend --> API : {autoMode: true/false}
+deactivate API
 
-Notifier -> Const : Baca nilai threshold (pH, PPM, Temp, WL)
-activate Const
+Notifier -> API : getLatestTelemetry(kitId)
+activate API
+API -> Backend : GET /telemetry/latest?deviceId={kitId}
+Backend --> API : Telemetry JSON
+deactivate API
+
+Notifier -> Const : Baca threshold (pH, PPM, Temp, WL)
 Const --> Notifier : Threshold values
-deactivate Const
 
 Notifier -> Notifier : Bandingkan telemetry dengan threshold
-Notifier -> Notifier : Tentukan severity (info/warning/urgent)
+Notifier -> Notifier : Hitung deviation percentage
 
-alt Ada deviasi dari threshold
-  Notifier -> API : createNotification(userId, kitId, message, level)
+alt Auto Mode = true
+  note over Notifier: Backend yang buat notifikasi via actuator.py
+  Notifier -> Notifier : SKIP local notification
+  Notifier -> API : getNotifications(userId) untuk refresh
+  API -> Backend : GET /notifications
+  Backend --> API : List<Notification> dari backend
+else Manual Mode = false
+  note over Notifier: Frontend yang buat notifikasi
+  Notifier -> Notifier : Tentukan severity (urgent/warning)
+  Notifier -> API : createNotification(userId, kitId, level, message)
   activate API
   API -> Backend : POST /notifications
-  activate Backend
   Backend --> API : Notification created
-  deactivate Backend
-  API --> Notifier : Success
   deactivate API
+  Notifier -> Notifier : _emit() untuk local display
 end
-
-deactivate Notifier
 
 ' === User membuka halaman notifikasi ===
 User -> Form : Membuka halaman notifikasi
@@ -43,13 +57,10 @@ activate Form
 Form -> Notifier : Load notifications
 activate Notifier
 
-Notifier -> API : getNotifications(userId, kitId)
+Notifier -> API : getNotifications(userId, days=7, limit=100)
 activate API
-API -> Backend : GET /notifications?userId={userId}&kitId={kitId}
-activate Backend
+API -> Backend : GET /notifications?userId={userId}
 Backend --> API : List<Notification> JSON
-deactivate Backend
-API --> Notifier : List<NotificationItem>
 deactivate API
 
 Notifier --> Form : List<NotificationItem>
@@ -70,12 +81,10 @@ User -> Form : Tap notifikasi
 activate Form
 Form -> Notifier : markRead(notificationId)
 activate Notifier
-Notifier -> API : updateNotification(id, isRead: true)
+Notifier -> API : markNotificationRead(id)
 activate API
-API -> Backend : PATCH /notifications/{id}
-activate Backend
+API -> Backend : PUT /notifications/{id}/read
 Backend --> API : Updated
-deactivate Backend
 deactivate API
 Notifier --> Form : Updated
 deactivate Notifier

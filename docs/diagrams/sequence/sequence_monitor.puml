@@ -1,5 +1,7 @@
 @startuml
-title Sequence Diagram - Monitor Real-Time
+scale 6
+skinparam monochrome true
+title Sequence Diagram - Monitor
 
 actor "User" as User
 participant "Monitor Screen" as Form
@@ -29,7 +31,7 @@ Form -> MQTT : loadAutoModeFromBackend(kitId)
 activate MQTT
 MQTT -> API : getDeviceMode(userId, kitId)
 activate API
-API -> Backend : GET /devices/{kitId}/mode
+API -> Backend : GET /device/mode?userId={userId}&deviceId={kitId}
 activate Backend
 Backend --> API : {autoMode: true/false}
 deactivate Backend
@@ -57,7 +59,7 @@ Form -> MQTT : setAutoMode(kitId, enabled)
 activate MQTT
 MQTT -> API : setDeviceMode(userId, kitId, autoMode)
 activate API
-API -> Backend : POST /devices/{kitId}/mode
+API -> Backend : POST /device/mode
 activate Backend
 Backend --> API : Success
 deactivate Backend
@@ -72,13 +74,24 @@ deactivate Form
 alt Mode Manual
   User -> Form : Tekan tombol kontrol (pH Up, Nutrient, dll)
   activate Form
-  Form -> MQTT : publishControl(cmd, data, kitId)
+  
+  Form -> API : POST /actuator/event?deviceId={kitId}
+  activate API
+  API -> Backend : POST /actuator/event
+  activate Backend
+  Backend --> API : Response with durations
+  deactivate Backend
+  API --> Form : Response with durations
+  deactivate API
+  
+  Form -> MQTT : publishActuator(cmd, kitId, args)
   activate MQTT
   MQTT -> Broker : Publish ke "kit/{kitId}/control"
   activate Broker
   Broker --> MQTT : Published
   deactivate Broker
   deactivate MQTT
+  
   Form -> User : Tampilkan feedback
   deactivate Form
 end

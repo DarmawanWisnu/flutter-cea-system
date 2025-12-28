@@ -1,5 +1,7 @@
 @startuml
-title Activity Diagram - Monitor Screen
+scale 6
+skinparam monochrome true
+title Activity Diagram - Monitor
 
 |User|
 start
@@ -10,6 +12,7 @@ start
 :Subscribe ke topic "kit/+/telemetry";
 :Subscribe ke topic "kit/+/status";
 :Load auto mode state dari Backend API;
+:GET /device/mode?userId={userId}&deviceId={kitId};
 :Menampilkan nilai sensor real-time;
 :(pH, PPM, Temperature, Humidity, Water Level, Water Temp);
 :Menampilkan status Kit dan mode kontrol (Auto / Manual);
@@ -20,26 +23,27 @@ start
 
 |Sistem|
 :Simpan preferensi mode ke Backend API;
+:POST /device/mode;
 
 if ("Mode Manual dipilih?") then (Ya)
   |Sistem|
   :Menampilkan tombol kontrol manual;
-  :(pH Up, pH Down, Nutrient A, Nutrient B, Refill);
+  :(pH Up, pH Down, Nutrient Add, Refill);
 
   |User|
   if ("User menekan tombol kontrol?") then (Ya)
+    |Sistem|
+    :Call API POST /actuator/event?deviceId={kitId};
+    :Mendapat response duration dari Backend;
     :Publish perintah ke MQTT Broker;
     :Topic: "kit/{kitId}/control";
+    :Update tampilan status aktuator;
   endif
-
-  |Sistem|
-  :Menjalankan perintah dari user;
-  :Update tampilan status aktuator;
 else (Tidak - Mode Auto)
   |Sistem|
   :Backend menjalankan kontrol otomatis;
-  :Berdasarkan threshold parameter;
-  :Hasil kontrol dikirim via MQTT;
+  :Berdasarkan threshold setiap 30 detik;
+  :Notifikasi dibuat oleh Backend;
 endif
 
 |Sistem|

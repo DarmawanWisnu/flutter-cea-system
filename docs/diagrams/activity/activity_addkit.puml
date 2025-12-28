@@ -1,4 +1,6 @@
 @startuml
+scale 3
+skinparam monochrome true
 title Activity Diagram - Add Kit
 
 |User|
@@ -18,20 +20,20 @@ start
 
 if ("Data valid?") then (Ya)
   :Kirim request ke Backend API;
-  :POST /kits {id, name};
+  :POST /kits {id, name, userId};
   
   if ("Request berhasil?") then (Ya)
-    :Menampilkan SnackBar "Kit berhasil ditambahkan";
+    :Menampilkan Dialog Sukses;
     :Navigate ke Home Screen;
     stop
   else (Tidak)
-    :Menampilkan pesan error;
+    :Menampilkan Dialog Error;
     :(ID Kit sudah terdaftar / network error);
     :Kembali ke form Add Kit;
   endif
 else (Tidak)
   :Menampilkan pesan kesalahan validasi;
-  :(ID atau nama kosong);
+  :(ID < 5 char atau nama kosong);
   :Kembali ke form Add Kit;
 endif
 @enduml
