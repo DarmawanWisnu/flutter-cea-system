@@ -47,6 +47,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Suppress noisy loggers for clean output
+logging.getLogger("uvicorn.access").setLevel(logging.WARNING)  # Hide 200 OK logs
+logging.getLogger("httpx").setLevel(logging.WARNING)  # Hide HTTP request logs
+logging.getLogger("httpcore").setLevel(logging.WARNING)  # Hide httpcore logs
+
 app = FastAPI()
 
 # CORS middleware for ngrok and mobile app compatibility
@@ -82,6 +87,8 @@ def _auto_mode_scheduler():
     logger.info(f"[AUTO MODE] Scheduler started (interval: {AUTO_MODE_INTERVAL}s)")
     
     while _auto_mode_running:
+        cycle_start = time.time()
+        
         try:
             # Query devices with auto mode enabled
             conn = get_connection()
@@ -98,18 +105,18 @@ def _auto_mode_scheduler():
                 release_connection(conn)
             
             if devices:
-                t = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                device_ids = [d[0] for d in devices]
-                logger.info(f"\n[AUTO MODE] 🤖 {t} - Triggering for {len(devices)} device(s): {device_ids}")
-                
                 for device_id, user_id in devices:
                     _trigger_auto_actuator(device_id, user_id)
                     
         except Exception as e:
             logger.error(f"[AUTO MODE] Error in scheduler: {e}", exc_info=True)
         
-        # Sleep in small increments
-        for _ in range(AUTO_MODE_INTERVAL * 10):
+        # Calculate remaining time to maintain exact interval
+        elapsed = time.time() - cycle_start
+        sleep_time = max(0, AUTO_MODE_INTERVAL - elapsed)
+        
+        # Sleep in small increments for graceful shutdown
+        for _ in range(int(sleep_time * 10)):
             if not _auto_mode_running:
                 break
             time.sleep(0.1)
@@ -148,7 +155,7 @@ def _trigger_auto_actuator(device_id: str, user_id: str):
         if data.get('refill', 0) > 0:
             actions.append(f"Refill: {data['refill']}s")
         
-        logger.info(f"[AUTO MODE] ✓ {device_id} → phUp:{data.get('phUp')}, phDown:{data.get('phDown')}, nutrient:{data.get('nutrientAdd')}, refill:{data.get('refill')}")
+        # actuator.py logs the details (AUTO_MODE, ML_PREDICT, EXECUTED)
         
         # Create notification
         if user_id:
@@ -161,7 +168,6 @@ def _trigger_auto_actuator(device_id: str, user_id: str):
                     VALUES (%s, %s, %s, %s, %s, NOW());
                 """, (user_id, device_id, "info", "Auto Mode", msg))
                 conn.commit()
-                logger.info(f"[AUTO MODE] 📢 Notification created for {user_id}")
             except Exception as ne:
                 conn.rollback()
                 logger.error(f"[AUTO MODE] Failed to create notification: {ne}")

@@ -10,26 +10,52 @@ import logging
 # Environment configuration
 ML_PREDICT_URL = os.getenv("ML_PREDICT_URL", "http://127.0.0.1:8000/ml/predict")
 
-# Custom formatter to show level only for ERROR
+# ANSI Color Codes for professional terminal output
+class Colors:
+    RESET = "\033[0m"
+    BOLD = "\033[1m"
+    DIM = "\033[2m"
+    
+    # Log type colors
+    CYAN = "\033[36m"       # AUTO_MODE
+    GREEN = "\033[32m"      # ML_PREDICT, RULE_BASED
+    YELLOW = "\033[33m"     # WARNING (COOLDOWN, CRITICAL, TIMEOUT)
+    RED = "\033[31m"        # ERROR
+    WHITE = "\033[97m"      # EXECUTED
+    MAGENTA = "\033[35m"    # Separator
+
+# Custom formatter with colors for different log types
 class CustomFormatter(logging.Formatter):
     def format(self, record):
+        msg = record.getMessage()
+        timestamp = self.formatTime(record, self.datefmt)
+        
+        # Color based on log content
         if record.levelno == logging.ERROR:
-            # Show ERROR level
-            return f"{self.formatTime(record, self.datefmt)} | ERROR | {record.getMessage()}"
+            return f"{Colors.RED}{timestamp} | ERROR | {msg}{Colors.RESET}"
+        elif msg.startswith("AUTO_MODE"):
+            return f"{Colors.CYAN}{timestamp} | {msg}{Colors.RESET}"
+        elif msg.startswith("ML_PREDICT") or msg.startswith("RULE_BASED"):
+            return f"{Colors.GREEN}{timestamp} | {msg}{Colors.RESET}"
+        elif msg.startswith("COOLDOWN") or msg.startswith("CRITICAL") or msg.startswith("ML_TIMEOUT"):
+            return f"{Colors.YELLOW}{timestamp} | {msg}{Colors.RESET}"
+        elif msg.startswith("EXECUTED"):
+            return f"{Colors.BOLD}{Colors.WHITE}{timestamp} | {msg}{Colors.RESET}"
+        elif msg.startswith("="):
+            return f"{Colors.DIM}{Colors.MAGENTA}{timestamp} | {msg}{Colors.RESET}"
         else:
-            # Hide level for INFO/WARNING
-            return f"{self.formatTime(record, self.datefmt)} | {record.getMessage()}"
+            return f"{timestamp} | {msg}"
 
-# Configure logging with custom formatter
+# Configure actuator-specific logger with custom formatter
+logger = logging.getLogger("actuator")
+logger.setLevel(logging.INFO)
+logger.propagate = False  # Don't pass to root logger
+
+# Add custom handler
 handler = logging.StreamHandler()
 formatter = CustomFormatter(datefmt='%Y-%m-%d %H:%M:%S')
 handler.setFormatter(formatter)
-
-logging.basicConfig(
-    level=logging.INFO,
-    handlers=[handler]
-)
-logger = logging.getLogger(__name__)
+logger.addHandler(handler)
 
 router = APIRouter()
 
@@ -274,6 +300,37 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
                     
                     source = "ml"
                     ml_success = True
+                    
+                    # POST-PROCESSING CONSTRAINTS
+                    # ML outputs are validated against actual sensor values
+                    PH_TARGET = 6.0  # Midpoint of optimal range (5.5-6.5)
+                    PPM_MIN, PPM_MAX = 560, 840
+                    WL_MIN = 1.2
+                    
+                    # 1. pH Mutual Exclusivity - based on actual pH reading
+                    if ph < PH_TARGET:
+                        # pH rendah → hanya butuh pH Up
+                        data.phDown = 0
+                    elif ph > PH_TARGET:
+                        # pH tinggi → hanya butuh pH Down
+                        data.phUp = 0
+                    else:
+                        # pH optimal → tidak perlu aksi pH
+                        data.phUp = 0
+                        data.phDown = 0
+                    
+                    # 2. Nutrient only when PPM is low
+                    if ppm >= PPM_MIN:
+                        data.nutrientAdd = 0
+                    
+                    # 3. Refill only when water level low OR PPM high (dilution)
+                    if wl >= WL_MIN and ppm <= PPM_MAX:
+                        data.refill = 0
+                    
+                    # Recalculate valueS after constraints
+                    data.valueS = float(max(data.phUp, data.phDown, data.nutrientAdd, data.refill))
+                    
+                    # Log FINAL values (after constraints applied)
                     logger.info(f"ML_PREDICT | phUp={data.phUp}s phDown={data.phDown}s nutrient={data.nutrientAdd}s refill={data.refill}s")
                 else:
                     logger.warning(f"ML_ERROR | http_status={r.status_code}")

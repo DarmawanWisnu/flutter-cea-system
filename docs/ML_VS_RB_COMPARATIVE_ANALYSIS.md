@@ -223,7 +223,9 @@ pH = 4.8, PPM = 700, WL = 2.0
 
 This multi-layer safety architecture ensures system **never sacrifices plant safety for hardware protection**, while still preventing unnecessary actuator wear under normal conditions.
 
+
 ---
+
 
 ### Production Logging System
 
@@ -255,10 +257,14 @@ class CustomFormatter(logging.Formatter):
 **Normal ML Execution:**
 ```log
 2025-12-24 13:40:15 | AUTO_MODE | pH=5.81 PPM=1264.6 temp=24.0C water_level=2.0
-2025-12-24 13:40:15 | ML_PREDICT | phUp=13s phDown=4s nutrient=0s refill=99s
+2025-12-24 13:40:15 | ML_PREDICT | phUp=13s phDown=0s nutrient=0s refill=99s
+2025-12-24 13:40:15 | COOLDOWN_BLOCK | phUp:120s refill:45s
 2025-12-24 13:40:15 | EXECUTED | device=CEA-02 user=8rnnv1TS2lOAtHCqYIP4o8p3NiJ3 source=ml event_id=45754
 2025-12-24 13:40:15 | ============================================================
 ```
+
+> **Note:** ML_PREDICT menampilkan nilai **setelah constraint validation**. Karena pH=5.81 < 6.0 (target), phDown otomatis di-set ke 0.
+
 
 **Rule-Based Fallback:**
 ```log
@@ -272,8 +278,8 @@ class CustomFormatter(logging.Formatter):
 **Cooldown Block:**
 ```log
 2025-12-24 13:43:45 | AUTO_MODE | pH=5.92 PPM=1128.98 temp=24.7C water_level=1.0
-2025-12-24 13:43:45 | ML_PREDICT | phUp=12s phDown=7s nutrient=0s refill=105s
-2025-12-24 13:43:45 | COOLDOWN_BLOCK | phUp:91s phDown:91s refill:91s
+2025-12-24 13:43:45 | ML_PREDICT | phUp=12s phDown=0s nutrient=0s refill=105s
+2025-12-24 13:43:45 | COOLDOWN_BLOCK | phUp:91s refill:91s
 2025-12-24 13:43:45 | EXECUTED | device=CEA-02 user=8rnnv1TS2lOAtHCqYIP4o8p3NiJ3 source=ml event_id=45756
 2025-12-24 13:43:45 | ============================================================
 ```
@@ -300,7 +306,7 @@ class CustomFormatter(logging.Formatter):
 | Tag | Meaning | Level |
 |-----|---------|-------|
 | `AUTO_MODE` | Auto mode triggered with current telemetry | INFO |
-| `ML_PREDICT` | ML prediction result with action durations | INFO |
+| `ML_PREDICT` | ML prediction result (after constraint validation) | INFO |
 | `ML_TIMEOUT` | ML service timeout, falling back to RB | WARNING |
 | `ML_ERROR` | ML service error with details | ERROR |
 | `RULE_BASED` | Rule-based control actions | INFO |
