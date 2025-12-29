@@ -107,6 +107,9 @@ def _auto_mode_scheduler():
             if devices:
                 for device_id, user_id in devices:
                     _trigger_auto_actuator(device_id, user_id)
+                
+                # Add blank line after each cycle for visual separation
+                print()  # Blank line between 30-second cycles
                     
         except Exception as e:
             logger.error(f"[AUTO MODE] Error in scheduler: {e}", exc_info=True)
