@@ -7,6 +7,20 @@ from paho.mqtt import client as mqtt
 from threading import Lock, Thread
 from datetime import datetime
 
+# ANSI Color Codes for professional terminal output
+class Colors:
+    RESET = "\033[0m"
+    BOLD = "\033[1m"
+    DIM = "\033[2m"
+    
+    CYAN = "\033[36m"       # Headers, RECV
+    GREEN = "\033[32m"      # OK, Success
+    YELLOW = "\033[33m"     # WAIT, Pending
+    RED = "\033[31m"        # ERROR
+    WHITE = "\033[97m"      # SEND
+    MAGENTA = "\033[35m"    # Separator
+    BLUE = "\033[34m"       # INFO
+
 RUNNING = True
 def handle_signal(signum, frame):
     global RUNNING
@@ -39,8 +53,8 @@ state_lock = Lock()
 sensor_updated = {}  # per-device: {sensor: bool}
 REQUIRED_SENSORS = ["ppm", "ph", "tempC", "humidity", "waterTemp", "waterLevel"]
 
-print("[INIT] KIT_ID:", KIT_ID)
-print("[INIT] SUBSCRIBING:", TOPIC)
+print(f"{Colors.BLUE}[INIT]{Colors.RESET} KIT_ID: {KIT_ID}")
+print(f"{Colors.BLUE}[INIT]{Colors.RESET} SUBSCRIBING: {TOPIC}")
 
 def safe_float(x, default=None):
     try:
@@ -59,9 +73,9 @@ def send_snapshot(kit_id):
     with state_lock:
         payload = STATE.get(kit_id, {})
 
-    print(f"\n[SEND] Sending Snapshot to Backend...")
-    print(f"POST /telemetry?deviceId={kit_id}")
-    print(pretty_json(payload))
+    print(f"\n{Colors.BOLD}{Colors.WHITE}[SEND]{Colors.RESET} Sending Snapshot to Backend...")
+    print(f"{Colors.WHITE}POST /telemetry?deviceId={kit_id}{Colors.RESET}")
+    print(f"{Colors.WHITE}{pretty_json(payload)}{Colors.RESET}")
 
     try:
         r = requests.post(
@@ -69,22 +83,22 @@ def send_snapshot(kit_id):
             json=payload,
             timeout=5
         )
-        print(f"[RESP] Backend Status: {r.status_code} | {r.text}")
+        print(f"{Colors.GREEN}[RESP]{Colors.RESET} Backend Status: {r.status_code} | {r.text}")
     except Exception as e:
-        print("[ERR] Backend error:", e)
+        print(f"{Colors.RED}[ERR]{Colors.RESET} Backend error:", e)
 
 
 def on_connect(client, userdata, flags, reason_code, properties):
-    print("[MQTT] Connected →", TOPIC)
+    print(f"{Colors.GREEN}[MQTT]{Colors.RESET} Connected → {TOPIC}")
     client.subscribe(TOPIC, qos=QOS)
 
 def on_message(client, userdata, msg):
     t = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    print("\n" + "=" * 50)
-    print("[RECV] MQTT MESSAGE RECEIVED")
-    print(f"[TIME] {t}")
-    print(f"[TOPIC] {msg.topic}")
+    print(f"\n{Colors.DIM}{Colors.MAGENTA}{'=' * 50}{Colors.RESET}")
+    print(f"{Colors.CYAN}[RECV]{Colors.RESET} MQTT MESSAGE RECEIVED")
+    print(f"{Colors.CYAN}[TIME]{Colors.RESET} {t}")
+    print(f"{Colors.CYAN}[TOPIC]{Colors.RESET} {msg.topic}")
 
     try:
         data = json.loads(msg.payload.decode())
@@ -95,8 +109,8 @@ def on_message(client, userdata, msg):
         else:
             kit_id = KIT_ID
 
-        print(f"[DEVICE] {kit_id}")
-        print("=" * 50 + "\n")
+        print(f"{Colors.CYAN}[DEVICE]{Colors.RESET} {kit_id}")
+        print(f"{Colors.DIM}{Colors.MAGENTA}{'=' * 50}{Colors.RESET}\n")
 
         print("Payload:")
         print(pretty_json(data))
@@ -129,20 +143,20 @@ def on_message(client, userdata, msg):
         all_updated = all(sensor_updated[kit_id].values())
         
         if all_updated:
-            print("[OK] All sensors updated, sending to backend...")
+            print(f"{Colors.GREEN}[OK]{Colors.RESET} All sensors updated, sending to backend...")
             send_snapshot(kit_id)
             # Reset the tracking
             sensor_updated[kit_id] = {s: False for s in REQUIRED_SENSORS}
         else:
             pending = [s for s, updated in sensor_updated[kit_id].items() if not updated]
-            print(f"[WAIT] Pending: {', '.join(pending)}")
+            print(f"{Colors.YELLOW}[WAIT]{Colors.RESET} Pending: {', '.join(pending)}")
 
-        print("=" * 50)
+        print(f"{Colors.DIM}{Colors.MAGENTA}{'=' * 50}{Colors.RESET}")
 
     except Exception as e:
-        print("[ERR] Failed to parse MQTT:", e)
-        print("[RAW]", msg.payload)
-        print("=" * 50)
+        print(f"{Colors.RED}[ERR]{Colors.RESET} Failed to parse MQTT:", e)
+        print(f"{Colors.RED}[RAW]{Colors.RESET}", msg.payload)
+        print(f"{Colors.DIM}{Colors.MAGENTA}{'=' * 50}{Colors.RESET}")
 
 def main():
     client = mqtt.Client(
@@ -157,13 +171,13 @@ def main():
     client.loop_start()
     client.connect(BROKER, PORT)
 
-    print("[INFO] Subscriber running...\n")
+    print(f"{Colors.BLUE}[INFO]{Colors.RESET} Subscriber running...\n")
 
     try:
         while RUNNING:
             time.sleep(0.1)
     finally:
-        print("\n[STOP] Subscriber berhenti.")
+        print(f"\n{Colors.YELLOW}[STOP]{Colors.RESET} Subscriber berhenti.")
         client.loop_stop()
         client.disconnect()
 
