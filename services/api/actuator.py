@@ -305,7 +305,7 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
                     # ML outputs are validated against actual sensor values
                     PH_TARGET = 6.0  # Midpoint of optimal range (5.5-6.5)
                     PPM_MIN, PPM_MAX = 560, 840
-                    WL_MIN = 1.2
+                    WL_MIN, WL_MAX = 1.2, 2.5
                     
                     # 1. pH Mutual Exclusivity - based on actual pH reading
                     if ph < PH_TARGET:
@@ -323,8 +323,14 @@ async def insert_event(deviceId: str, data: ActuatorEvent, background_tasks: Bac
                     if ppm >= PPM_MIN:
                         data.nutrientAdd = 0
                     
-                    # 3. Refill only when water level low OR PPM high (dilution)
-                    if wl >= WL_MIN and ppm <= PPM_MAX:
+                    # 3. Refill control with OVERFLOW PROTECTION
+                    # Refill aktif jika: (WL rendah) ATAU (PPM tinggi DAN masih ada ruang)
+                    # Refill STOP jika: (WL sudah optimal DAN PPM normal) ATAU (WL sudah penuh)
+                    if wl >= WL_MAX:
+                        # SAFETY: Water level sudah penuh, stop refill untuk cegah overflow
+                        data.refill = 0
+                    elif wl >= WL_MIN and ppm <= PPM_MAX:
+                        # Water level OK dan PPM normal, tidak perlu refill
                         data.refill = 0
                     
                     # Recalculate valueS after constraints
