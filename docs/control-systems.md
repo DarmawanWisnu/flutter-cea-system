@@ -230,6 +230,39 @@ Where:
 
 ---
 
+### Overflow Protection
+
+Prevents tank overflow by stopping refill when water level reaches maximum capacity.
+
+**Algorithm:**
+
+```python
+# Post-processing constraint (after ML/RB prediction)
+WL_MAX = 2.5  # Maximum tank capacity in liters
+
+if wl >= WL_MAX:
+    # SAFETY: Stop refill to prevent overflow
+    refill = 0
+elif wl >= WL_MIN and ppm <= PPM_MAX:
+    # Water level OK and PPM normal, no refill needed
+    refill = 0
+# else: Allow refill (for low water level OR dilution)
+```
+
+**Decision Matrix:**
+
+| Water Level | PPM | Refill Action |
+|-------------|-----|---------------|
+| < 1.2 L | Any | ✅ ON (low water emergency) |
+| 1.2 - 2.5 L | > 840 | ✅ ON (dilution needed) |
+| 1.2 - 2.5 L | ≤ 840 | ❌ OFF (stable) |
+| ≥ 2.5 L | Any | ❌ **OFF (overflow protection)** |
+
+> [!CAUTION]
+> The overflow protection is a **critical safety feature**. Even if PPM is extremely high and dilution is needed, refill will be blocked when water level reaches 2.5 L to prevent physical overflow and potential hardware damage.
+
+---
+
 ## System Constants
 
 | Constant | Value | Description |

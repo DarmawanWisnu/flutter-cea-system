@@ -1,4 +1,4 @@
-# Perancangan Database
+# Perancangan Database (Entity Relationship Diagram)
 
 ## Logical Database Design
 
@@ -28,11 +28,11 @@ Diagram database (`database_diagram.puml`) menggambarkan **9 (sembilan) entitas*
 
 | Simbol | Arti |
 |--------|------|
-| `<<PK>>` | Primary Key - identifier unik untuk setiap record |
-| `<<FK>>` | Foreign Key - referensi ke tabel lain |
-| `<<UNIQUE>>` | Constraint unik - nilai tidak boleh duplikat |
-| `||--o{` | Relasi one-to-many (satu ke banyak) |
-| `||--o|` | Relasi one-to-one (satu ke satu) |
+| `<<PK>>` | **Primary Key** - Identifier unik untuk setiap record, tidak boleh duplikat |
+| `<<FK>>` | **Foreign Key** - Referensi ke tabel lain, menciptakan relasi |
+| `<<UNIQUE>>` | **Constraint Unique** - Nilai kolom tidak boleh duplikat dalam tabel |
+| `\|\|--o{` | **One-to-Many** - Satu record di tabel kiri berhubungan dengan banyak record di tabel kanan |
+| `\|\|--o\|` | **One-to-One** - Satu record di tabel kiri berhubungan dengan maksimal satu record di tabel kanan |
 
 ### Hubungan Antar Entitas
 
@@ -54,117 +54,147 @@ Pada masing-masing entitas memiliki *primary key* dan atribut. *Primary key* dig
 ## Deskripsi Entitas
 
 ### 1. Tabel `kits`
-Tabel ini menyimpan data kit hidroponik yang terdaftar dalam sistem. Setiap kit memiliki ID unik yang menjadi referensi utama untuk seluruh data telemetry dan aktuator.
+
+**Fungsi**: Tabel registry utama untuk semua kit hidroponik dalam sistem. Setiap IoT device harus terdaftar di tabel ini sebelum dapat mengirim data.
 
 | Kolom | Tipe Data | Keterangan |
 |-------|-----------|------------|
-| id | TEXT | Primary Key, ID unik kit |
-| name | TEXT | Nama kit hidroponik |
-| createdAt | TIMESTAMPTZ | Waktu pendaftaran kit |
+| id | TEXT | Primary Key - ID unik kit (format: alphanumeric) |
+| name | TEXT | Nama kit yang diberikan oleh user |
+| createdAt | TIMESTAMPTZ | Waktu pendaftaran kit ke sistem |
+
+**Relasi**: Tabel ini menjadi *parent table* untuk hampir semua tabel lain melalui kolom `deviceId` atau `kitId`.
 
 ---
 
 ### 2. Tabel `telemetry`
-Tabel ini menyimpan data sensor yang dikirim secara berkala dari perangkat IoT. Data mencakup parameter lingkungan hidroponik seperti pH, PPM, suhu, kelembaban, dan level air.
+
+**Fungsi**: Menyimpan data sensor yang dikirim secara berkala (setiap 30 detik) dari ESP32 melalui MQTT. Data ini mencakup semua parameter lingkungan hidroponik.
 
 | Kolom | Tipe Data | Keterangan |
 |-------|-----------|------------|
-| rowId | TEXT | Primary Key, ID unik record |
-| deviceId | TEXT | Foreign Key ke tabel kits |
-| ingestTime | BIGINT | Timestamp penerimaan data (Unix epoch) |
+| rowId | TEXT | Primary Key - ID unik berbasis UUID |
+| deviceId | TEXT | Foreign Key ke tabel `kits` |
+| ingestTime | BIGINT | Unix timestamp (epoch seconds) saat data diterima |
 | payloadJson | JSONB | Data JSON mentah dari sensor |
-| ppm | FLOAT | Nilai kepekatan nutrisi (Part Per Million) |
-| ph | FLOAT | Nilai keasaman larutan |
+| ppm | FLOAT | Nilai kepekatan nutrisi (Part Per Million), range: 0-3000 |
+| ph | FLOAT | Nilai keasaman larutan, range: 0-14 |
 | tempC | FLOAT | Suhu udara dalam Celsius |
-| humidity | FLOAT | Kelembaban udara dalam persen |
-| waterTemp | FLOAT | Suhu air dalam Celsius |
-| waterLevel | FLOAT | Level ketinggian air (0-3) |
-| payloadHash | TEXT | Hash unik untuk deduplikasi data |
+| humidity | FLOAT | Kelembaban udara dalam persen (0-100) |
+| waterTemp | FLOAT | Suhu air nutrisi dalam Celsius |
+| waterLevel | FLOAT | Level ketinggian air (0=Kosong, 1=Low, 2=Medium, 3=Full) |
+| payloadHash | TEXT | Hash SHA-256 untuk deduplikasi data |
+
+**Deduplikasi**: Kolom `payloadHash` dengan constraint UNIQUE mencegah penyimpanan data identik berulang.
 
 ---
 
 ### 3. Tabel `actuator_event`
-Tabel ini menyimpan riwayat aktivasi aktuator, baik secara manual maupun otomatis. Data ini digunakan untuk monitoring dan analisis performa sistem kontrol.
+
+**Fungsi**: Menyimpan log setiap aktivasi aktuator, baik dari mode Manual (trigger user) maupun mode Auto (trigger sistem berdasarkan threshold atau ML).
 
 | Kolom | Tipe Data | Keterangan |
 |-------|-----------|------------|
-| id | SERIAL | Primary Key, auto-increment |
-| deviceId | TEXT | Foreign Key ke tabel kits |
-| ingestTime | BIGINT | Timestamp kejadian |
-| phUp | INT | Durasi aktivasi pompa pH Up (detik) |
-| phDown | INT | Durasi aktivasi pompa pH Down (detik) |
-| nutrientAdd | INT | Durasi aktivasi pompa nutrisi (detik) |
-| valueS | FLOAT | Nilai prediksi durasi dari ML |
-| manual | INT | Flag mode manual (1/0) |
-| auto | INT | Flag mode otomatis (1/0) |
-| refill | INT | Durasi aktivasi refill air (detik) |
+| id | SERIAL | Primary Key - Auto-increment |
+| deviceId | TEXT | Foreign Key ke tabel `kits` |
+| ingestTime | BIGINT | Unix timestamp saat event terjadi |
+| phUp | INT | Durasi aktivasi pompa pH Up dalam detik |
+| phDown | INT | Durasi aktivasi pompa pH Down dalam detik |
+| nutrientAdd | INT | Durasi aktivasi pompa nutrisi dalam detik |
+| valueS | FLOAT | Nilai prediksi durasi dari model ML (jika ada) |
+| refill | INT | Durasi aktivasi pompa refill air dalam detik |
+| manual | INT | Flag mode manual (1 = Manual, 0 = Auto) |
+| auto | INT | Flag mode otomatis (1 = Auto, 0 = Manual) |
+
+**Catatan**: Kolom `manual` dan `auto` bersifat mutually exclusive (hanya salah satu yang bernilai 1).
 
 ---
 
 ### 4. Tabel `actuator_cooldown`
-Tabel ini menyimpan informasi *cooldown* aktuator untuk mencegah aktivasi berlebihan dalam waktu singkat.
+
+**Fungsi**: Mengimplementasikan mekanisme *cooldown* untuk mencegah aktivasi aktuator berlebihan dalam waktu singkat. Setiap jenis aksi memiliki record tersendiri.
 
 | Kolom | Tipe Data | Keterangan |
 |-------|-----------|------------|
 | id | SERIAL | Primary Key |
-| deviceId | TEXT | Foreign Key ke tabel kits |
-| actionType | TEXT | Jenis aksi (phUp, phDown, nutrient, refill) |
-| lastTime | BIGINT | Waktu aktivasi terakhir |
-| lastValue | FLOAT | Nilai terakhir saat aktivasi |
+| deviceId | TEXT | Foreign Key ke tabel `kits` |
+| actionType | TEXT | Jenis aksi: `phUp`, `phDown`, `nutrient`, atau `refill` |
+| lastTime | BIGINT | Unix timestamp aktivasi terakhir |
+| lastValue | FLOAT | Nilai parameter saat aktivasi terakhir (untuk evaluasi) |
+
+**Cooldown Period**: Default 60 detik per action type per device.
 
 ---
 
 ### 5. Tabel `ml_prediction_log`
-Tabel ini menyimpan log prediksi dari model *Machine Learning* untuk keperluan audit dan evaluasi performa model.
+
+**Fungsi**: Menyimpan log prediksi dari model *Machine Learning* untuk keperluan audit dan evaluasi performa model.
 
 | Kolom | Tipe Data | Keterangan |
 |-------|-----------|------------|
 | id | SERIAL | Primary Key |
-| deviceId | TEXT | Foreign Key ke tabel kits |
-| predictTime | BIGINT | Waktu prediksi dilakukan |
-| payloadJson | JSONB | Data input untuk prediksi |
-| predictJson | JSONB | Hasil prediksi dari model ML |
+| deviceId | TEXT | Foreign Key ke tabel `kits` |
+| predictTime | BIGINT | Unix timestamp saat prediksi dilakukan |
+| payloadJson | JSONB | Data input sensor yang digunakan untuk prediksi |
+| predictJson | JSONB | Hasil prediksi model (durasi aktuator yang disarankan) |
 
 ---
 
 ### 6. Tabel `device_mode`
-Tabel ini menyimpan preferensi mode kontrol (Auto/Manual) per pengguna per perangkat.
+
+**Fungsi**: Menyimpan preferensi mode kontrol per kombinasi user-device. Memungkinkan user yang berbeda memiliki setting mode berbeda untuk kit yang sama.
 
 | Kolom | Tipe Data | Keterangan |
 |-------|-----------|------------|
 | id | SERIAL | Primary Key |
-| userId | TEXT | ID pengguna dari Firebase Auth |
-| deviceId | TEXT | Foreign Key ke tabel kits |
-| autoMode | BOOLEAN | True = Auto, False = Manual |
+| userId | TEXT | ID user dari Firebase Auth |
+| deviceId | TEXT | Foreign Key ke tabel `kits` |
+| autoMode | BOOLEAN | TRUE = Mode Auto, FALSE = Mode Manual |
 | updatedAt | TIMESTAMPTZ | Waktu perubahan terakhir |
+
+**Unique Constraint**: Kombinasi `(userId, deviceId)` bersifat unik.
 
 ---
 
 ### 7. Tabel `user_preference`
-Tabel ini menyimpan preferensi pengguna, termasuk kit yang sedang dipilih/aktif.
+
+**Fungsi**: Menyimpan preferensi user, utamanya kit yang sedang dipilih/aktif untuk ditampilkan di dashboard.
 
 | Kolom | Tipe Data | Keterangan |
 |-------|-----------|------------|
 | id | SERIAL | Primary Key |
-| userId | TEXT | ID pengguna (Unique) |
-| selectedKitId | TEXT | Foreign Key ke tabel kits |
+| userId | TEXT | ID user (UNIQUE - satu user satu preference) |
+| selectedKitId | TEXT | Foreign Key ke tabel `kits` |
 | updatedAt | TIMESTAMPTZ | Waktu perubahan terakhir |
 
 ---
 
 ### 8. Tabel `notifications`
-Tabel ini menyimpan notifikasi yang dihasilkan sistem berdasarkan kondisi sensor yang menyimpang dari *threshold*.
+
+**Fungsi**: Menyimpan notifikasi yang dihasilkan sistem ketika kondisi sensor menyimpang dari threshold atau saat aktuator diaktifkan.
 
 | Kolom | Tipe Data | Keterangan |
 |-------|-----------|------------|
 | id | SERIAL | Primary Key |
-| userId | TEXT | ID pengguna tujuan notifikasi |
-| deviceId | TEXT | Foreign Key ke tabel kits |
-| level | TEXT | Tingkat urgensi (info, warning, urgent) |
+| userId | TEXT | ID user tujuan notifikasi |
+| deviceId | TEXT | Foreign Key ke tabel `kits` |
+| level | TEXT | Tingkat urgensi: `info`, `warning`, atau `urgent` |
 | title | TEXT | Judul notifikasi |
-| message | TEXT | Isi pesan notifikasi |
-| isRead | BOOLEAN | Status sudah dibaca atau belum |
+| message | TEXT | Isi pesan detail |
+| isRead | BOOLEAN | Status sudah dibaca (TRUE/FALSE) |
 | createdAt | TIMESTAMPTZ | Waktu pembuatan notifikasi |
+
+---
+
+### 9. Tabel `user_kits`
+
+**Fungsi**: Menyimpan relasi *many-to-many* antara user dan kit. Memungkinkan satu user memiliki banyak kit, dan satu kit dapat diakses oleh banyak user.
+
+| Kolom | Tipe Data | Keterangan |
+|-------|-----------|------------|
+| userId | TEXT | Primary Key (composite) - ID user dari Firebase Auth |
+| kitId | TEXT | Primary Key (composite) + Foreign Key ke tabel `kits` |
+| addedAt | TIMESTAMPTZ | Waktu penambahan kit ke user |
 
 ---
 
@@ -172,20 +202,38 @@ Tabel ini menyimpan notifikasi yang dihasilkan sistem berdasarkan kondisi sensor
 
 Tabel **kits** menjadi entitas utama yang berelasi dengan seluruh tabel lainnya melalui kolom `deviceId` atau `kitId`. Relasi yang terbentuk adalah *one-to-many* di mana satu kit dapat memiliki banyak data telemetry, actuator event, cooldown record, ML prediction log, device mode setting, notifications, dan user_kits. Tabel **user_kits** memungkinkan relasi *many-to-many* di mana satu user dapat memiliki banyak kit, dan satu kit dapat dimiliki oleh banyak user. Relasi *one-to-one* terbentuk antara **user_preference** dan **kits** di mana satu user hanya dapat memiliki satu kit yang dipilih pada satu waktu.
 
+### Diagram Relasi
+
+```
+                    ┌──────────────────────────────────────────┐
+                    │                 KITS                     │
+                    │              (Parent Table)              │
+                    └─────────────────────┬────────────────────┘
+                                          │
+        ┌─────────────┬─────────────┬─────┴────┬─────────────┬─────────────┐
+        │             │             │          │             │             │
+        ▼             ▼             ▼          ▼             ▼             ▼
+   telemetry    actuator_event  device_mode  notifications  ml_log     user_kits
+   (1:many)     (1:many)        (1:many)     (1:many)       (1:many)   (1:many)
+        │             │
+        ▼             ▼
+ actuator_cooldown  user_preference
+   (1:many)          (1:one)
+```
+
 ---
 
-### 9. Tabel `user_kits`
-Tabel ini menyimpan relasi antara pengguna dan kit yang mereka miliki. Memungkinkan satu user memiliki banyak kit dan satu kit dimiliki oleh banyak user.
+## Kunci Utama Desain
 
-| Kolom | Tipe Data | Keterangan |
-|-------|-----------|------------|
-| userId | TEXT | Primary Key, ID pengguna dari Firebase Auth |
-| kitId | TEXT | Primary Key, Foreign Key ke tabel kits |
-| addedAt | TIMESTAMPTZ | Waktu penambahan kit ke user |
+1. **Normalisasi**: Setiap tabel memiliki tanggung jawab spesifik tanpa redundansi data.
+2. **Scalability**: Penggunaan SERIAL untuk auto-increment ID memudahkan penambahan data.
+3. **Audit Trail**: Tabel `ingestTime` dan `createdAt` memungkinkan tracking temporal.
+4. **Deduplikasi**: Hash payload mencegah data duplikat masuk ke database.
+5. **Flexibility**: Desain many-to-many (`user_kits`) mendukung sharing kit antar user.
 
 ---
 
-## Tabel Endpoint API Aplikasi Fountaine Hydroponic Monitoring
+## Tabel Endpoint API
 
 Berikut adalah daftar endpoint REST API yang tersedia pada backend aplikasi **Fountaine Hydroponic Monitoring**:
 

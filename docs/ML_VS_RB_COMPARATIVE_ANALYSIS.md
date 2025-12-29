@@ -216,12 +216,38 @@ pH = 4.8, PPM = 700, WL = 2.0
 
 **Safety Hierarchy:**
 
-1. **Critical Bypass** (highest priority): Protect plant health
-2. **ML Prediction**: Optimal control
-3. **Cooldown Block**: Protect hardware
-4. **RB Fallback**: Safety guarantee
+1. **Overflow Protection** (highest priority): Stop refill if WL >= 2.5L
+2. **Critical Bypass**: Bypass cooldown for plant health emergencies
+3. **ML Prediction**: Optimal control
+4. **Cooldown Block**: Protect hardware
+5. **RB Fallback**: Safety guarantee
 
-This multi-layer safety architecture ensures system **never sacrifices plant safety for hardware protection**, while still preventing unnecessary actuator wear under normal conditions.
+#### Overflow Protection
+
+**File:** `services/api/actuator.py` (Lines 325-333)
+
+```python
+WL_MAX = 2.5  # Maximum tank capacity
+
+# Post-processing constraint
+if wl >= WL_MAX:
+    # SAFETY: Stop refill to prevent overflow
+    data.refill = 0
+elif wl >= WL_MIN and ppm <= PPM_MAX:
+    # Water level OK and PPM normal
+    data.refill = 0
+```
+
+**Decision Matrix:**
+
+| Water Level | PPM | Refill |
+|-------------|-----|--------|
+| < 1.2 L | Any | ✅ ON |
+| 1.2 - 2.5 L | > 840 | ✅ ON (dilution) |
+| 1.2 - 2.5 L | ≤ 840 | ❌ OFF |
+| ≥ 2.5 L | Any | ❌ **BLOCKED (overflow protection)** |
+
+This multi-layer safety architecture ensures system **never sacrifices plant safety for hardware protection**, while preventing tank overflow even when dilution is needed.
 
 
 ---
