@@ -347,7 +347,7 @@ Info: 83 (code quality suggestions)
 2. 🔵 Print statements (~20) - Replace with logger
 3. 🔵 Deprecated APIs (~10) - Update to new APIs
 
-**See:** [Flutter App Audit](../../docs/flutter_app_audit.md)
+**See:** [Future Improvements](../../docs/future_improvement.md)
 
 ---
 
@@ -367,9 +367,11 @@ Info: 83 (code quality suggestions)
 ## 📚 **Documentation**
 
 - [Main README](../../README.md) - Project overview
-- [ICD](../../docs/icd.md) - MQTT communication protocol
-- [ML Algorithm](../../docs/ml_algorithm_explanation.md) - Backend ML system
-- [App Audit](../../docs/flutter_app_audit.md) - Code quality report
+- [ICD](../../docs/icd.md) - MQTT protocol & REST API (26 endpoints)
+- [Control Systems](../../docs/control-systems.md) - ML, Rule-based, priority system
+- [Flow Analysis](../../docs/flow_analysis.md) - System architecture & data flow
+- [Black Box Testing](../../docs/BLACK_BOX_TESTING.md) - 15 test cases (100% passed)
+- [Mobile Setup Guide](../../docs/setup-hp-guide.md) - Physical device & emulator setup
 
 ---
 

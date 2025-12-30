@@ -181,10 +181,10 @@ flutter-cea-system/
 │
 ├── services/
 │   ├── api/                 # FastAPI backend
-│   │   ├── main.py          # API server
+│   │   ├── main.py          # API server (26 endpoints)
 │   │   ├── actuator.py      # Control logic (ML + rules)
 │   │   ├── database.py      # PostgreSQL connection
-│   │   └── ml_service.py    # ML prediction endpoint
+│   │   └── ml_service.py    # ML prediction service
 │   │
 │   ├── mqtt/                # MQTT services
 │   │   ├── publisher.py     # Telemetry simulator
@@ -193,17 +193,12 @@ flutter-cea-system/
 │   │
 │   └── ml/                  # Machine Learning
 │       ├── generate_dataset.py      # Create training data
-│       ├── dataset_loader.py        # Load CSV/DB data
-│       ├── preprocessing.py         # Data preparation
-│       ├── trainer.py               # Model training
 │       ├── predictor.py             # Inference
-│       ├── colab_training.ipynb     # Google Colab notebook
-│       └── model_registry/          # Trained models
-│
-├── data/
-│   └── raw/                 # Raw datasets
+│       ├── ML_RandomForest.ipynb    # Training notebook
+│       └── model_registry/          # Trained models (.joblib)
 │
 ├── docs/                    # Documentation
+├── run_services.py          # Service runner script
 ├── config.yaml              # System configuration
 └── README.md                # This file
 ```
@@ -212,12 +207,24 @@ flutter-cea-system/
 
 ## 📚 **Documentation**
 
-### **Guides**
-- [ML Algorithm Explanation](docs/ml_algorithm_explanation.md)
-- [Logic Fixes Summary](docs/logic_fixes_summary.md)
-- [Synthetic Dataset Guide](docs/synthetic_dataset_guide.md)
-- [Colab Training Guide](docs/colab_training_guide.md)
-- [Flutter App Audit](docs/flutter_app_audit.md)
+### **Technical**
+- [Control Systems](docs/control-systems.md) - Rule-based, ML, priority system, formulas
+- [Interface Control Document](docs/icd.md) - MQTT protocol, REST API (26 endpoints)
+- [Flow Analysis](docs/flow_analysis.md) - System architecture & data flow
+- [ML vs Rule-Based Analysis](docs/ML_VS_RB_COMPARATIVE_ANALYSIS.md) - Comparative study
+
+### **Testing & Setup**
+- [Black Box Testing](docs/BLACK_BOX_TESTING.md) - 15 functional test cases (100% passed)
+- [Mobile Setup Guide](docs/setup-hp-guide.md) - Physical device & emulator setup
+- [Future Improvements](docs/future_improvement.md) - Planned enhancements
+
+### **UML Diagrams**
+Diagrams are available in `docs/diagrams/`:
+- Activity diagrams (6 workflows)
+- Sequence diagrams (6 interactions)
+- Class diagram (5-layer architecture)
+- Database ERD (9 tables)
+- Use case diagrams
 
 ### **API Endpoints**
 ```
