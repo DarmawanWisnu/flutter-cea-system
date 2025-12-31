@@ -7,14 +7,14 @@ skinparam actorStyle stick
 
 actor "User" as User
 
-rectangle "Sistem Flutter CEA System" {
+rectangle "Usecase - Diagram" {
   rectangle "Features" {
-    usecase "Lihat Data Sensor" as UC_Sensor
-    usecase "Monitor Real-Time" as UC_Monitor
-    usecase "Tambah Kit Baru" as UC_AddKit
-    usecase "Kendali Pompa" as UC_Control
-    usecase "Lihat Notifikasi" as UC_Notify
-    usecase "Lihat History" as UC_History
+    usecase "Data Sensor" as UC_Sensor
+    usecase "Monitor" as UC_Monitor
+    usecase "Add Kit" as UC_AddKit
+    usecase "Actuator Control" as UC_Control
+    usecase "Notification" as UC_Notify
+    usecase "History" as UC_History
     usecase "Settings" as UC_Settings
     usecase "Profile" as UC_Profile
   }

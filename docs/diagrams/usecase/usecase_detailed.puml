@@ -1,37 +1,43 @@
-@startuml
-scale 2
+@startuml Usecase - Diagram
+scale 3
 skinparam monochrome true
 skinparam shadowing false
 left to right direction
 skinparam actorStyle stick
 
+title Usecase - Diagram
+
 actor User
 
-rectangle System {
-  usecase UC1 as "Lihat Sensor"
-  usecase UC2 as "Monitor"
-  usecase UC3 as "Tambah Kit"
-  usecase UC4 as "Kendali Pompa"
-  usecase UC5 as "Notifikasi"
-  usecase UC6 as "History"
-  usecase UC7 as "Login"
-  usecase UC8 as "Register"
+rectangle "Usecase - Diagram" {
+  rectangle "Fitur Utama" {
+    usecase UC1 as "Add Kit"
+    usecase UC2 as "Notification"
+    usecase UC3 as "Actuator Control\n(Manual / Auto)"
+    usecase UC4 as "History"
+    usecase UC5 as "Monitor"
+    usecase UC6 as "Data Sensor"
+  }
+  
+  rectangle "Autentikasi" {
+    usecase UC7 as "Login"
+  }
 }
 
 User --> UC1
 User --> UC2
 User --> UC3
 User --> UC4
-User --> UC5
-User --> UC6
-User --> UC7
-User --> UC8
 
-UC1 ..> UC7 : include
-UC2 ..> UC7 : include
-UC3 ..> UC7 : include
-UC4 ..> UC7 : include
-UC5 ..> UC7 : include
-UC6 ..> UC7 : include
+' Relasi extend
+UC4 ..> UC6 : <<extend>>
+UC3 ..> UC6 : <<extend>>
+
+' Relasi include
+UC1 ..> UC7 : <<include>>
+UC2 ..> UC7 : <<include>>
+UC3 ..> UC7 : <<include>>
+UC5 ..> UC7 : <<include>>
+UC6 ..> UC7 : <<include>>
 
 @enduml
