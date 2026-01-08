@@ -539,7 +539,7 @@ def get_latest(deviceId: str):
 def get_history(deviceId: str, days: int = 7, limit: int = 10000):
     """
     Get telemetry history for a device.
-    - days: How many days back to fetch (default 7, max 30)
+    - days: How many days back to fetch (max 7)
     - limit: Max entries to return (default 10000, for safety)
     """
     days = max(1, min(days, 7))

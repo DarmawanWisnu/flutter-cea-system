@@ -45,6 +45,16 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   bool _isLoading = false;
   Timer? _refreshTimer;
 
+  // Lazy loading pagination
+  int _displayCount = 10;
+  static const int _pageSize = 10;
+
+  @override
+  void initState() {
+    super.initState();
+    _scroll.addListener(_onScroll);
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -64,24 +74,19 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           );
         }
       } else {
-        // Try to get current kit from: 1) local provider, 2) backend preference, 3) first kit
         String? kitToLoad = ref.read(currentKitIdProvider);
 
         if (kitToLoad == null) {
           final api = ref.read(apiServiceProvider);
           final user = ref.read(authProvider);
 
-          // Get user's kit list first (filtered by userId)
           List<Map<String, dynamic>> userKits = [];
           try {
             userKits = await ref.read(apiKitsListProvider.future);
-          } catch (_) {
-            // Error loading kits
-          }
+          } catch (_) {}
 
           final kitIds = userKits.map((k) => k["id"] as String).toList();
 
-          // Try backend preference first (but validate it exists in user's kit list)
           if (user != null && kitIds.isNotEmpty) {
             try {
               final savedKit = await api.getUserPreference(userId: user.uid);
@@ -89,12 +94,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                 kitToLoad = savedKit;
                 ref.read(currentKitIdProvider.notifier).state = savedKit;
               }
-            } catch (_) {
-              // Error loading preference
-            }
+            } catch (_) {}
           }
 
-          // Fallback to first kit from user's list
           if (kitToLoad == null && kitIds.isNotEmpty) {
             kitToLoad = kitIds.first;
             ref.read(currentKitIdProvider.notifier).state = kitToLoad;
@@ -103,12 +105,11 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
         if (kitToLoad != null) {
           await _loadData(kitToLoad, days: 1);
-        } else {}
+        }
       }
 
       if (mounted) setState(() {});
 
-      // Auto-refresh every 30 seconds (only for today)
       _refreshTimer = Timer.periodic(const Duration(seconds: 30), (_) {
         if (mounted && selectedDate == null) {
           final currentKit = ref.read(currentKitIdProvider);
@@ -120,15 +121,39 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     });
   }
 
+  void _resetScroll() {
+    if (_scroll.hasClients) {
+      _scroll.jumpTo(0);
+    }
+  }
+
+  void _onScroll() {
+    if (!_scroll.hasClients) return;
+
+    if (_scroll.position.atEdge && _scroll.position.pixels != 0) {
+      final filtered = _getFiltered();
+      if (_displayCount < filtered.length) {
+        setState(() {
+          _displayCount += _pageSize;
+        });
+      }
+    }
+  }
+
   @override
   void dispose() {
     _refreshTimer?.cancel();
+    _scroll.removeListener(_onScroll);
     _scroll.dispose();
     super.dispose();
   }
 
   Future<void> _loadData(String kitId, {int days = 1}) async {
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _displayCount = _pageSize;
+    });
+
     final limit = days == 1 ? 2880 : 20160;
 
     try {
@@ -147,7 +172,12 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       _entries = [];
     }
 
-    if (mounted) setState(() => _isLoading = false);
+    if (mounted) {
+      setState(() => _isLoading = false);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _resetScroll();
+      });
+    }
   }
 
   String _formatDate(DateTime date) {
@@ -161,12 +191,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     return DateFormat('EEE, d MMM').format(date);
   }
 
-  // Filter entries by selected date AND time filter
   List<Map<String, dynamic>> _getFiltered() {
     final now = DateTime.now();
     final targetDate = selectedDate ?? DateTime(now.year, now.month, now.day);
 
-    // First filter by date
     var filtered = _entries.where((e) {
       final ts = e['ts'] as int;
       final d = DateTime.fromMillisecondsSinceEpoch(ts);
@@ -175,7 +203,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           d.day == targetDate.day;
     }).toList();
 
-    // Then filter by time (only for today)
     if (selectedDate == null && _timeFilter != TimeFilter.all) {
       final hoursBack = _timeFilter == TimeFilter.hour1 ? 1 : 6;
       final cutoff = now.subtract(Duration(hours: hoursBack));
@@ -186,12 +213,11 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       }).toList();
     }
 
-    // Apply sort order
-    if (_sortDesc) {
-      filtered.sort((a, b) => (b['ts'] as int).compareTo(a['ts'] as int));
-    } else {
-      filtered.sort((a, b) => (a['ts'] as int).compareTo(b['ts'] as int));
-    }
+    filtered.sort(
+      (a, b) => _sortDesc
+          ? (b['ts'] as int).compareTo(a['ts'] as int)
+          : (a['ts'] as int).compareTo(b['ts'] as int),
+    );
 
     return filtered;
   }
@@ -215,7 +241,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         backgroundColor: _kBg,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
-        primary: !widget.embedded, // Disable SafeArea when embedded in container
+        primary: !widget.embedded,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: _kPrimary),
           onPressed: () => Navigator.pop(context),
@@ -280,12 +306,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           ? _buildNoKit()
           : Column(
               children: [
-                // Date picker row
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                   child: Row(
                     children: [
-                      // Date picker button
                       Expanded(
                         child: GestureDetector(
                           onTap: () => _showDatePicker(currentKit),
@@ -353,8 +377,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                     ],
                   ),
                 ),
-
-                // Time filter chips (only for today)
                 if (selectedDate == null)
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
@@ -366,7 +388,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                         const SizedBox(width: 8),
                         _filterChip('6h', TimeFilter.hour6),
                         const Spacer(),
-                        // Sort toggle
                         GestureDetector(
                           onTap: () => setState(() => _sortDesc = !_sortDesc),
                           child: Container(
@@ -404,8 +425,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                       ],
                     ),
                   ),
-
-                // Content
                 Expanded(
                   child: filtered.isEmpty
                       ? _buildEmpty()
@@ -413,7 +432,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                 ),
               ],
             ),
-      // Only show FAB when not embedded in PageView container
       floatingActionButton: widget.embedded
           ? null
           : FloatingActionButton(
@@ -471,7 +489,15 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   Widget _filterChip(String label, TimeFilter filter) {
     final isSelected = _timeFilter == filter;
     return GestureDetector(
-      onTap: () => setState(() => _timeFilter = filter),
+      onTap: () {
+        setState(() {
+          _timeFilter = filter;
+          _displayCount = _pageSize;
+        });
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _resetScroll();
+        });
+      },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
@@ -545,71 +571,89 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   }
 
   Widget _buildList(List<Map<String, dynamic>> data, String kitId) {
+    final displayData = data.take(_displayCount).toList();
+    final hasMore = data.length > _displayCount;
+
     return Scrollbar(
       controller: _scroll,
-      thumbVisibility: true, // Always show scrollbar
-      interactive: true, // Allow dragging the scrollbar
+      thumbVisibility: true,
+      interactive: true,
       child: ListView.builder(
         controller: _scroll,
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-        itemCount: data.length,
+        itemCount: displayData.length + (hasMore ? 1 : 0),
         itemBuilder: (context, index) {
-        final item = data[index];
-        final Telemetry t = item['t'];
-        final ts = item['ts'] as int;
-        final date = DateTime.fromMillisecondsSinceEpoch(ts);
-
-        final key = _itemKeys.putIfAbsent(ts, () => GlobalKey());
-
-        return Container(
-          key: key,
-          margin: const EdgeInsets.only(bottom: 8),
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Time
-              Row(
-                children: [
-                  Icon(
-                    Icons.access_time,
-                    size: 14,
+          if (index == displayData.length && hasMore) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Center(
+                child: Text(
+                  'Scroll untuk lihat lebih banyak (${data.length - _displayCount} lagi)',
+                  style: TextStyle(
+                    fontSize: 12,
                     color: _kPrimary.withOpacity(0.5),
                   ),
-                  const SizedBox(width: 6),
-                  Text(
-                    DateFormat('HH:mm:ss').format(date),
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: _kPrimary.withOpacity(0.6),
-                      fontWeight: FontWeight.w500,
+                ),
+              ),
+            );
+          }
+
+          final item = displayData[index];
+          final Telemetry t = item['t'];
+          final ts = item['ts'] as int;
+          final date = DateTime.fromMillisecondsSinceEpoch(ts);
+          final key = _itemKeys.putIfAbsent(ts, () => GlobalKey());
+
+          return Container(
+            key: key,
+            margin: const EdgeInsets.only(bottom: 8),
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.access_time,
+                      size: 14,
+                      color: _kPrimary.withOpacity(0.5),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              // Sensor values
-              Row(
-                children: [
-                  _sensorValue('pH', t.ph.toStringAsFixed(2)),
-                  _sensorValue('TDS', '${t.ppm.toInt()} ppm'),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  _sensorValue('Humidity', '${t.humidity.toStringAsFixed(1)}%'),
-                  _sensorValue('Temp', '${t.tempC.toStringAsFixed(1)}°C'),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
+                    const SizedBox(width: 6),
+                    Text(
+                      DateFormat('HH:mm:ss').format(date),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: _kPrimary.withOpacity(0.6),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    _sensorValue('pH', t.ph.toStringAsFixed(2)),
+                    _sensorValue('TDS', '${t.ppm.toInt()} ppm'),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    _sensorValue(
+                      'Humidity',
+                      '${t.humidity.toStringAsFixed(1)}%',
+                    ),
+                    _sensorValue('Temp', '${t.tempC.toStringAsFixed(1)}°C'),
+                  ],
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
