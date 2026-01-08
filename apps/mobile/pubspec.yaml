@@ -31,6 +31,8 @@ dependencies:
   flutter:
     sdk: flutter  # Flutter versi 3.35.0 or higher is required for
                   # SDK 36
+  flutter_localizations:      # For localization support
+    sdk: flutter
 
   # ============================================
   # USED LIBRARIES (Actively used in codebase)
@@ -82,6 +84,7 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+  generate: true  # Enable code generation for localization
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

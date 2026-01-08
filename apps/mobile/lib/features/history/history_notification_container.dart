@@ -3,10 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'history_screen.dart';
 import '../notifications/notification_screen.dart';
 
-// Match color scheme from other screens
-const Color _kPrimary = Color(0xFF0E5A2A);
-const Color _kBg = Color(0xFFF3F9F4);
-
 /// Container that wraps History and Notification screens in a PageView
 /// with swipe navigation and dot indicators.
 class HistoryNotificationContainer extends ConsumerStatefulWidget {
@@ -46,8 +42,10 @@ class _HistoryNotificationContainerState
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -56,7 +54,7 @@ class _HistoryNotificationContainerState
               padding: const EdgeInsets.symmetric(vertical: 6),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [_buildDot(0), const SizedBox(width: 8), _buildDot(1)],
+                children: [_buildDot(0, colorScheme), const SizedBox(width: 8), _buildDot(1, colorScheme)],
               ),
             ),
             // PageView with History and Notification content
@@ -86,7 +84,7 @@ class _HistoryNotificationContainerState
     );
   }
 
-  Widget _buildDot(int index) {
+  Widget _buildDot(int index, ColorScheme colorScheme) {
     final isActive = _currentPage == index;
     return GestureDetector(
       onTap: () {
@@ -101,7 +99,7 @@ class _HistoryNotificationContainerState
         width: isActive ? 24 : 8,
         height: 8,
         decoration: BoxDecoration(
-          color: isActive ? _kPrimary : _kPrimary.withOpacity(0.3),
+          color: isActive ? colorScheme.primary : colorScheme.primary.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(4),
         ),
       ),

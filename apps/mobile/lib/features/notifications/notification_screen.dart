@@ -3,11 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/provider/notification_provider.dart';
 import '../../models/nav_args.dart';
-
-// GLOBAL COLOR CONSTANTS
-const Color kPrimary = Color(0xFF0E5A2A);
-const Color kBg = Color(0xFFF3F9F4);
-const Color kChipBg = Color(0xFFE8F2EC);
+import '../../l10n/app_localizations.dart';
 
 class NotificationScreen extends ConsumerStatefulWidget {
   final bool embedded;
@@ -108,17 +104,19 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
     }
   }
 
-  String _ago(DateTime t) {
+  String _ago(DateTime t, AppLocalizations l10n) {
     final d = DateTime.now().difference(t);
-    if (d.inMinutes < 1) return 'just now';
-    if (d.inMinutes < 60) return '${d.inMinutes}m ago';
-    if (d.inHours < 24) return '${d.inHours}h ago';
-    return '${d.inDays}d ago';
+    if (d.inMinutes < 1) return l10n.notificationJustNow;
+    if (d.inMinutes < 60) return l10n.notificationMinutesAgo(d.inMinutes);
+    if (d.inHours < 24) return l10n.notificationHoursAgo(d.inHours);
+    return l10n.notificationDaysAgo(d.inDays);
   }
 
   @override
   Widget build(BuildContext context) {
     final eff = _sanitizeFilter(_filter);
+    final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     final all = ref.watch(notificationListProvider);
     List<NotificationItem> list = ref.watch(filteredNotificationProvider(eff));
@@ -137,16 +135,16 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
         all.where((e) => _norm(e.level) == _norm(lvl)).length;
 
     return Scaffold(
-      backgroundColor: kBg,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: kBg,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         centerTitle: true,
         primary: !widget.embedded,
-        title: const Text(
-          'Notification',
+        title: Text(
+          l10n.notificationTitle,
           style: TextStyle(
-            color: kPrimary,
+            color: colorScheme.primary,
             fontWeight: FontWeight.w900,
             fontSize: 20,
             letterSpacing: .2,
@@ -154,7 +152,7 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
         ),
         actions: [
           PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert, color: kPrimary),
+            icon: Icon(Icons.more_vert, color: colorScheme.primary),
             onSelected: (v) async {
               switch (v) {
                 case 'read':
@@ -167,9 +165,9 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
                   break;
               }
             },
-            itemBuilder: (ctx) => const [
-              PopupMenuItem(value: 'read', child: Text('Mark all read')),
-              PopupMenuItem(value: 'delete', child: Text('Delete all')),
+            itemBuilder: (ctx) => [
+              PopupMenuItem(value: 'read', child: Text(l10n.notificationMarkAllRead)),
+              PopupMenuItem(value: 'delete', child: Text(l10n.notificationDeleteAll)),
             ],
           ),
         ],
@@ -185,9 +183,12 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: _Glass(
+                colorScheme: colorScheme,
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                 child: _FilterChips(
                   value: eff,
+                  colorScheme: colorScheme,
+                  l10n: l10n,
                   onChanged: (newKey) {
                     setState(() {
                       _filter = _sanitizeFilter(newKey);
@@ -205,7 +206,11 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
             ),
             const SizedBox(height: 8),
             if (displayList.isEmpty)
-              _EmptyState(onExploreAll: () => setState(() => _filter = null))
+              _EmptyState(
+                colorScheme: colorScheme,
+                l10n: l10n,
+                onExploreAll: () => setState(() => _filter = null),
+              )
             else ...[
               ...displayList.map(
                 (n) => Padding(
@@ -214,10 +219,12 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
                     title: n.title,
                     message: n.message,
                     meta:
-                        '${n.kitName ?? "Unknown Kit"} • ${_ago(n.timestamp)}',
+                        '${n.kitName ?? "Unknown Kit"} • ${_ago(n.timestamp, l10n)}',
                     icon: _icon(n.level),
                     accent: _accent(n.level),
                     isRead: n.isRead,
+                    colorScheme: colorScheme,
+                    newLabel: l10n.notificationNew,
                     onTap: () {
                       notifier.markRead(n.id);
                       Navigator.pushNamed(
@@ -239,10 +246,10 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   child: Center(
                     child: Text(
-                      'Scroll untuk lihat lebih banyak',
+                      l10n.notificationScrollMore,
                       style: TextStyle(
                         fontSize: 12,
-                        color: kPrimary.withOpacity(.5),
+                        color: colorScheme.primary.withValues(alpha: 0.5),
                       ),
                     ),
                   ),
@@ -256,10 +263,11 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
 }
 
 class _Glass extends StatelessWidget {
-  const _Glass({this.child, this.padding, this.borderRadius = 14});
+  const _Glass({this.child, this.padding, this.borderRadius = 14, required this.colorScheme});
   final Widget? child;
   final EdgeInsetsGeometry? padding;
   final double borderRadius;
+  final ColorScheme colorScheme;
 
   @override
   Widget build(BuildContext context) {
@@ -270,9 +278,9 @@ class _Glass extends StatelessWidget {
         child: Container(
           padding: padding,
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(.55),
+            color: colorScheme.surface.withValues(alpha: 0.55),
             borderRadius: BorderRadius.circular(borderRadius),
-            border: Border.all(color: Colors.white.withOpacity(.7)),
+            border: Border.all(color: colorScheme.surface.withValues(alpha: 0.7)),
           ),
           child: child,
         ),
@@ -281,14 +289,15 @@ class _Glass extends StatelessWidget {
   }
 }
 
-// CHIP KUSTOM
 class _FilterChips extends StatelessWidget {
   const _FilterChips({
-    required this.value, // null => All
+    required this.value,
     required this.onChanged,
     required this.infoCount,
     required this.warningCount,
     required this.urgentCount,
+    required this.colorScheme,
+    required this.l10n,
   });
 
   final String? value;
@@ -296,27 +305,29 @@ class _FilterChips extends StatelessWidget {
   final int infoCount;
   final int warningCount;
   final int urgentCount;
+  final ColorScheme colorScheme;
+  final AppLocalizations l10n;
 
   String _cap(int n) => n > 9 ? '9+' : '$n';
 
   @override
   Widget build(BuildContext context) {
     final items = <({String label, String? key, IconData? icon, int? count})>[
-      (label: 'All', key: null, icon: null, count: null),
+      (label: l10n.commonAll, key: null, icon: null, count: null),
       (
-        label: 'Info',
+        label: l10n.notificationFilterInfo,
         key: 'info',
         icon: Icons.campaign_rounded,
         count: infoCount,
       ),
       (
-        label: 'Warning',
+        label: l10n.notificationFilterWarning,
         key: 'warning',
         icon: Icons.warning_amber_rounded,
         count: warningCount,
       ),
       (
-        label: 'Urgent',
+        label: l10n.notificationFilterUrgent,
         key: 'urgent',
         icon: Icons.dangerous_outlined,
         count: urgentCount,
@@ -334,6 +345,7 @@ class _FilterChips extends StatelessWidget {
             selected: selected,
             icon: it.icon,
             badge: it.count == null ? null : _cap(it.count!),
+            colorScheme: colorScheme,
             onTap: () => onChanged(it.key),
           ),
         );
@@ -349,6 +361,7 @@ class _ChipBtn extends StatelessWidget {
     this.icon,
     this.badge,
     required this.onTap,
+    required this.colorScheme,
   });
 
   final String label;
@@ -356,14 +369,15 @@ class _ChipBtn extends StatelessWidget {
   final IconData? icon;
   final String? badge;
   final VoidCallback onTap;
+  final ColorScheme colorScheme;
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: selected ? kPrimary : kChipBg,
+      color: selected ? colorScheme.primary : colorScheme.surfaceContainerHighest,
       shape: StadiumBorder(
         side: BorderSide(
-          color: (selected ? Colors.white : kPrimary).withOpacity(.25),
+          color: (selected ? colorScheme.onPrimary : colorScheme.primary).withValues(alpha: 0.25),
         ),
       ),
       child: InkWell(
@@ -380,19 +394,19 @@ class _ChipBtn extends StatelessWidget {
                   child: Icon(
                     icon,
                     size: 16,
-                    color: selected ? Colors.white : kPrimary,
+                    color: selected ? colorScheme.onPrimary : colorScheme.primary,
                   ),
                 ),
               Text(
                 label,
                 style: TextStyle(
-                  color: selected ? Colors.white : kPrimary,
+                  color: selected ? colorScheme.onPrimary : colorScheme.primary,
                   fontWeight: FontWeight.w700,
                 ),
               ),
               if (badge != null) ...[
                 const SizedBox(width: 6),
-                _CountBadge(value: badge!, selected: selected),
+                _CountBadge(value: badge!, selected: selected, colorScheme: colorScheme),
               ],
             ],
           ),
@@ -403,21 +417,22 @@ class _ChipBtn extends StatelessWidget {
 }
 
 class _CountBadge extends StatelessWidget {
-  const _CountBadge({required this.value, required this.selected});
+  const _CountBadge({required this.value, required this.selected, required this.colorScheme});
   final String value;
   final bool selected;
+  final ColorScheme colorScheme;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: selected ? Colors.white.withOpacity(.2) : Colors.white,
+        color: selected ? colorScheme.onPrimary.withValues(alpha: 0.2) : colorScheme.surface,
         borderRadius: BorderRadius.circular(999),
         border: Border.all(
           color: selected
-              ? Colors.white.withOpacity(.5)
-              : kPrimary.withOpacity(.25),
+              ? colorScheme.onPrimary.withValues(alpha: 0.5)
+              : colorScheme.primary.withValues(alpha: 0.25),
         ),
       ),
       child: Text(
@@ -425,7 +440,7 @@ class _CountBadge extends StatelessWidget {
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w800,
-          color: selected ? Colors.white : kPrimary,
+          color: selected ? colorScheme.onPrimary : colorScheme.primary,
         ),
       ),
     );
@@ -433,8 +448,10 @@ class _CountBadge extends StatelessWidget {
 }
 
 class _EmptyState extends StatelessWidget {
-  const _EmptyState({required this.onExploreAll});
+  const _EmptyState({required this.onExploreAll, required this.colorScheme, required this.l10n});
   final VoidCallback onExploreAll;
+  final ColorScheme colorScheme;
+  final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {
@@ -444,62 +461,31 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.inbox_rounded, size: 72, color: kPrimary),
+            Icon(Icons.inbox_rounded, size: 72, color: colorScheme.primary),
             const SizedBox(height: 12),
-            const Text(
-              "No notifications (for this filter)",
+            Text(
+              l10n.notificationEmptyTitle,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: kPrimary,
+                color: colorScheme.primary,
                 fontWeight: FontWeight.w800,
                 fontSize: 16.5,
               ),
             ),
             const SizedBox(height: 6),
             Text(
-              "Your system is operating normally. No issues detected.",
+              l10n.notificationEmptyDesc,
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.black.withOpacity(.65)),
+              style: TextStyle(color: colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: 12),
             FilledButton.icon(
               onPressed: onExploreAll,
               icon: const Icon(Icons.all_inclusive_rounded),
-              label: const Text('Show All'),
+              label: Text(l10n.notificationShowAll),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _SwipeBg extends StatelessWidget {
-  const _SwipeBg();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      alignment: Alignment.centerRight,
-      padding: const EdgeInsets.symmetric(horizontal: 18),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.red.shade400, Colors.red.shade300],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: const Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Text(
-            'Delete',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
-          ),
-          SizedBox(width: 8),
-          Icon(Icons.delete_outline, color: Colors.white, size: 24),
-        ],
       ),
     );
   }
@@ -514,6 +500,8 @@ class _NotificationCard extends StatelessWidget {
     required this.accent,
     required this.isRead,
     required this.onTap,
+    required this.colorScheme,
+    required this.newLabel,
   });
 
   final String title;
@@ -523,6 +511,8 @@ class _NotificationCard extends StatelessWidget {
   final Color accent;
   final bool isRead;
   final VoidCallback onTap;
+  final ColorScheme colorScheme;
+  final String newLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -531,12 +521,12 @@ class _NotificationCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
               blurRadius: 16,
-              color: Colors.black.withOpacity(.06),
+              color: Colors.black.withValues(alpha: 0.06),
               offset: const Offset(0, 8),
             ),
           ],
@@ -547,7 +537,7 @@ class _NotificationCard extends StatelessWidget {
               width: 5,
               height: 96,
               decoration: BoxDecoration(
-                color: accent.withOpacity(.9),
+                color: accent.withValues(alpha: 0.9),
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(16),
                   bottomLeft: Radius.circular(16),
@@ -572,8 +562,8 @@ class _NotificationCard extends StatelessWidget {
                             Flexible(
                               child: Text(
                                 title,
-                                style: const TextStyle(
-                                  color: kPrimary,
+                                style: TextStyle(
+                                  color: colorScheme.primary,
                                   fontSize: 16.5,
                                   fontWeight: FontWeight.w800,
                                 ),
@@ -589,15 +579,15 @@ class _NotificationCard extends StatelessWidget {
                                   vertical: 1.5,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: accent.withOpacity(.12),
+                                  color: accent.withValues(alpha: 0.12),
                                   borderRadius: BorderRadius.circular(99),
                                   border: Border.all(
-                                    color: accent.withOpacity(.35),
+                                    color: accent.withValues(alpha: 0.35),
                                   ),
                                 ),
-                                child: const Text(
-                                  'NEW',
-                                  style: TextStyle(
+                                child: Text(
+                                  newLabel,
+                                  style: const TextStyle(
                                     fontSize: 10.5,
                                     fontWeight: FontWeight.w800,
                                   ),
@@ -609,22 +599,22 @@ class _NotificationCard extends StatelessWidget {
                         const SizedBox(height: 4),
                         Text(
                           message,
-                          style: const TextStyle(fontSize: 14.5, height: 1.35),
+                          style: TextStyle(fontSize: 14.5, height: 1.35, color: colorScheme.onSurface),
                         ),
                         const SizedBox(height: 8),
                         Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.schedule_rounded,
                               size: 13,
-                              color: Colors.black54,
+                              color: colorScheme.onSurfaceVariant,
                             ),
                             const SizedBox(width: 6),
                             Text(
                               meta,
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.black.withOpacity(.55),
+                                color: colorScheme.onSurfaceVariant,
                               ),
                             ),
                           ],
@@ -654,12 +644,12 @@ class _IconBadge extends StatelessWidget {
       height: 40,
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [color.withOpacity(.18), color.withOpacity(.06)],
+          colors: [color.withValues(alpha: 0.18), color.withValues(alpha: 0.06)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withOpacity(.25)),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
       ),
       child: Icon(icon, color: color, size: 22),
     );

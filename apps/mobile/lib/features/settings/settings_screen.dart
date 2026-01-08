@@ -4,26 +4,28 @@ import 'package:fountaine/app/routes.dart';
 import 'package:fountaine/providers/provider/auth_provider.dart';
 import 'package:fountaine/providers/provider/url_settings_provider.dart';
 import 'package:fountaine/providers/provider/api_provider.dart';
+import 'package:fountaine/providers/provider/locale_provider.dart';
+import 'package:fountaine/providers/provider/theme_provider.dart';
+import 'package:fountaine/l10n/app_localizations.dart';
 import 'package:http/http.dart' as http;
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
-  static const Color _bg = Color(0xFFF6FBF6);
-  static const Color _primary = Color(0xFF154B2E);
-  static const Color _muted = Color(0xFF7A7A7A);
-
   void _confirmLogout(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final colorScheme = Theme.of(context).colorScheme;
+    
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: const Text('Confirm Logout'),
-        content: const Text('Are you sure you want to log out?'),
+        title: Text(l10n.logoutConfirmTitle),
+        content: Text(l10n.logoutConfirmMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.commonCancel),
           ),
           TextButton(
             onPressed: () async {
@@ -45,10 +47,112 @@ class SettingsScreen extends ConsumerWidget {
                 );
               }
             },
-            child: const Text('Logout'),
+            child: Text(l10n.settingsLogout),
           ),
         ],
       ),
+    );
+  }
+
+  void _showThemeDialog(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final currentTheme = ref.read(themeProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: Text(l10n.themeSelectTitle),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildThemeOption(context, ref, ThemeMode.light, l10n.themeLight, currentTheme, Icons.light_mode_outlined),
+            _buildThemeOption(context, ref, ThemeMode.dark, l10n.themeDark, currentTheme, Icons.dark_mode_outlined),
+            _buildThemeOption(context, ref, ThemeMode.system, l10n.themeSystem, currentTheme, Icons.settings_suggest_outlined),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildThemeOption(
+    BuildContext context,
+    WidgetRef ref,
+    ThemeMode mode,
+    String label,
+    ThemeMode currentTheme,
+    IconData icon,
+  ) {
+    final isSelected = currentTheme == mode;
+    final colorScheme = Theme.of(context).colorScheme;
+    
+    return ListTile(
+      leading: Icon(icon, color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant),
+      title: Text(
+        label,
+        style: TextStyle(
+          color: isSelected ? colorScheme.primary : colorScheme.onSurface,
+          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+        ),
+      ),
+      trailing: isSelected
+          ? Icon(Icons.check_circle, color: colorScheme.primary)
+          : null,
+      onTap: () {
+        ref.read(themeProvider.notifier).setTheme(mode);
+        Navigator.pop(context);
+      },
+    );
+  }
+
+  void _showLanguageDialog(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final currentLocale = ref.read(localeProvider);
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: Text(l10n.languageSelectTitle),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildLanguageOption(context, ref, const Locale('en'), l10n.languageEnglish, currentLocale, '🇺🇸'),
+            _buildLanguageOption(context, ref, const Locale('id'), l10n.languageIndonesia, currentLocale, '🇮🇩'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLanguageOption(
+    BuildContext context,
+    WidgetRef ref,
+    Locale locale,
+    String label,
+    Locale currentLocale,
+    String flag,
+  ) {
+    final isSelected = currentLocale.languageCode == locale.languageCode;
+    final colorScheme = Theme.of(context).colorScheme;
+    
+    return ListTile(
+      leading: Text(flag, style: const TextStyle(fontSize: 24)),
+      title: Text(
+        label,
+        style: TextStyle(
+          color: isSelected ? colorScheme.primary : colorScheme.onSurface,
+          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+        ),
+      ),
+      trailing: isSelected
+          ? Icon(Icons.check_circle, color: colorScheme.primary)
+          : null,
+      onTap: () {
+        ref.read(localeProvider.notifier).setLocale(locale);
+        Navigator.pop(context);
+      },
     );
   }
 
@@ -167,11 +271,14 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Widget _buildTile({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required VoidCallback onTap,
     bool showArrow = true,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(14),
@@ -179,28 +286,28 @@ class SettingsScreen extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         margin: const EdgeInsets.only(bottom: 10),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colorScheme.surface,
           borderRadius: BorderRadius.circular(14),
         ),
         child: Row(
           children: [
-            Icon(icon, color: _primary),
+            Icon(icon, color: colorScheme.primary),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 label,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w500,
-                  color: _primary,
+                  color: colorScheme.primary,
                 ),
               ),
             ),
             if (showArrow)
-              const Icon(
+              Icon(
                 Icons.arrow_forward_ios_rounded,
                 size: 16,
-                color: _primary,
+                color: colorScheme.primary,
               ),
           ],
         ),
@@ -209,10 +316,13 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Widget _buildLinkTile({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required VoidCallback onTap,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(14),
@@ -220,24 +330,24 @@ class SettingsScreen extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         margin: const EdgeInsets.only(bottom: 10),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colorScheme.surface,
           borderRadius: BorderRadius.circular(14),
         ),
         child: Row(
           children: [
-            Icon(icon, color: _primary),
+            Icon(icon, color: colorScheme.primary),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 label,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w500,
-                  color: _primary,
+                  color: colorScheme.primary,
                 ),
               ),
             ),
-            const Icon(Icons.open_in_new_rounded, size: 18, color: _primary),
+            Icon(Icons.open_in_new_rounded, size: 18, color: colorScheme.primary),
           ],
         ),
       ),
@@ -246,6 +356,8 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final colorScheme = Theme.of(context).colorScheme;
     final s = MediaQuery.of(context).size.width / 375.0;
     final user = ref.watch(authProvider);
 
@@ -256,7 +368,7 @@ class SettingsScreen extends ConsumerWidget {
         : (email != '—' ? email.split('@').first : 'User');
 
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 20 * s, vertical: 14 * s),
@@ -267,13 +379,13 @@ class SettingsScreen extends ConsumerWidget {
               Row(
                 children: [
                   CircleAvatar(
-                    backgroundColor: Colors.white,
+                    backgroundColor: colorScheme.surface,
                     radius: 20 * s,
                     child: IconButton(
                       padding: EdgeInsets.zero,
                       icon: Icon(
                         Icons.arrow_back,
-                        color: _primary,
+                        color: colorScheme.primary,
                         size: 20 * s,
                       ),
                       onPressed: () => Navigator.maybePop(context),
@@ -282,11 +394,11 @@ class SettingsScreen extends ConsumerWidget {
                   Expanded(
                     child: Center(
                       child: Text(
-                        'Settings',
+                        l10n.settingsTitle,
                         style: TextStyle(
                           fontSize: 20 * s,
                           fontWeight: FontWeight.w800,
-                          color: _primary,
+                          color: colorScheme.primary,
                         ),
                       ),
                     ),
@@ -301,17 +413,17 @@ class SettingsScreen extends ConsumerWidget {
               Container(
                 padding: EdgeInsets.all(16 * s),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: colorScheme.surface,
                   borderRadius: BorderRadius.circular(14 * s),
                 ),
                 child: Row(
                   children: [
                     CircleAvatar(
                       radius: 24 * s,
-                      backgroundColor: _primary,
+                      backgroundColor: colorScheme.primary,
                       child: Icon(
                         Icons.person,
-                        color: Colors.white,
+                        color: colorScheme.onPrimary,
                         size: 24 * s,
                       ),
                     ),
@@ -325,13 +437,13 @@ class SettingsScreen extends ConsumerWidget {
                             style: TextStyle(
                               fontSize: 16 * s,
                               fontWeight: FontWeight.w700,
-                              color: _primary,
+                              color: colorScheme.primary,
                             ),
                           ),
                           SizedBox(height: 2 * s),
                           Text(
                             email,
-                            style: TextStyle(fontSize: 13 * s, color: _muted),
+                            style: TextStyle(fontSize: 13 * s, color: colorScheme.onSurfaceVariant),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ],
@@ -340,7 +452,7 @@ class SettingsScreen extends ConsumerWidget {
                     TextButton(
                       onPressed: () =>
                           Navigator.pushNamed(context, Routes.profile),
-                      child: const Text('View'),
+                      child: Text(l10n.commonView),
                     ),
                   ],
                 ),
@@ -350,44 +462,40 @@ class SettingsScreen extends ConsumerWidget {
 
               // Account
               Text(
-                'Account Setting',
+                l10n.settingsAccountSetting,
                 style: TextStyle(
                   fontSize: 16 * s,
                   fontWeight: FontWeight.w700,
-                  color: _primary,
+                  color: colorScheme.primary,
                 ),
               ),
               SizedBox(height: 12 * s),
 
               _buildTile(
+                context: context,
                 icon: Icons.person_outline,
-                label: 'Profile',
+                label: l10n.settingsProfile,
                 onTap: () => Navigator.pushNamed(context, Routes.profile),
               ),
               _buildTile(
+                context: context,
                 icon: Icons.dark_mode_outlined,
-                label: 'Theme',
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Feature coming soon')),
-                  );
-                },
+                label: l10n.settingsTheme,
+                onTap: () => _showThemeDialog(context, ref),
               ),
               _buildTile(
+                context: context,
                 icon: Icons.language,
-                label: 'Change language',
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Feature coming soon')),
-                  );
-                },
+                label: l10n.settingsChangeLanguage,
+                onTap: () => _showLanguageDialog(context, ref),
               ),
               _buildTile(
+                context: context,
                 icon: Icons.privacy_tip_outlined,
-                label: 'Privacy',
+                label: l10n.settingsPrivacy,
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Feature coming soon')),
+                    SnackBar(content: Text(l10n.commonFeatureComingSoon)),
                   );
                 },
               ),
@@ -396,39 +504,42 @@ class SettingsScreen extends ConsumerWidget {
 
               // Legal
               Text(
-                'Legal',
+                l10n.settingsLegal,
                 style: TextStyle(
                   fontSize: 16 * s,
                   fontWeight: FontWeight.w700,
-                  color: _primary,
+                  color: colorScheme.primary,
                 ),
               ),
               SizedBox(height: 12 * s),
 
               _buildLinkTile(
+                context: context,
                 icon: Icons.article_outlined,
-                label: 'Terms and Condition',
+                label: l10n.settingsTerms,
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Link belum diisi')),
+                    SnackBar(content: Text(l10n.commonLinkNotSet)),
                   );
                 },
               ),
               _buildLinkTile(
+                context: context,
                 icon: Icons.security_outlined,
-                label: 'Privacy policy',
+                label: l10n.settingsPrivacyPolicy,
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Link belum diisi')),
+                    SnackBar(content: Text(l10n.commonLinkNotSet)),
                   );
                 },
               ),
               _buildLinkTile(
+                context: context,
                 icon: Icons.info_outline,
-                label: 'Help',
+                label: l10n.settingsHelp,
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Link belum diisi')),
+                    SnackBar(content: Text(l10n.commonLinkNotSet)),
                   );
                 },
               ),
@@ -440,8 +551,8 @@ class SettingsScreen extends ConsumerWidget {
                 child: OutlinedButton(
                   onPressed: () => _confirmLogout(context, ref),
                   style: OutlinedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    side: BorderSide(color: _primary.withOpacity(0.2)),
+                    backgroundColor: colorScheme.surface,
+                    side: BorderSide(color: colorScheme.primary.withValues(alpha: 0.2)),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
@@ -451,11 +562,11 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                   ),
                   child: Text(
-                    'Logout',
+                    l10n.settingsLogout,
                     style: TextStyle(
                       fontSize: 16 * s,
                       fontWeight: FontWeight.w700,
-                      color: _primary,
+                      color: colorScheme.primary,
                       decoration: TextDecoration.underline,
                     ),
                   ),
@@ -465,8 +576,8 @@ class SettingsScreen extends ConsumerWidget {
               SizedBox(height: 12 * s),
               Center(
                 child: Text(
-                  'Version 1.0.0',
-                  style: TextStyle(fontSize: 13 * s, color: _muted),
+                  l10n.settingsVersion('1.0.0'),
+                  style: TextStyle(fontSize: 13 * s, color: colorScheme.onSurfaceVariant),
                 ),
               ),
             ],

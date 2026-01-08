@@ -4,6 +4,7 @@ import 'package:fountaine/app/routes.dart';
 import 'package:fountaine/utils/validators.dart';
 import 'package:fountaine/providers/provider/auth_provider.dart';
 import 'package:fountaine/utils/firebase_error_handler.dart';
+import 'package:fountaine/l10n/app_localizations.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -21,10 +22,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   bool _loading = false;
   bool _obscure = true;
 
-  static const Color _bgColor = Color(0xFFF6FBF6);
-  static const Color _primaryColor = Color(0xFF154B2E);
-  static const Color _mutedText = Color(0xFF6B6B6B);
-
   Future<void> _doRegister() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -40,7 +37,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     } catch (e) {
       if (!mounted) return;
 
-      // Use FirebaseErrorHandler
       final (title, message) = FirebaseErrorHandler.handleAuthException(e);
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -89,9 +85,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final s = MediaQuery.of(context).size.width / 375.0;
+    final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: _bgColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 24 * s, vertical: 28 * s),
@@ -104,12 +102,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: CircleAvatar(
-                    backgroundColor: Colors.white,
+                    backgroundColor: colorScheme.surface,
                     radius: 20 * s,
                     child: IconButton(
                       icon: Icon(
                         Icons.arrow_back,
-                        color: _primaryColor,
+                        color: colorScheme.primary,
                         size: 20 * s,
                       ),
                       onPressed: () => Navigator.maybePop(context),
@@ -121,18 +119,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                 // Title
                 Text(
-                  'Create Account',
+                  l10n.authRegisterTitle,
                   style: TextStyle(
                     fontSize: 32 * s,
                     fontWeight: FontWeight.w800,
-                    color: _primaryColor,
+                    color: colorScheme.primary,
                   ),
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 6 * s),
                 Text(
-                  "Let's Create Account Together",
-                  style: TextStyle(fontSize: 14 * s, color: _mutedText),
+                  l10n.authRegisterSubtitle,
+                  style: TextStyle(fontSize: 14 * s, color: colorScheme.onSurfaceVariant),
                   textAlign: TextAlign.center,
                 ),
 
@@ -140,19 +138,20 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                 // Name
                 Text(
-                  'Your Name',
+                  l10n.authNameLabel,
                   style: TextStyle(
                     fontSize: 16 * s,
                     fontWeight: FontWeight.w700,
-                    color: _primaryColor,
+                    color: colorScheme.primary,
                   ),
                 ),
                 SizedBox(height: 8 * s),
                 _roundedField(
+                  context: context,
                   controller: _nameCtrl,
-                  hint: 'Full name',
+                  hint: l10n.authNameHint,
                   validator: (v) => (v == null || v.trim().isEmpty)
-                      ? 'Nama tidak boleh kosong'
+                      ? l10n.validationNameEmpty
                       : null,
                 ),
 
@@ -160,17 +159,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                 // Email
                 Text(
-                  'Email Address',
+                  l10n.authEmailLabel,
                   style: TextStyle(
                     fontSize: 16 * s,
                     fontWeight: FontWeight.w700,
-                    color: _primaryColor,
+                    color: colorScheme.primary,
                   ),
                 ),
                 SizedBox(height: 8 * s),
                 _roundedField(
+                  context: context,
                   controller: _emailCtrl,
-                  hint: 'example@email.com',
+                  hint: l10n.authEmailHint,
                   keyboardType: TextInputType.emailAddress,
                   validator: (v) => Validators.email(v),
                 ),
@@ -179,17 +179,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                 // Password
                 Text(
-                  'Password',
+                  l10n.authPasswordLabel,
                   style: TextStyle(
                     fontSize: 16 * s,
                     fontWeight: FontWeight.w700,
-                    color: _primaryColor,
+                    color: colorScheme.primary,
                   ),
                 ),
                 SizedBox(height: 8 * s),
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: colorScheme.surface,
                     borderRadius: BorderRadius.circular(28 * s),
                   ),
                   child: Row(
@@ -199,7 +199,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           controller: _pwCtrl,
                           obscureText: _obscure,
                           decoration: InputDecoration(
-                            hintText: 'Enter your password',
+                            hintText: l10n.authPasswordHint,
                             border: InputBorder.none,
                             contentPadding: EdgeInsets.symmetric(
                               horizontal: 20 * s,
@@ -216,7 +216,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           onPressed: () => setState(() => _obscure = !_obscure),
                           icon: Icon(
                             _obscure ? Icons.visibility_off : Icons.visibility,
-                            color: _primaryColor,
+                            color: colorScheme.primary,
                             size: 22 * s,
                           ),
                         ),
@@ -229,17 +229,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                 // Location
                 Text(
-                  'Location',
+                  l10n.authLocationLabel,
                   style: TextStyle(
                     fontSize: 16 * s,
                     fontWeight: FontWeight.w700,
-                    color: _primaryColor,
+                    color: colorScheme.primary,
                   ),
                 ),
                 SizedBox(height: 8 * s),
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: colorScheme.surface,
                     borderRadius: BorderRadius.circular(28 * s),
                   ),
                   child: Row(
@@ -248,7 +248,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         child: TextFormField(
                           controller: _locationCtrl,
                           decoration: InputDecoration(
-                            hintText: 'Your city',
+                            hintText: l10n.authLocationHint,
                             border: InputBorder.none,
                             contentPadding: EdgeInsets.symmetric(
                               horizontal: 20 * s,
@@ -256,7 +256,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             ),
                           ),
                           validator: (v) => (v == null || v.trim().isEmpty)
-                              ? 'Lokasi tidak boleh kosong'
+                              ? l10n.validationLocationEmpty
                               : null,
                         ),
                       ),
@@ -264,7 +264,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         padding: EdgeInsets.only(right: 12 * s),
                         child: Icon(
                           Icons.location_on,
-                          color: _primaryColor,
+                          color: colorScheme.primary,
                           size: 22 * s,
                         ),
                       ),
@@ -280,16 +280,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   child: ElevatedButton(
                     onPressed: _loading ? null : _doRegister,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _primaryColor,
+                      backgroundColor: colorScheme.primary,
+                      foregroundColor: colorScheme.onPrimary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(40 * s),
                       ),
                       elevation: 4,
                     ),
                     child: _loading
-                        ? const CircularProgressIndicator(color: Colors.white)
+                        ? CircularProgressIndicator(color: colorScheme.onPrimary)
                         : Text(
-                            'Sign Up',
+                            l10n.authSignUp,
                             style: TextStyle(
                               fontSize: 18 * s,
                               fontWeight: FontWeight.w700,
@@ -305,10 +306,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   height: 56 * s,
                   child: OutlinedButton(
                     onPressed: () {
-                      // TODO: implement Google register / sign-in
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(l10n.commonFeatureComingSoon)),
+                      );
                     },
                     style: OutlinedButton.styleFrom(
-                      backgroundColor: Colors.white,
+                      backgroundColor: colorScheme.surface,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(40 * s),
                       ),
@@ -323,16 +326,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           errorBuilder: (_, __, ___) => Icon(
                             Icons.g_mobiledata,
                             size: 20 * s,
-                            color: _primaryColor,
+                            color: colorScheme.primary,
                           ),
                         ),
                         SizedBox(width: 10 * s),
                         Text(
-                          'Sign in with google',
+                          l10n.authSignInGoogle,
                           style: TextStyle(
                             fontSize: 16 * s,
                             fontWeight: FontWeight.w600,
-                            color: _primaryColor,
+                            color: colorScheme.primary,
                           ),
                         ),
                       ],
@@ -349,16 +352,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     );
   }
 
-  // Helper field
   Widget _roundedField({
+    required BuildContext context,
     required TextEditingController controller,
     required String hint,
     String? Function(String?)? validator,
     TextInputType? keyboardType,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(28),
       ),
       child: TextFormField(

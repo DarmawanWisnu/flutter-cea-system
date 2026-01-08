@@ -4,13 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:fountaine/app/routes.dart';
 import 'package:fountaine/providers/provider/auth_provider.dart';
+import 'package:fountaine/l10n/app_localizations.dart';
 
 class VerifyScreen extends ConsumerStatefulWidget {
   const VerifyScreen({super.key});
-
-  static const Color _bg = Color(0xFFF6FBF6);
-  static const Color _primary = Color(0xFF154B2E);
-  static const Color _muted = Color(0xFF555555);
 
   @override
   ConsumerState<VerifyScreen> createState() => _VerifyScreenState();
@@ -30,24 +27,24 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
     final uri = Uri.parse('https://mail.google.com/');
     try {
       final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
-      if (!ok) _showSnack('Gagal membuka email. Coba buka manual ya.');
+      if (!ok) _showSnack('Failed to open email. Try opening manually.');
     } catch (e) {
-      _showSnack('Gagal membuka email. Error: $e');
+      _showSnack('Failed to open email. Error: $e');
     }
   }
 
   Future<void> _copyEmail(String email) async {
     await Clipboard.setData(ClipboardData(text: email));
-    _showSnack('Email disalin ke clipboard');
+    _showSnack('Email copied to clipboard');
   }
 
   Future<void> _resend() async {
     setState(() => _isWorking = true);
     try {
       await ref.read(authProvider.notifier).sendEmailVerification();
-      _showSnack('Email verifikasi dikirim ulang. Cek inbox/spam ya.');
+      _showSnack('Verification email sent. Check your inbox/spam.');
     } catch (e) {
-      _showSnack('Gagal kirim verifikasi: $e');
+      _showSnack('Failed to send verification: $e');
     } finally {
       if (mounted) setState(() => _isWorking = false);
     }
@@ -60,13 +57,13 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
       final user = ref.read(authProvider);
       if (user != null && user.emailVerified) {
         if (!mounted) return;
-        _showSnack('Verifikasi terdeteksi. Selamat!');
+        _showSnack('Verification detected. Welcome!');
         Navigator.pushReplacementNamed(context, Routes.home);
         return;
       }
-      _showSnack('Belum terverifikasi. Coba lagi beberapa detik nanti.');
+      _showSnack('Not verified yet. Try again in a few seconds.');
     } catch (e) {
-      _showSnack('Gagal memuat status: $e');
+      _showSnack('Failed to load status: $e');
     } finally {
       if (mounted) setState(() => _isWorking = false);
     }
@@ -79,7 +76,7 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
       if (!mounted) return;
       Navigator.pushReplacementNamed(context, Routes.login);
     } catch (e) {
-      _showSnack('Gagal keluar: $e');
+      _showSnack('Failed to logout: $e');
     } finally {
       if (mounted) setState(() => _isWorking = false);
     }
@@ -88,11 +85,13 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
   @override
   Widget build(BuildContext context) {
     final s = MediaQuery.of(context).size.width / 375.0;
-    final user = ref.watch(authProvider); // User? dari StateNotifier
+    final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
+    final user = ref.watch(authProvider);
     final email = user?.email ?? '—';
 
     return Scaffold(
-      backgroundColor: VerifyScreen._bg,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 24 * s, vertical: 16 * s),
@@ -103,7 +102,7 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
               Row(
                 children: [
                   Material(
-                    color: Colors.white,
+                    color: colorScheme.surface,
                     shape: const CircleBorder(),
                     elevation: 2,
                     child: InkWell(
@@ -113,7 +112,7 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
                         padding: EdgeInsets.all(8 * s),
                         child: Icon(
                           Icons.arrow_back,
-                          color: VerifyScreen._primary,
+                          color: colorScheme.primary,
                           size: 20 * s,
                         ),
                       ),
@@ -123,7 +122,7 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
                   TextButton.icon(
                     onPressed: _isWorking ? null : _logout,
                     icon: const Icon(Icons.logout),
-                    label: const Text('Keluar'),
+                    label: Text(l10n.authLogout),
                   ),
                 ],
               ),
@@ -137,11 +136,11 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
                   horizontal: 16 * s,
                 ),
                 decoration: BoxDecoration(
-                  color: VerifyScreen._primary,
+                  color: colorScheme.primary,
                   borderRadius: BorderRadius.circular(10),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
+                      color: Colors.black.withValues(alpha: 0.08),
                       blurRadius: 12,
                       offset: const Offset(0, 6),
                     ),
@@ -149,11 +148,10 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
                 ),
                 child: Row(
                   children: [
-                    // icon box
                     Container(
                       padding: EdgeInsets.all(10 * s),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.08),
+                        color: Colors.white.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Image.asset(
@@ -163,23 +161,23 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
                       ),
                     ),
                     SizedBox(width: 12 * s),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'Fountaine',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: colorScheme.onPrimary,
                               fontSize: 15,
                               fontWeight: FontWeight.w800,
                             ),
                           ),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Text(
-                            'Email Verification',
+                            l10n.authVerifyBanner,
                             style: TextStyle(
-                              color: Colors.white70,
+                              color: colorScheme.onPrimary.withValues(alpha: 0.7),
                               fontSize: 13,
                             ),
                           ),
@@ -195,11 +193,11 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
               // Title
               Center(
                 child: Text(
-                  'Welcome to Fountaine',
+                  l10n.authVerifyTitle,
                   style: TextStyle(
                     fontSize: 20 * s,
                     fontWeight: FontWeight.w800,
-                    color: Colors.black87,
+                    color: colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -208,12 +206,11 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
               // Description + user email
               Center(
                 child: Text(
-                  'Terima kasih sudah mendaftar.\n'
-                  'Silakan verifikasi alamat email berikut:\n$email',
+                  l10n.authVerifyDesc(email),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14 * s,
-                    color: VerifyScreen._muted,
+                    color: colorScheme.onSurfaceVariant,
                     height: 1.5,
                   ),
                 ),
@@ -228,12 +225,12 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
                 children: [
                   ActionChip(
                     avatar: const Icon(Icons.copy, size: 18),
-                    label: const Text('Salin Email'),
+                    label: Text(l10n.authCopyEmail),
                     onPressed: email == '—' ? null : () => _copyEmail(email),
                   ),
                   ActionChip(
                     avatar: const Icon(Icons.mail_outline, size: 18),
-                    label: const Text('Buka Email'),
+                    label: Text(l10n.authOpenEmail),
                     onPressed: _isWorking ? null : _openMailApp,
                   ),
                 ],
@@ -241,14 +238,15 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
 
               const SizedBox(height: 24),
 
-              // Tombol utama: Kirim Ulang & Muat Ulang
+              // Resend button
               SizedBox(
                 height: 52 * s,
                 child: ElevatedButton.icon(
                   onPressed: _isWorking ? null : _resend,
                   icon: const Icon(Icons.send_outlined, size: 18),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: VerifyScreen._primary,
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: colorScheme.onPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14 * s),
                     ),
@@ -264,11 +262,10 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
                           ),
                         )
                       : Text(
-                          'Kirim Ulang Email Verifikasi',
+                          l10n.authResendEmail,
                           style: TextStyle(
                             fontSize: 16 * s,
                             fontWeight: FontWeight.w700,
-                            color: Colors.white,
                           ),
                         ),
                 ),
@@ -279,7 +276,7 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
               OutlinedButton.icon(
                 onPressed: _isWorking ? null : _refresh,
                 icon: const Icon(Icons.refresh),
-                label: const Text('Muat Ulang Status'),
+                label: Text(l10n.authRefreshStatus),
               ),
 
               const SizedBox(height: 16),
@@ -287,6 +284,7 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
               // Tips expandable
               Card(
                 elevation: 2,
+                color: colorScheme.surface,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -304,12 +302,12 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
                           children: [
                             Icon(
                               _showTips ? Icons.expand_less : Icons.expand_more,
-                              color: VerifyScreen._muted,
+                              color: colorScheme.onSurfaceVariant,
                             ),
                             const SizedBox(width: 8),
-                            const Text(
-                              'Butuh bantuan?',
-                              style: TextStyle(fontWeight: FontWeight.w600),
+                            Text(
+                              l10n.authNeedHelp,
+                              style: const TextStyle(fontWeight: FontWeight.w600),
                             ),
                           ],
                         ),
@@ -317,13 +315,10 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
                       if (_showTips) ...[
                         const SizedBox(height: 8),
                         Text(
-                          '• Cek folder Spam/Promotions.\n'
-                          '• Tunggu 1–2 menit lalu tekan "Muat Ulang Status".\n'
-                          '• Pastikan email benar.\n'
-                          '• Coba "Kirim Ulang Email Verifikasi".',
+                          l10n.authHelpTips,
                           style: TextStyle(
                             fontSize: 13 * s,
-                            color: VerifyScreen._muted,
+                            color: colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],
@@ -340,13 +335,13 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
                   onPressed: _isWorking
                       ? null
                       : () => Navigator.pushReplacementNamed(
-                          context,
-                          Routes.login,
-                        ),
+                            context,
+                            Routes.login,
+                          ),
                   child: Text(
-                    'Back to Login',
+                    l10n.authBackToLogin,
                     style: TextStyle(
-                      color: VerifyScreen._primary,
+                      color: colorScheme.primary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

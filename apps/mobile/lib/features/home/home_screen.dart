@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fountaine/app/routes.dart';
+import 'package:fountaine/l10n/app_localizations.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final s = MediaQuery.of(context).size.width / 375.0;
-    const bg = Color(0xFFF6FBF6);
-    const primary = Color(0xFF154B2E);
-    const muted = Color(0xFF7A7A7A);
+    final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     Widget featureCard({
       required String title,
@@ -22,7 +23,7 @@ class HomeScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(16 * s),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colorScheme.surface,
             borderRadius: BorderRadius.circular(16 * s),
           ),
           padding: EdgeInsets.all(12 * s),
@@ -34,13 +35,13 @@ class HomeScreen extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 18 * s,
                   fontWeight: FontWeight.w700,
-                  color: primary,
+                  color: colorScheme.primary,
                 ),
               ),
               SizedBox(height: 6 * s),
               Text(
                 subtitle,
-                style: TextStyle(fontSize: 13 * s, color: muted),
+                style: TextStyle(fontSize: 13 * s, color: colorScheme.onSurfaceVariant),
               ),
               const Spacer(),
               Align(
@@ -55,8 +56,8 @@ class HomeScreen extends StatelessWidget {
                     errorBuilder: (_, __, ___) => Container(
                       width: 110 * s,
                       height: 90 * s,
-                      color: primary.withOpacity(0.1),
-                      child: Icon(Icons.image, size: 32 * s, color: primary),
+                      color: colorScheme.primary.withValues(alpha: 0.1),
+                      child: Icon(Icons.image, size: 32 * s, color: colorScheme.primary),
                     ),
                   ),
                 ),
@@ -68,7 +69,7 @@ class HomeScreen extends StatelessWidget {
     }
 
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -87,7 +88,7 @@ class HomeScreen extends StatelessWidget {
                         'assets/images/weather_icon.png',
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) =>
-                            Container(color: primary.withOpacity(0.3)),
+                            Container(color: colorScheme.primary.withValues(alpha: 0.3)),
                       ),
                     ),
                   ),
@@ -106,7 +107,7 @@ class HomeScreen extends StatelessWidget {
                           child: IconButton(
                             icon: Icon(
                               Icons.grid_view_rounded,
-                              color: primary,
+                              color: colorScheme.primary,
                               size: 18 * s,
                             ),
                             onPressed: () {},
@@ -125,7 +126,7 @@ class HomeScreen extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          'Your location',
+                          l10n.homeYourLocation,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Colors.white70,
@@ -171,7 +172,7 @@ class HomeScreen extends StatelessWidget {
                     vertical: 18 * s,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: colorScheme.surface,
                     borderRadius: BorderRadius.circular(16 * s),
                   ),
                   child: Row(
@@ -184,13 +185,13 @@ class HomeScreen extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 28 * s,
                               fontWeight: FontWeight.w800,
-                              color: primary,
+                              color: colorScheme.primary,
                             ),
                           ),
                           SizedBox(height: 6 * s),
                           Text(
                             'Tangerang, Banten',
-                            style: TextStyle(fontSize: 16 * s, color: primary),
+                            style: TextStyle(fontSize: 16 * s, color: colorScheme.primary),
                           ),
                         ],
                       ),
@@ -202,7 +203,7 @@ class HomeScreen extends StatelessWidget {
                         errorBuilder: (_, __, ___) => Icon(
                           Icons.cloud,
                           size: 72 * s,
-                          color: primary.withOpacity(0.3),
+                          color: colorScheme.primary.withValues(alpha: 0.3),
                         ),
                       ),
                     ],
@@ -219,11 +220,11 @@ class HomeScreen extends StatelessWidget {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'All Features',
+                  l10n.homeAllFeatures,
                   style: TextStyle(
                     fontSize: 18 * s,
                     fontWeight: FontWeight.w800,
-                    color: primary,
+                    color: colorScheme.primary,
                   ),
                 ),
               ),
@@ -244,26 +245,26 @@ class HomeScreen extends StatelessWidget {
                   childAspectRatio: 0.82,
                   children: [
                     featureCard(
-                      title: 'Monitoring',
-                      subtitle: 'Check your plant\'s health',
+                      title: l10n.homeMonitoring,
+                      subtitle: l10n.homeMonitoringDesc,
                       assetImage: 'assets/images/feature_monitor.png',
                       onTap: () => Navigator.pushNamed(context, Routes.monitor),
                     ),
                     featureCard(
-                      title: 'Notification',
-                      subtitle: 'View past records',
+                      title: l10n.homeNotification,
+                      subtitle: l10n.homeNotificationDesc,
                       assetImage: 'assets/images/feature_notification.png',
                       onTap: () => Navigator.pushNamed(context, Routes.history),
                     ),
                     featureCard(
-                      title: 'Add Kit',
-                      subtitle: 'Connect new devices',
+                      title: l10n.homeAddKit,
+                      subtitle: l10n.homeAddKitDesc,
                       assetImage: 'assets/images/feature_addkit.png',
                       onTap: () => Navigator.pushNamed(context, Routes.addKit),
                     ),
                     featureCard(
-                      title: 'Setting',
-                      subtitle: 'Manage your account',
+                      title: l10n.homeSetting,
+                      subtitle: l10n.homeSettingDesc,
                       assetImage: 'assets/images/feature_setting.png',
                       onTap: () =>
                           Navigator.pushNamed(context, Routes.settings),
@@ -290,7 +291,7 @@ class HomeScreen extends StatelessWidget {
               child: Container(
                 height: 64 * s,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: colorScheme.surface,
                   borderRadius: BorderRadius.vertical(
                     top: Radius.circular(22 * s),
                   ),
@@ -311,7 +312,7 @@ class HomeScreen extends StatelessWidget {
                           children: [
                             Icon(
                               Icons.home_outlined,
-                              color: primary,
+                              color: colorScheme.primary,
                               size: 26 * s,
                             ),
                             SizedBox(height: 6 * s),
@@ -319,7 +320,7 @@ class HomeScreen extends StatelessWidget {
                               width: 6 * s,
                               height: 6 * s,
                               decoration: BoxDecoration(
-                                color: primary,
+                                color: colorScheme.primary,
                                 shape: BoxShape.circle,
                               ),
                             ),
@@ -333,7 +334,7 @@ class HomeScreen extends StatelessWidget {
                             Navigator.pushNamed(context, Routes.monitor),
                         child: Icon(
                           Icons.people_outline,
-                          color: Colors.grey,
+                          color: colorScheme.onSurfaceVariant,
                           size: 26 * s,
                         ),
                       ),
@@ -347,7 +348,7 @@ class HomeScreen extends StatelessWidget {
                             Navigator.pushNamed(context, Routes.history),
                         child: Icon(
                           Icons.park_outlined,
-                          color: Colors.grey,
+                          color: colorScheme.onSurfaceVariant,
                           size: 26 * s,
                         ),
                       ),
@@ -358,7 +359,7 @@ class HomeScreen extends StatelessWidget {
                             Navigator.pushNamed(context, Routes.settings),
                         child: Icon(
                           Icons.person_outline,
-                          color: Colors.grey,
+                          color: colorScheme.onSurfaceVariant,
                           size: 26 * s,
                         ),
                       ),
@@ -377,11 +378,11 @@ class HomeScreen extends StatelessWidget {
                   width: 72 * s,
                   height: 72 * s,
                   decoration: BoxDecoration(
-                    color: primary,
+                    color: colorScheme.primary,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: primary.withOpacity(0.18),
+                        color: colorScheme.primary.withValues(alpha: 0.18),
                         blurRadius: 18 * s,
                         offset: Offset(0, 8 * s),
                       ),
@@ -390,7 +391,7 @@ class HomeScreen extends StatelessWidget {
                   child: Center(
                     child: Icon(
                       Icons.qr_code_2,
-                      color: Colors.white,
+                      color: colorScheme.onPrimary,
                       size: 30 * s,
                     ),
                   ),

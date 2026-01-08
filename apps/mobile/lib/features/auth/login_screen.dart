@@ -5,6 +5,7 @@ import 'package:fountaine/app/routes.dart';
 import 'package:fountaine/providers/provider/auth_provider.dart';
 import 'package:fountaine/utils/validators.dart';
 import 'package:fountaine/utils/firebase_error_handler.dart';
+import 'package:fountaine/l10n/app_localizations.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -18,15 +19,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _pwCtrl = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  // State UI
   bool _loading = false;
   bool _obscure = true;
 
-  static const Color _bgColor = Color(0xFFF6FBF6);
-  static const Color _primaryColor = Color(0xFF154B2E);
-  static const Color _mutedText = Color(0xFF6B6B6B);
-
-  // Submit: validasi -> panggil AuthProvider -> ke Home
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _loading = true);
@@ -42,7 +37,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     } catch (e) {
       if (!mounted) return;
 
-      // Use FirebaseErrorHandler for user-friendly error messages
       final (title, message) = FirebaseErrorHandler.handleAuthException(e);
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -88,25 +82,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
-      backgroundColor: _bgColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 36),
           child: Form(
             key: _formKey,
-
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Tombol Back
+                // Back Button
                 Align(
                   alignment: Alignment.centerLeft,
                   child: CircleAvatar(
-                    backgroundColor: Colors.white,
+                    backgroundColor: colorScheme.surface,
                     radius: 20,
                     child: IconButton(
-                      icon: const Icon(Icons.arrow_back, color: _primaryColor),
+                      icon: Icon(Icons.arrow_back, color: colorScheme.primary),
                       onPressed: () => Navigator.maybePop(context),
                     ),
                   ),
@@ -114,49 +110,49 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                 const SizedBox(height: 32),
 
-                // Judul Halaman
-                const Text(
-                  'Hello Again!',
+                // Title
+                Text(
+                  l10n.authLoginTitle,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.w800,
-                    color: _primaryColor,
+                    color: colorScheme.primary,
                   ),
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  "Welcome Back You've Been Missed!",
+                  l10n.authLoginSubtitle,
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 14, color: _mutedText),
+                  style: TextStyle(fontSize: 14, color: colorScheme.onSurfaceVariant),
                 ),
 
                 const SizedBox(height: 36),
 
-                // Label Email
-                const Text(
-                  'Email Address',
+                // Email Label
+                Text(
+                  l10n.authEmailLabel,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    color: _primaryColor,
+                    color: colorScheme.primary,
                   ),
                 ),
                 const SizedBox(height: 8),
 
-                // Field Email + Validator
+                // Email Field
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: colorScheme.surface,
                     borderRadius: BorderRadius.circular(30),
                   ),
                   child: TextFormField(
                     controller: _emailCtrl,
                     keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(
-                      hintText: 'example@email.com',
+                    decoration: InputDecoration(
+                      hintText: l10n.authEmailHint,
                       border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(
+                      contentPadding: const EdgeInsets.symmetric(
                         horizontal: 20,
                         vertical: 18,
                       ),
@@ -168,21 +164,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                 const SizedBox(height: 20),
 
-                // Label Password
-                const Text(
-                  'Password',
+                // Password Label
+                Text(
+                  l10n.authPasswordLabel,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    color: _primaryColor,
+                    color: colorScheme.primary,
                   ),
                 ),
                 const SizedBox(height: 8),
 
-                // Field Password + Toggle Eye + Validator
+                // Password Field
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: colorScheme.surface,
                     borderRadius: BorderRadius.circular(30),
                   ),
                   child: Row(
@@ -191,10 +187,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         child: TextFormField(
                           controller: _pwCtrl,
                           obscureText: _obscure,
-                          decoration: const InputDecoration(
-                            hintText: 'Enter your password',
+                          decoration: InputDecoration(
+                            hintText: l10n.authPasswordHint,
                             border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(
+                            contentPadding: const EdgeInsets.symmetric(
                               horizontal: 20,
                               vertical: 18,
                             ),
@@ -203,7 +199,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           onFieldSubmitted: (_) => _loading ? null : _submit(),
                         ),
                       ),
-                      // Icon toggle show/hide password
                       Padding(
                         padding: const EdgeInsets.only(right: 8),
                         child: IconButton(
@@ -211,7 +206,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           onPressed: () => setState(() => _obscure = !_obscure),
                           icon: Icon(
                             _obscure ? Icons.visibility_off : Icons.visibility,
-                            color: _primaryColor,
+                            color: colorScheme.primary,
                             size: 20,
                           ),
                         ),
@@ -222,27 +217,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                 const SizedBox(height: 8),
 
-                // Link Lupa Password
+                // Recovery Password
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () =>
                         Navigator.pushNamed(context, Routes.forgotPassword),
                     child: Text(
-                      'Recovery Password',
-                      style: TextStyle(fontSize: 13, color: _mutedText),
+                      l10n.authRecoveryPassword,
+                      style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
                     ),
                   ),
                 ),
 
                 const SizedBox(height: 24),
 
-                // Tombol Sign In
+                // Sign In Button
                 _HoverScaleButton(
                   height: 56,
                   radius: 40,
-                  backgroundColor: _primaryColor,
-                  shadowColor: const Color(0x33154B2E),
+                  backgroundColor: colorScheme.primary,
+                  shadowColor: colorScheme.primary.withValues(alpha: 0.2),
                   pressedScale: 0.985,
                   onPressed: _loading ? null : _submit,
                   child: _loading
@@ -251,25 +246,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           height: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text(
-                          'Sign In',
+                      : Text(
+                          l10n.authSignIn,
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
-                            color: Colors.white,
+                            color: colorScheme.onPrimary,
                           ),
                         ),
                 ),
 
                 const SizedBox(height: 16),
 
-                // Tombol Google
+                // Google Button
                 _HoverScaleButton(
                   height: 56,
                   radius: 40,
-                  backgroundColor: Colors.white,
+                  backgroundColor: colorScheme.surface,
                   borderColor: Colors.transparent,
-                  shadowColor: const Color(0x1A000000),
+                  shadowColor: Colors.black.withValues(alpha: 0.1),
                   pressedScale: 0.985,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -277,48 +272,45 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       Image.asset(
                         'assets/images/google_logo.png',
                         height: 20,
-                        errorBuilder: (_, __, ___) => const Icon(
+                        errorBuilder: (_, __, ___) => Icon(
                           Icons.g_mobiledata,
                           size: 20,
-                          color: _primaryColor,
+                          color: colorScheme.primary,
                         ),
                       ),
                       const SizedBox(width: 10),
-                      const Text(
-                        'Sign in with Google',
+                      Text(
+                        l10n.authSignInGoogle,
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: _primaryColor,
+                          color: colorScheme.primary,
                         ),
                       ),
                     ],
                   ),
                   onPressed: () {
-                    // TODO: Implement Google Sign-In (google_sign_in + FirebaseAuth credential)
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Google Sign-In belum diimplementasi'),
-                      ),
+                      SnackBar(content: Text(l10n.commonFeatureComingSoon)),
                     );
                   },
                 ),
 
                 const SizedBox(height: 28),
 
-                // Footer ke Register
+                // Footer
                 Center(
                   child: RichText(
                     text: TextSpan(
-                      text: "Don’t Have An Account? ",
-                      style: TextStyle(fontSize: 13, color: _mutedText),
+                      text: l10n.authNoAccount,
+                      style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
                       children: [
                         TextSpan(
-                          text: "Sign Up For Free",
-                          style: const TextStyle(
+                          text: l10n.authSignUpFree,
+                          style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
-                            color: _primaryColor,
+                            color: colorScheme.primary,
                           ),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () {
@@ -392,7 +384,7 @@ class _HoverScaleButtonState extends State<_HoverScaleButton> {
             height: widget.height,
             decoration: BoxDecoration(
               color: widget.onPressed == null
-                  ? widget.backgroundColor.withOpacity(0.6)
+                  ? widget.backgroundColor.withValues(alpha: 0.6)
                   : widget.backgroundColor,
               borderRadius: BorderRadius.circular(widget.radius),
               border: Border.all(color: border),

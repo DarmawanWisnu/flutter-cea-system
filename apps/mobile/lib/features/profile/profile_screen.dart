@@ -4,17 +4,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fountaine/app/routes.dart';
 import 'package:fountaine/providers/provider/auth_provider.dart';
 import 'package:fountaine/providers/provider/api_provider.dart';
+import 'package:fountaine/l10n/app_localizations.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
-  static const Color _bg = Color(0xFFF6FBF6);
-  static const Color _primary = Color(0xFF154B2E);
-  static const Color _muted = Color(0xFF7A7A7A);
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     // FETCH kits dari backend
     final kitsAsync = ref.watch(apiKitsListProvider);
@@ -25,15 +24,15 @@ class ProfileScreen extends ConsumerWidget {
     final inferredName =
         (user?.displayName != null && user!.displayName!.trim().isNotEmpty)
         ? user.displayName!.trim()
-        : (email != '-' ? email.split('@').first : 'Profile');
+        : (email != '-' ? email.split('@').first : l10n.profileTitle);
 
     final name = inferredName;
 
     final s = MediaQuery.of(context).size.width / 375.0;
 
     // KIT dari backend
-    String kitName = 'Your Kit Name';
-    String kitId = 'SUF-XXXX-XXXX';
+    String kitName = l10n.profileDefaultKitName;
+    String kitId = l10n.profileDefaultKitId;
 
     // Get currently selected kit from monitor screen
     final currentKitId = ref.watch(currentKitIdProvider);
@@ -45,13 +44,13 @@ class ProfileScreen extends ConsumerWidget {
           (k) => k["id"] == currentKitId,
           orElse: () => data.first,
         );
-        kitName = selectedKit["name"] as String? ?? 'Your Kit Name';
-        kitId = selectedKit["id"] as String? ?? 'SUF-XXXX-XXXX';
+        kitName = selectedKit["name"] as String? ?? l10n.profileDefaultKitName;
+        kitId = selectedKit["id"] as String? ?? l10n.profileDefaultKitId;
       }
     });
 
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 20 * s, vertical: 14 * s),
@@ -62,6 +61,7 @@ class ProfileScreen extends ConsumerWidget {
               Row(
                 children: [
                   _pillIconButton(
+                    context: context,
                     s: s,
                     icon: Icons.arrow_back,
                     onTap: () => Navigator.maybePop(context),
@@ -69,11 +69,11 @@ class ProfileScreen extends ConsumerWidget {
                   Expanded(
                     child: Center(
                       child: Text(
-                        'Profile',
+                        l10n.profileTitle,
                         style: TextStyle(
                           fontSize: 20 * s,
                           fontWeight: FontWeight.w800,
-                          color: _primary,
+                          color: colorScheme.primary,
                         ),
                       ),
                     ),
@@ -91,15 +91,18 @@ class ProfileScreen extends ConsumerWidget {
                     Container(
                       padding: EdgeInsets.all(3 * s),
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(
+                        gradient: LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
-                          colors: [Color(0xFF1E6C45), Color(0xFF154B2E)],
+                          colors: [
+                            colorScheme.primary.withValues(alpha: 0.8),
+                            colorScheme.primary,
+                          ],
                         ),
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.06),
+                            color: Colors.black.withValues(alpha: 0.06),
                             blurRadius: 16 * s,
                             offset: Offset(0, 8 * s),
                           ),
@@ -107,14 +110,14 @@ class ProfileScreen extends ConsumerWidget {
                       ),
                       child: CircleAvatar(
                         radius: 46 * s,
-                        backgroundColor: Colors.white,
+                        backgroundColor: colorScheme.surface,
                         child: CircleAvatar(
                           radius: 42 * s,
-                          backgroundColor: _primary,
+                          backgroundColor: colorScheme.primary,
                           child: Icon(
                             Icons.person,
                             size: 46 * s,
-                            color: Colors.white,
+                            color: colorScheme.onPrimary,
                           ),
                         ),
                       ),
@@ -125,7 +128,7 @@ class ProfileScreen extends ConsumerWidget {
                       style: TextStyle(
                         fontSize: 18 * s,
                         fontWeight: FontWeight.w800,
-                        color: _primary,
+                        color: colorScheme.primary,
                         letterSpacing: 0.2,
                       ),
                     ),
@@ -136,7 +139,7 @@ class ProfileScreen extends ConsumerWidget {
                           email,
                           style: TextStyle(
                             fontSize: 13 * s,
-                            color: _muted,
+                            color: colorScheme.onSurfaceVariant,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -148,7 +151,7 @@ class ProfileScreen extends ConsumerWidget {
               SizedBox(height: 22 * s),
 
               // KIT BADGE
-              _kitBadge(kitName, s),
+              _kitBadge(context, kitName, s, l10n),
 
               SizedBox(height: 14 * s),
 
@@ -156,12 +159,12 @@ class ProfileScreen extends ConsumerWidget {
               Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: colorScheme.surface,
                   borderRadius: BorderRadius.circular(18 * s),
-                  border: Border.all(color: const Color(0xFFE8EEE9)),
+                  border: Border.all(color: colorScheme.outlineVariant),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
+                      color: Colors.black.withValues(alpha: 0.03),
                       blurRadius: 12 * s,
                       offset: Offset(0, 6 * s),
                     ),
@@ -170,30 +173,34 @@ class ProfileScreen extends ConsumerWidget {
                 child: Column(
                   children: [
                     _infoTile(
+                      context: context,
                       s: s,
                       icon: Icons.badge_outlined,
-                      label: 'User ID',
+                      label: l10n.profileUserId,
                       value: uid,
                     ),
-                    _divider(s),
+                    _divider(context, s),
                     _infoTile(
+                      context: context,
                       s: s,
                       icon: Icons.email_outlined,
-                      label: 'Email',
+                      label: l10n.profileEmail,
                       value: email,
                     ),
-                    _divider(s),
+                    _divider(context, s),
                     _infoTile(
+                      context: context,
                       s: s,
                       icon: Icons.view_in_ar_outlined,
-                      label: 'Kit Name',
+                      label: l10n.profileKitName,
                       value: kitName,
                     ),
-                    _divider(s),
+                    _divider(context, s),
                     _infoTile(
+                      context: context,
                       s: s,
                       icon: Icons.qr_code_2_outlined,
-                      label: 'Kit ID',
+                      label: l10n.profileKitId,
                       value: kitId,
                     ),
                   ],
@@ -204,14 +211,16 @@ class ProfileScreen extends ConsumerWidget {
 
               // EDIT & LOGOUT
               _primaryButton(
+                context: context,
                 s: s,
-                label: 'Edit Profile',
+                label: l10n.profileEditProfile,
                 onTap: () => Navigator.pushNamed(context, Routes.settings),
               ),
               SizedBox(height: 12 * s),
               _ghostButton(
+                context: context,
                 s: s,
-                label: 'Logout',
+                label: l10n.settingsLogout,
                 onTap: () async {
                   await ref.read(authProvider.notifier).signOut();
                   
@@ -239,18 +248,23 @@ class ProfileScreen extends ConsumerWidget {
 
   // SMALL WIDGETS
 
-  Widget _divider(double s) => Padding(
-    padding: EdgeInsets.symmetric(horizontal: 16 * s),
-    child: Divider(height: 1, color: const Color(0xFFF0F4F1)),
-  );
+  Widget _divider(BuildContext context, double s) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16 * s),
+      child: Divider(height: 1, color: colorScheme.outlineVariant),
+    );
+  }
 
   Widget _pillIconButton({
+    required BuildContext context,
     required double s,
     required IconData icon,
     required VoidCallback onTap,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Material(
-      color: Colors.white,
+      color: colorScheme.surface,
       borderRadius: BorderRadius.circular(22 * s),
       child: InkWell(
         borderRadius: BorderRadius.circular(22 * s),
@@ -263,25 +277,26 @@ class ProfileScreen extends ConsumerWidget {
             borderRadius: BorderRadius.circular(22 * s),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.04),
+                color: Colors.black.withValues(alpha: 0.04),
                 blurRadius: 10 * s,
                 offset: Offset(0, 6 * s),
               ),
             ],
           ),
-          child: Icon(icon, color: _primary, size: 20 * s),
+          child: Icon(icon, color: colorScheme.primary, size: 20 * s),
         ),
       ),
     );
   }
 
-  Widget _kitBadge(String kitName, double s) {
+  Widget _kitBadge(BuildContext context, String kitName, double s, AppLocalizations l10n) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12 * s, vertical: 10 * s),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(14 * s),
-        border: Border.all(color: const Color(0xFFE8EEE9)),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: Row(
         children: [
@@ -298,7 +313,7 @@ class ProfileScreen extends ConsumerWidget {
             child: Text(
               kitName,
               style: TextStyle(
-                color: _primary,
+                color: colorScheme.primary,
                 fontWeight: FontWeight.w700,
                 fontSize: 14 * s,
               ),
@@ -313,7 +328,7 @@ class ProfileScreen extends ConsumerWidget {
               border: Border.all(color: const Color(0xFF00C853)),
             ),
             child: Text(
-              'ACTIVE',
+              l10n.commonActive,
               style: TextStyle(
                 color: const Color(0xFF00A84A),
                 fontSize: 11 * s,
@@ -328,11 +343,13 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   Widget _infoTile({
+    required BuildContext context,
     required double s,
     required IconData icon,
     required String label,
     required String value,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16 * s, vertical: 14 * s),
       child: Row(
@@ -341,10 +358,10 @@ class ProfileScreen extends ConsumerWidget {
             height: 40 * s,
             width: 40 * s,
             decoration: BoxDecoration(
-              color: const Color(0xFFF3F7F4),
+              color: colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(12 * s),
             ),
-            child: Icon(icon, color: _primary, size: 22 * s),
+            child: Icon(icon, color: colorScheme.primary, size: 22 * s),
           ),
           SizedBox(width: 12 * s),
           Expanded(
@@ -353,7 +370,7 @@ class ProfileScreen extends ConsumerWidget {
               children: [
                 Text(
                   label,
-                  style: TextStyle(fontSize: 12 * s, color: _muted),
+                  style: TextStyle(fontSize: 12 * s, color: colorScheme.onSurfaceVariant),
                 ),
                 SizedBox(height: 4 * s),
                 Text(
@@ -361,7 +378,7 @@ class ProfileScreen extends ConsumerWidget {
                   style: TextStyle(
                     fontSize: 15 * s,
                     fontWeight: FontWeight.w800,
-                    color: _primary,
+                    color: colorScheme.primary,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -374,10 +391,12 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   Widget _primaryButton({
+    required BuildContext context,
     required double s,
     required String label,
     required VoidCallback onTap,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return SizedBox(
       width: double.infinity,
       height: 56 * s,
@@ -386,15 +405,18 @@ class ProfileScreen extends ConsumerWidget {
         onTap: onTap,
         child: Ink(
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
+            gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Color(0xFF1E6C45), Color(0xFF154B2E)],
+              colors: [
+                colorScheme.primary.withValues(alpha: 0.85),
+                colorScheme.primary,
+              ],
             ),
             borderRadius: BorderRadius.circular(16 * s),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.15),
+                color: Colors.black.withValues(alpha: 0.15),
                 blurRadius: 16 * s,
                 offset: Offset(0, 6 * s),
               ),
@@ -404,7 +426,7 @@ class ProfileScreen extends ConsumerWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.edit_rounded, color: Colors.white),
+                Icon(Icons.edit_rounded, color: colorScheme.onPrimary),
                 SizedBox(width: 10 * s),
                 Text(
                   label,
@@ -412,7 +434,7 @@ class ProfileScreen extends ConsumerWidget {
                     fontSize: 16 * s,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.4,
-                    color: Colors.white,
+                    color: colorScheme.onPrimary,
                   ),
                 ),
               ],
@@ -424,18 +446,20 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   Widget _ghostButton({
+    required BuildContext context,
     required double s,
     required String label,
     required VoidCallback onTap,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return SizedBox(
       width: double.infinity,
       height: 50 * s,
       child: OutlinedButton(
         onPressed: onTap,
         style: OutlinedButton.styleFrom(
-          backgroundColor: Colors.white,
-          side: BorderSide(color: _primary.withOpacity(0.18)),
+          backgroundColor: colorScheme.surface,
+          side: BorderSide(color: colorScheme.primary.withValues(alpha: 0.18)),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14 * s),
           ),
@@ -445,7 +469,7 @@ class ProfileScreen extends ConsumerWidget {
           style: TextStyle(
             fontSize: 16 * s,
             fontWeight: FontWeight.w800,
-            color: _primary,
+            color: colorScheme.primary,
           ),
         ),
       ),

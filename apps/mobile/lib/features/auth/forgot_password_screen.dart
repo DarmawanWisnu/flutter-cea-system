@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fountaine/providers/provider/auth_provider.dart';
+import 'package:fountaine/l10n/app_localizations.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -15,21 +16,21 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   final _emailCtrl = TextEditingController();
   bool _isSending = false;
 
-  // Validator email sederhana
-  String? _validateEmail(String? v) {
-    if (v == null || v.trim().isEmpty) return 'Email tidak boleh kosong';
+  String? _validateEmail(String? v, AppLocalizations l10n) {
+    if (v == null || v.trim().isEmpty) return l10n.validationEmailEmpty;
     final email = v.trim();
     final regex = RegExp(r'^[\w\.-]+@([\w-]+\.)+[\w-]{2,4}$');
-    if (!regex.hasMatch(email)) return 'Format email tidak valid';
+    if (!regex.hasMatch(email)) return l10n.validationEmailInvalid;
     return null;
   }
 
   Future<void> _sendResetLink() async {
+    final l10n = AppLocalizations.of(context)!;
+    
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isSending = true);
 
     try {
-      // Riverpod AuthNotifier
       await ref
           .read(authProvider.notifier)
           .sendPasswordReset(_emailCtrl.text.trim());
@@ -38,27 +39,24 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('Berhasil'),
-          content: Text(
-            'Link reset password telah dikirim ke ${_emailCtrl.text.trim()}.\n'
-            'Cek inbox atau folder spam ya.',
-          ),
+          title: Text(l10n.authForgotPasswordSuccess),
+          content: Text(l10n.authForgotPasswordSuccessMsg(_emailCtrl.text.trim())),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(ctx).pop();
                 Navigator.of(context).maybePop();
               },
-              child: const Text('Oke'),
+              child: Text(l10n.commonOk),
             ),
           ],
         ),
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Gagal kirim reset: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.authForgotPasswordFailed(e.toString()))),
+      );
     } finally {
       if (mounted) setState(() => _isSending = false);
     }
@@ -72,24 +70,32 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text('Forgot Password'),
+        title: Text(
+          l10n.authForgotPasswordTitle,
+          style: TextStyle(color: colorScheme.onSurface),
+        ),
         centerTitle: true,
+        iconTheme: IconThemeData(color: colorScheme.onSurface),
       ),
 
       body: Stack(
         children: [
           // background gradient
           Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFFe8f5ff), Color(0xFFf7fbff)],
+                colors: [
+                  colorScheme.primaryContainer.withValues(alpha: 0.3),
+                  Theme.of(context).scaffoldBackgroundColor,
+                ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
@@ -108,6 +114,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                       borderRadius: BorderRadius.circular(18),
                     ),
                     elevation: 6,
+                    color: colorScheme.surface,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 18,
@@ -118,33 +125,35 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: theme.colorScheme.primary.withOpacity(
-                                0.12,
-                              ),
+                              color: colorScheme.primary.withValues(alpha: 0.12),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
                               Icons.lock_open,
-                              color: theme.colorScheme.primary,
+                              color: colorScheme.primary,
                               size: 28,
                             ),
                           ),
                           const SizedBox(width: 14),
-                          const Expanded(
+                          Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Lupa Password?',
+                                  l10n.authForgotPasswordHeader,
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w600,
+                                    color: colorScheme.onSurface,
                                   ),
                                 ),
-                                SizedBox(height: 6),
+                                const SizedBox(height: 6),
                                 Text(
-                                  'Masukkan email yang terdaftar. Kami akan mengirimkan link untuk mereset passwordmu.',
-                                  style: TextStyle(fontSize: 13),
+                                  l10n.authForgotPasswordDesc,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
                                 ),
                               ],
                             ),
@@ -161,6 +170,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                       borderRadius: BorderRadius.circular(14),
                     ),
                     elevation: 3,
+                    color: colorScheme.surface,
                     child: Padding(
                       padding: const EdgeInsets.all(18),
                       child: Form(
@@ -169,11 +179,12 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            const Text(
-                              'Email',
+                            Text(
+                              l10n.commonEmail,
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
+                                color: colorScheme.onSurface,
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -181,8 +192,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                               controller: _emailCtrl,
                               keyboardType: TextInputType.emailAddress,
                               autofillHints: const [AutofillHints.email],
+                              style: TextStyle(color: colorScheme.onSurface),
                               decoration: InputDecoration(
-                                hintText: 'contoh: kamu@domain.com',
+                                hintText: l10n.authForgotPasswordHint,
                                 prefixIcon: const Icon(Icons.email_outlined),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
@@ -192,13 +204,16 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                                   horizontal: 12,
                                 ),
                               ),
-                              validator: _validateEmail,
+                              validator: (v) => _validateEmail(v, l10n),
                             ),
                             const SizedBox(height: 16),
 
-                            const Text(
-                              'Kami akan mengirimkan instruksi reset password ke email tersebut. Link berlaku 24 jam.',
-                              style: TextStyle(fontSize: 12),
+                            Text(
+                              l10n.authForgotPasswordInfo,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: colorScheme.onSurfaceVariant,
+                              ),
                             ),
                             const SizedBox(height: 18),
 
@@ -208,7 +223,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                               child: ElevatedButton(
                                 onPressed:
                                     (_isSending ||
-                                        _validateEmail(_emailCtrl.text) != null)
+                                        _validateEmail(_emailCtrl.text, l10n) != null)
                                     ? null
                                     : _sendResetLink,
                                 style: ElevatedButton.styleFrom(
@@ -229,13 +244,13 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                                               ),
                                         ),
                                       )
-                                    : const Row(
+                                    : Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
                                         children: [
-                                          Icon(Icons.send_outlined, size: 18),
-                                          SizedBox(width: 10),
-                                          Text('Kirim Link Reset'),
+                                          const Icon(Icons.send_outlined, size: 18),
+                                          const SizedBox(width: 10),
+                                          Text(l10n.authForgotPasswordSend),
                                         ],
                                       ),
                               ),
@@ -248,7 +263,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                               onPressed: _isSending
                                   ? null
                                   : () => Navigator.of(context).maybePop(),
-                              child: const Text('Kembali ke Login'),
+                              child: Text(l10n.authBackToLogin),
                             ),
                           ],
                         ),
@@ -261,14 +276,14 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                   // tips
                   Row(
                     children: [
-                      const Icon(Icons.info_outline, size: 16),
+                      Icon(Icons.info_outline, size: 16, color: colorScheme.onSurfaceVariant),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Tip: Jika tidak menerima email, cek folder Spam atau coba lagi beberapa menit kemudian.',
+                          l10n.authForgotPasswordTip,
                           style: TextStyle(
                             fontSize: 13,
-                            color: Colors.grey[700],
+                            color: colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ),

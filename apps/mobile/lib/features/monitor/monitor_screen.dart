@@ -4,13 +4,11 @@ import 'package:fountaine/providers/provider/monitor_provider.dart';
 import 'package:fountaine/providers/provider/api_provider.dart';
 import 'package:fountaine/providers/provider/mqtt_provider.dart';
 import 'package:fountaine/providers/provider/auth_provider.dart';
+import 'package:fountaine/l10n/app_localizations.dart';
 import '../../domain/telemetry.dart';
 import '../../core/constants.dart';
 
-// Color scheme - human-like, minimal
-const Color _kPrimary = Color(0xFF0E5A2A);
-const Color _kBg = Color(0xFFF3F9F4);
-const Color _kCardBg = Colors.white;
+// Semantic colors for sensor status
 const Color _kGreen = Color(0xFF2E7D32); // Normal
 const Color _kYellow = Color(0xFFFFB300); // Warning
 const Color _kRed = Color(0xFFE53935); // Urgent
@@ -66,7 +64,6 @@ Color _severityColor(String key, double value) {
       }
       return _kRed;
     case 'water temp':
-      // Water temp ideal: 18-26°C
       if (value >= 18 && value <= 26) {
         return _kGreen;
       } else if (value >= 15 && value <= 30) {
@@ -82,7 +79,6 @@ Color _severityColor(String key, double value) {
       }
       return _kRed;
     case 'humidity':
-      // Humidity ideal: 50-80%
       if (value >= 50 && value <= 80) {
         return _kGreen;
       } else if (value >= 40 && value <= 90) {
@@ -111,16 +107,11 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
   void initState() {
     super.initState();
 
-    // INITIALIZE MQTT CONNECTION
     Future.microtask(() async {
       try {
-        // Start MQTT connection (may fail in tests)
         await ref.read(mqttProvider.notifier).init();
-      } catch (_) {
-        // MQTT init failed, continue without MQTT
-      }
+      } catch (_) {}
 
-      // Load kits regardless of MQTT status
       try {
         final kits = await ref.read(apiKitsListProvider.future);
 
@@ -139,23 +130,18 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
         String initial;
         bool shouldSavePreference = false;
         
-        // Priority 1: Load from backend (persists across app restarts)
         if (userId != null) {
           final savedKitFromBackend = await api.getUserPreference(userId: userId);
           if (savedKitFromBackend != null && kitIds.contains(savedKitFromBackend)) {
             initial = savedKitFromBackend;
-
           } else if (widget.selectedKit != null && kitIds.contains(widget.selectedKit)) {
-            // Priority 2: Use kit passed via widget
             initial = widget.selectedKit!;
             shouldSavePreference = true;
           } else {
-            // Priority 3: Fallback to first kit
             initial = kitIds.first;
             shouldSavePreference = true;
           }
         } else {
-          // No user logged in, use local logic
           final savedKit = ref.read(currentKitIdProvider);
           if (savedKit != null && kitIds.contains(savedKit)) {
             initial = savedKit;
@@ -171,7 +157,6 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
             kitId = initial;
           });
           
-          // Load auto mode from backend (persists across app restarts)
           final loadedAutoMode = await ref
               .read(mqttProvider.notifier)
               .loadAutoModeFromBackend(initial);
@@ -182,33 +167,30 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
             });
           }
           
-          // Update local provider
           ref.read(currentKitIdProvider.notifier).state = initial;
           
-          // Save to backend if this was a new preference
           if (shouldSavePreference && userId != null) {
             await api.setUserPreference(userId: userId, selectedKitId: initial);
-
           }
         }
-      } catch (_) {
-        // Kit loading error
-      }
+      } catch (_) {}
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final _kitId = kitId;
+    final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     final size = MediaQuery.of(context).size;
     final s = size.width / 375.0;
 
     if (_kitId == null) {
       return Scaffold(
-        backgroundColor: _kBg,
-        appBar: _buildAppBar(s),
-        body: const Center(child: CircularProgressIndicator(color: _kPrimary)),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        appBar: _buildAppBar(context, s),
+        body: Center(child: CircularProgressIndicator(color: colorScheme.primary)),
       );
     }
 
@@ -246,8 +228,8 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
     }
 
     return Scaffold(
-      backgroundColor: _kBg,
-      appBar: _buildAppBar(s),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      appBar: _buildAppBar(context, s),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.fromLTRB(16 * s, 10 * s, 16 * s, 16 * s),
@@ -266,65 +248,23 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
                   childAspectRatio: 1.0,
                 ),
                 children: [
-                  _sensorCard(
-                    s,
-                    'pH',
-                    safe(t?.ph),
-                    '',
-                    frac('ph', safe(t?.ph)),
-                    _severityColor('ph', safe(t?.ph)),
-                  ),
-                  _sensorCard(
-                    s,
-                    'TDS',
-                    safe(t?.ppm),
-                    'ppm',
-                    frac('ppm', safe(t?.ppm)),
-                    _severityColor('ppm', safe(t?.ppm)),
-                  ),
-                  _sensorCard(
-                    s,
-                    'Humidity',
-                    safe(t?.humidity),
-                    '%',
-                    frac('humidity', safe(t?.humidity)),
-                    _severityColor('humidity', safe(t?.humidity)),
-                  ),
-                  _sensorCard(
-                    s,
-                    'Air Temp',
-                    safe(t?.tempC),
-                    '°C',
-                    frac('temperature', safe(t?.tempC)),
-                    _severityColor('air temp', safe(t?.tempC)),
-                  ),
-                  _sensorCard(
-                    s,
-                    'Water Temp',
-                    safe(t?.waterTemp),
-                    '°C',
-                    frac('waterTemp', safe(t?.waterTemp)),
-                    _severityColor('water temp', safe(t?.waterTemp)),
-                  ),
-                  _sensorCard(
-                    s,
-                    'Water Level',
-                    safe(t?.waterLevel),
-                    '',
-                    frac('waterLevel', safe(t?.waterLevel)),
-                    _severityColor('water level', safe(t?.waterLevel)),
-                  ),
+                  _sensorCard(context, s, l10n.sensorPh, safe(t?.ph), '', frac('ph', safe(t?.ph)), _severityColor('ph', safe(t?.ph))),
+                  _sensorCard(context, s, l10n.sensorTds, safe(t?.ppm), 'ppm', frac('ppm', safe(t?.ppm)), _severityColor('ppm', safe(t?.ppm))),
+                  _sensorCard(context, s, l10n.sensorHumidity, safe(t?.humidity), '%', frac('humidity', safe(t?.humidity)), _severityColor('humidity', safe(t?.humidity))),
+                  _sensorCard(context, s, l10n.sensorAirTemp, safe(t?.tempC), '°C', frac('temperature', safe(t?.tempC)), _severityColor('air temp', safe(t?.tempC))),
+                  _sensorCard(context, s, l10n.sensorWaterTemp, safe(t?.waterTemp), '°C', frac('waterTemp', safe(t?.waterTemp)), _severityColor('water temp', safe(t?.waterTemp))),
+                  _sensorCard(context, s, l10n.sensorWaterLevel, safe(t?.waterLevel), '', frac('waterLevel', safe(t?.waterLevel)), _severityColor('water level', safe(t?.waterLevel))),
                 ],
               ),
 
               SizedBox(height: 20 * s),
 
               Text(
-                'Your Kit',
+                l10n.monitorYourKit,
                 style: TextStyle(
                   fontSize: 16 * s,
                   fontWeight: FontWeight.w700,
-                  color: _kPrimary,
+                  color: colorScheme.primary,
                 ),
               ),
               SizedBox(height: 8 * s),
@@ -333,11 +273,11 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
               Container(
                 padding: EdgeInsets.all(14 * s),
                 decoration: BoxDecoration(
-                  color: _kCardBg,
+                  color: colorScheme.surface,
                   borderRadius: BorderRadius.circular(12 * s),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
+                      color: Colors.black.withValues(alpha: 0.04),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -345,7 +285,6 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
                 ),
                 child: Row(
                   children: [
-                    // STATUS DOT
                     Container(
                       width: 10 * s,
                       height: 10 * s,
@@ -354,23 +293,18 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
                         shape: BoxShape.circle,
                       ),
                     ),
-
                     SizedBox(width: 12 * s),
-
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // DROPDOWN
-                          _kitSelector(s),
-
+                          _kitSelector(context, s, l10n),
                           SizedBox(height: 4 * s),
-
                           Text(
-                            'Last: ${format(last)}',
+                            '${l10n.commonLast}: ${format(last)}',
                             style: TextStyle(
                               fontSize: 11 * s,
-                              color: _kPrimary.withOpacity(0.5),
+                              color: colorScheme.primary.withValues(alpha: 0.5),
                             ),
                           ),
                         ],
@@ -382,7 +316,7 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
 
               SizedBox(height: 20 * s),
 
-              _modeSection(context, s, _kitId),
+              _modeSection(context, s, _kitId, l10n),
             ],
           ),
         ),
@@ -390,14 +324,15 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
     );
   }
 
-  PreferredSizeWidget _buildAppBar(double s) {
+  PreferredSizeWidget _buildAppBar(BuildContext context, double s) {
+    final colorScheme = Theme.of(context).colorScheme;
     return AppBar(
-      backgroundColor: _kBg,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       elevation: 0,
       surfaceTintColor: Colors.transparent,
       centerTitle: true,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: _kPrimary),
+        icon: Icon(Icons.arrow_back, color: colorScheme.primary),
         onPressed: () => Navigator.pop(context),
       ),
       title: Row(
@@ -408,34 +343,34 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
             width: 24 * s,
             height: 24 * s,
             errorBuilder: (_, __, ___) =>
-                Icon(Icons.eco, color: _kPrimary, size: 24 * s),
+                Icon(Icons.eco, color: colorScheme.primary, size: 24 * s),
           ),
           SizedBox(width: 8 * s),
           Text(
             'Fountaine',
             style: TextStyle(
-              color: _kPrimary,
+              color: colorScheme.primary,
               fontWeight: FontWeight.w800,
               fontSize: 18 * s,
             ),
           ),
         ],
       ),
-      iconTheme: const IconThemeData(color: _kPrimary),
+      iconTheme: IconThemeData(color: colorScheme.primary),
     );
   }
 
-  // KIT DROPDOWN SELECTOR with long-press delete
-  Widget _kitSelector(double s) {
+  Widget _kitSelector(BuildContext context, double s, AppLocalizations l10n) {
     final kitsAsync = ref.watch(apiKitsListProvider);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return kitsAsync.when(
       loading: () => SizedBox(
         height: 20 * s,
         width: 20 * s,
-        child: const CircularProgressIndicator(
+        child: CircularProgressIndicator(
           strokeWidth: 2,
-          color: _kPrimary,
+          color: colorScheme.primary,
         ),
       ),
       error: (e, _) => Text("Failed: $e", style: TextStyle(fontSize: 12 * s)),
@@ -444,22 +379,22 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
           return Text("No kits", style: TextStyle(fontSize: 12 * s));
 
         return GestureDetector(
-          onTap: () => _showKitSelector(s, kits),
+          onTap: () => _showKitSelector(context, s, kits, l10n),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                kitId ?? 'Select Kit',
+                kitId ?? l10n.monitorSelectKit,
                 style: TextStyle(
                   fontSize: 14 * s,
                   fontWeight: FontWeight.w600,
-                  color: _kPrimary,
+                  color: colorScheme.primary,
                 ),
               ),
               SizedBox(width: 4 * s),
               Icon(
                 Icons.keyboard_arrow_down_rounded,
-                color: _kPrimary,
+                color: colorScheme.primary,
                 size: 20 * s,
               ),
             ],
@@ -469,46 +404,46 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
     );
   }
 
-  void _showKitSelector(double s, List<Map<String, dynamic>> kits) {
+  void _showKitSelector(BuildContext context, double s, List<Map<String, dynamic>> kits, AppLocalizations l10n) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (ctx) => Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colorScheme.surface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20 * s)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Header
             Padding(
               padding: EdgeInsets.all(16 * s),
               child: Row(
                 children: [
                   Text(
-                    'Select Kit',
+                    l10n.monitorSelectKit,
                     style: TextStyle(
                       fontSize: 18 * s,
                       fontWeight: FontWeight.w700,
-                      color: _kPrimary,
+                      color: colorScheme.primary,
                     ),
                   ),
                   const Spacer(),
                   Text(
-                    'Long press to delete',
+                    l10n.monitorLongPressDelete,
                     style: TextStyle(
                       fontSize: 11 * s,
-                      color: Colors.grey,
+                      color: colorScheme.onSurfaceVariant,
                       fontStyle: FontStyle.italic,
                     ),
                   ),
                 ],
               ),
             ),
-            Divider(height: 1, color: Colors.grey.shade200),
+            Divider(height: 1, color: colorScheme.outlineVariant),
             
-            // Kit list
             ...kits.map((k) {
               final id = k["id"] as String;
               final isSelected = id == kitId;
@@ -520,12 +455,12 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
                 },
                 onLongPress: () {
                   Navigator.pop(ctx);
-                  _confirmDeleteKit(s, id);
+                  _confirmDeleteKit(context, s, id, l10n);
                 },
                 child: Container(
                   padding: EdgeInsets.symmetric(horizontal: 16 * s, vertical: 14 * s),
                   decoration: BoxDecoration(
-                    color: isSelected ? _kPrimary.withOpacity(0.1) : null,
+                    color: isSelected ? colorScheme.primary.withValues(alpha: 0.1) : null,
                   ),
                   child: Row(
                     children: [
@@ -533,7 +468,7 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
                         width: 10 * s,
                         height: 10 * s,
                         decoration: BoxDecoration(
-                          color: isSelected ? _kGreen : Colors.grey.shade300,
+                          color: isSelected ? _kGreen : colorScheme.outlineVariant,
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -543,7 +478,7 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
                         style: TextStyle(
                           fontSize: 15 * s,
                           fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                          color: _kPrimary,
+                          color: colorScheme.primary,
                         ),
                       ),
                       if (isSelected) ...[
@@ -568,7 +503,6 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
         kitId = v;
       });
       
-      // Load auto mode from backend for the newly selected kit
       final loadedAutoMode = await ref
           .read(mqttProvider.notifier)
           .loadAutoModeFromBackend(v);
@@ -579,10 +513,8 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
         });
       }
       
-      // Update shared kit ID for notifications
       ref.read(currentKitIdProvider.notifier).state = v;
       
-      // Save kit preference to backend
       final user = ref.read(authProvider);
       if (user != null) {
         final api = ref.read(apiServiceProvider);
@@ -594,32 +526,32 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
     }
   }
 
-  void _confirmDeleteKit(double s, String id) {
+  void _confirmDeleteKit(BuildContext context, double s, String id, AppLocalizations l10n) {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: const Text('Delete Kit'),
-        content: Text('Are you sure you want to remove "$id" from your kit list?'),
+        title: Text(l10n.monitorDeleteKit),
+        content: Text(l10n.monitorDeleteKitConfirm(id)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.commonCancel),
           ),
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
-              await _deleteKit(id);
+              await _deleteKit(id, l10n);
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: Text(l10n.commonDelete),
           ),
         ],
       ),
     );
   }
 
-  Future<void> _deleteKit(String id) async {
+  Future<void> _deleteKit(String id, AppLocalizations l10n) async {
     final user = ref.read(authProvider);
     if (user == null) return;
     
@@ -627,16 +559,13 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
       final kitsApi = ref.read(apiKitsProvider);
       await kitsApi.deleteKit(id: id, userId: user.uid);
       
-      // Refresh kit list
       ref.invalidate(apiKitsListProvider);
       
-      // If deleted current kit, switch to first available
       if (id == kitId) {
         final kits = await ref.read(apiKitsListProvider.future);
         if (kits.isNotEmpty) {
           await _selectKit(kits.first["id"] as String);
         } else {
-          // No kits left, redirect to add kit
           if (mounted) {
             Navigator.pushReplacementNamed(context, "/addkit");
           }
@@ -645,7 +574,7 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Kit "$id" removed from your list')),
+          SnackBar(content: Text(l10n.monitorKitRemoved(id))),
         );
       }
     } catch (e) {
@@ -657,8 +586,8 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
     }
   }
 
-  // NEW SENSOR CARD with loading bar
   Widget _sensorCard(
+    BuildContext context,
     double s,
     String title,
     double value,
@@ -666,6 +595,8 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
     double fraction,
     Color barColor,
   ) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: fraction),
       duration: const Duration(milliseconds: 600),
@@ -674,11 +605,11 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
         return Container(
           padding: EdgeInsets.all(10 * s),
           decoration: BoxDecoration(
-            color: _kCardBg,
+            color: colorScheme.surface,
             borderRadius: BorderRadius.circular(12 * s),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.04),
+                color: Colors.black.withValues(alpha: 0.04),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -688,7 +619,6 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Icon + Title row - centered
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
@@ -696,7 +626,7 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
                   Icon(
                     _iconFor(title),
                     size: 12 * s,
-                    color: _kPrimary.withOpacity(0.6),
+                    color: colorScheme.primary.withValues(alpha: 0.6),
                   ),
                   SizedBox(width: 4 * s),
                   Text(
@@ -704,15 +634,12 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
                     style: TextStyle(
                       fontSize: 11 * s,
                       fontWeight: FontWeight.w500,
-                      color: _kPrimary.withOpacity(0.7),
+                      color: colorScheme.primary.withValues(alpha: 0.7),
                     ),
                   ),
                 ],
               ),
-
               SizedBox(height: 6 * s),
-
-              // Value
               Text(
                 unit.isEmpty
                     ? value.toStringAsFixed(2)
@@ -720,19 +647,16 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
                 style: TextStyle(
                   fontSize: 16 * s,
                   fontWeight: FontWeight.w800,
-                  color: _kPrimary,
+                  color: colorScheme.primary,
                 ),
               ),
-
               SizedBox(height: 6 * s),
-
-              // Progress bar
               ClipRRect(
                 borderRadius: BorderRadius.circular(3 * s),
                 child: LinearProgressIndicator(
                   value: fr,
                   minHeight: 5 * s,
-                  backgroundColor: Colors.grey.shade200,
+                  backgroundColor: colorScheme.outlineVariant,
                   valueColor: AlwaysStoppedAnimation<Color>(barColor),
                 ),
               ),
@@ -743,32 +667,31 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
     );
   }
 
-  // MODE SECTION - simplified
-  Widget _modeSection(BuildContext context, double s, String currentKitId) {
+  Widget _modeSection(BuildContext context, double s, String currentKitId, AppLocalizations l10n) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Mode',
+          l10n.monitorMode,
           style: TextStyle(
             fontSize: 16 * s,
             fontWeight: FontWeight.w700,
-            color: _kPrimary,
+            color: colorScheme.primary,
           ),
         ),
         SizedBox(height: 10 * s),
 
-        // Sliding pill toggle with centered circle
         Container(
           height: 48 * s,
           padding: EdgeInsets.all(4 * s),
           decoration: BoxDecoration(
-            color: Colors.grey.shade200,
+            color: colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(50 * s),
           ),
           child: Stack(
             children: [
-              // Animated sliding pill
               AnimatedAlign(
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOut,
@@ -779,11 +702,11 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
                   widthFactor: 0.5,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: _kPrimary,
+                      color: colorScheme.primary,
                       borderRadius: BorderRadius.circular(50 * s),
                       boxShadow: [
                         BoxShadow(
-                          color: _kPrimary.withOpacity(0.3),
+                          color: colorScheme.primary.withValues(alpha: 0.3),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -792,7 +715,6 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
                   ),
                 ),
               ),
-              // Text labels
               Row(
                 children: [
                   Expanded(
@@ -814,10 +736,10 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
                               fontSize: 13 * s,
                               fontWeight: FontWeight.w700,
                               color: isAuto
-                                  ? Colors.white
-                                  : _kPrimary.withOpacity(0.5),
+                                  ? colorScheme.onPrimary
+                                  : colorScheme.primary.withValues(alpha: 0.5),
                             ),
-                            child: const Text("AUTO"),
+                            child: Text(l10n.monitorAuto),
                           ),
                         ),
                       ),
@@ -842,10 +764,10 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
                               fontSize: 13 * s,
                               fontWeight: FontWeight.w700,
                               color: !isAuto
-                                  ? Colors.white
-                                  : _kPrimary.withOpacity(0.5),
+                                  ? colorScheme.onPrimary
+                                  : colorScheme.primary.withValues(alpha: 0.5),
                             ),
-                            child: const Text("MANUAL"),
+                            child: Text(l10n.monitorManual),
                           ),
                         ),
                       ),
@@ -859,14 +781,13 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
 
         SizedBox(height: 16 * s),
 
-        // Actuator buttons - only show in manual mode
         if (!isAuto)
           Column(
             children: [
               Row(
                 children: [
                   Expanded(
-                    child: _actionBtn(s, "PH UP", () {
+                    child: _actionBtn(context, s, l10n.actionPhUp, () {
                       ref
                           .read(monitorTelemetryProvider(currentKitId).notifier)
                           .phUp();
@@ -874,7 +795,7 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
                   ),
                   SizedBox(width: 10 * s),
                   Expanded(
-                    child: _actionBtn(s, "PH DOWN", () {
+                    child: _actionBtn(context, s, l10n.actionPhDown, () {
                       ref
                           .read(monitorTelemetryProvider(currentKitId).notifier)
                           .phDown();
@@ -886,7 +807,7 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: _actionBtn(s, "NUTRIENT", () {
+                    child: _actionBtn(context, s, l10n.actionNutrient, () {
                       ref
                           .read(monitorTelemetryProvider(currentKitId).notifier)
                           .nutrientAdd();
@@ -894,7 +815,7 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
                   ),
                   SizedBox(width: 10 * s),
                   Expanded(
-                    child: _actionBtn(s, "REFILL", () {
+                    child: _actionBtn(context, s, l10n.actionRefill, () {
                       ref
                           .read(monitorTelemetryProvider(currentKitId).notifier)
                           .refill();
@@ -906,14 +827,14 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
             ],
           )
         else
-          // Auto mode - show latest actuator info
-          _buildAutoModeInfo(s, currentKitId),
+          _buildAutoModeInfo(context, s, currentKitId, l10n),
       ],
     );
   }
 
-  // Auto Mode Info Card - shows latest actuator control info
-  Widget _buildAutoModeInfo(double s, String kitId) {
+  Widget _buildAutoModeInfo(BuildContext context, double s, String kitId, AppLocalizations l10n) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return FutureBuilder<Map<String, dynamic>?>(
       future: ref.read(apiServiceProvider).getLatestActuatorEvent(kitId),
       builder: (context, snapshot) {
@@ -925,15 +846,12 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
           (event['refill'] as int? ?? 0) > 0
         );
 
-        // Parse timestamp - check multiple possible field names
         String timeStr = '--:--:--';
         if (event != null) {
-          // Try different field names
           final rawTime = event['createdAt'] ?? event['created_at'] ?? event['timestamp'] ?? event['ingestTime'];
           if (rawTime != null) {
             DateTime? dt;
             if (rawTime is int) {
-              // Unix timestamp in milliseconds
               dt = DateTime.fromMillisecondsSinceEpoch(rawTime);
             } else {
               dt = DateTime.tryParse(rawTime.toString());
@@ -954,26 +872,25 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                _kPrimary.withOpacity(0.08),
-                _kPrimary.withOpacity(0.03),
+                colorScheme.primary.withValues(alpha: 0.08),
+                colorScheme.primary.withValues(alpha: 0.03),
               ],
             ),
             borderRadius: BorderRadius.circular(16 * s),
             border: Border.all(
-              color: _kPrimary.withOpacity(0.15),
+              color: colorScheme.primary.withValues(alpha: 0.15),
               width: 1,
             ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header row
               Row(
                 children: [
                   Container(
                     padding: EdgeInsets.all(8 * s),
                     decoration: BoxDecoration(
-                      color: hasActions ? _kPrimary : _kGreen,
+                      color: hasActions ? colorScheme.primary : _kGreen,
                       borderRadius: BorderRadius.circular(10 * s),
                     ),
                     child: Icon(
@@ -988,19 +905,19 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          hasActions ? 'Auto Control Active' : 'All Parameters Safe',
+                          hasActions ? l10n.monitorAutoControlActive : l10n.monitorAllParametersSafe,
                           style: TextStyle(
                             fontSize: 14 * s,
                             fontWeight: FontWeight.w700,
-                            color: _kPrimary,
+                            color: colorScheme.primary,
                           ),
                         ),
                         SizedBox(height: 2 * s),
                         Text(
-                          hasActions ? 'Latest adjustment' : 'No adjustment needed',
+                          hasActions ? l10n.monitorLatestAdjustment : l10n.monitorNoAdjustmentNeeded,
                           style: TextStyle(
                             fontSize: 11 * s,
-                            color: _kPrimary.withOpacity(0.6),
+                            color: colorScheme.primary.withValues(alpha: 0.6),
                           ),
                         ),
                       ],
@@ -1009,7 +926,6 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
                 ],
               ),
 
-              // Show actions grid if there are actions
               if (hasActions) ...[
                 SizedBox(height: 14 * s),
                 Wrap(
@@ -1017,25 +933,24 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
                   runSpacing: 8 * s,
                   children: [
                     if ((event!['phUp'] as int? ?? 0) > 0)
-                      _actionChip(s, 'pH Up', '${event['phUp']}s', Icons.arrow_upward),
+                      _actionChip(context, s, 'pH Up', '${event['phUp']}s', Icons.arrow_upward),
                     if ((event['phDown'] as int? ?? 0) > 0)
-                      _actionChip(s, 'pH Down', '${event['phDown']}s', Icons.arrow_downward),
+                      _actionChip(context, s, 'pH Down', '${event['phDown']}s', Icons.arrow_downward),
                     if ((event['nutrientAdd'] as int? ?? 0) > 0)
-                      _actionChip(s, 'Nutrient', '${event['nutrientAdd']}s', Icons.water_drop),
+                      _actionChip(context, s, 'Nutrient', '${event['nutrientAdd']}s', Icons.water_drop),
                     if ((event['refill'] as int? ?? 0) > 0)
-                      _actionChip(s, 'Refill', '${event['refill']}s', Icons.refresh),
+                      _actionChip(context, s, 'Refill', '${event['refill']}s', Icons.refresh),
                   ],
                 ),
               ],
 
-              // Timestamp
               SizedBox(height: 12 * s),
               Row(
                 children: [
                   Icon(
                     Icons.schedule,
                     size: 14 * s,
-                    color: _kPrimary.withOpacity(0.5),
+                    color: colorScheme.primary.withValues(alpha: 0.5),
                   ),
                   SizedBox(width: 4 * s),
                   Text(
@@ -1043,7 +958,7 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
                     style: TextStyle(
                       fontSize: 12 * s,
                       fontWeight: FontWeight.w500,
-                      color: _kPrimary.withOpacity(0.6),
+                      color: colorScheme.primary.withValues(alpha: 0.6),
                     ),
                   ),
                 ],
@@ -1055,16 +970,17 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
     );
   }
 
-  // Action chip for auto mode info
-  Widget _actionChip(double s, String label, String value, IconData icon) {
+  Widget _actionChip(BuildContext context, double s, String label, String value, IconData icon) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12 * s, vertical: 8 * s),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(20 * s),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 4,
             offset: const Offset(0, 1),
           ),
@@ -1073,13 +989,13 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14 * s, color: _kPrimary),
+          Icon(icon, size: 14 * s, color: colorScheme.primary),
           SizedBox(width: 6 * s),
           Text(
             '$label: ',
             style: TextStyle(
               fontSize: 11 * s,
-              color: _kPrimary.withOpacity(0.7),
+              color: colorScheme.primary.withValues(alpha: 0.7),
             ),
           ),
           Text(
@@ -1087,7 +1003,7 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
             style: TextStyle(
               fontSize: 12 * s,
               fontWeight: FontWeight.w700,
-              color: _kPrimary,
+              color: colorScheme.primary,
             ),
           ),
         ],
@@ -1095,20 +1011,21 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
     );
   }
 
-  // Simple action button
-  Widget _actionBtn(double s, String label, VoidCallback onTap) {
+  Widget _actionBtn(BuildContext context, double s, String label, VoidCallback onTap) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(10 * s),
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 14 * s),
         decoration: BoxDecoration(
-          color: _kCardBg,
+          color: colorScheme.surface,
           borderRadius: BorderRadius.circular(10 * s),
-          border: Border.all(color: _kPrimary.withOpacity(0.2), width: 1),
+          border: Border.all(color: colorScheme.primary.withValues(alpha: 0.2), width: 1),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
+              color: Colors.black.withValues(alpha: 0.03),
               blurRadius: 6,
               offset: const Offset(0, 2),
             ),
@@ -1120,7 +1037,7 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
             style: TextStyle(
               fontSize: 13 * s,
               fontWeight: FontWeight.w700,
-              color: _kPrimary,
+              color: colorScheme.primary,
             ),
           ),
         ),

@@ -7,11 +7,7 @@ import '../../providers/provider/api_provider.dart';
 import '../../providers/provider/auth_provider.dart';
 import '../../domain/telemetry.dart';
 import '../../models/nav_args.dart';
-
-// Match color scheme from other screens
-const Color _kPrimary = Color(0xFF0E5A2A);
-const Color _kBg = Color(0xFFF3F9F4);
-const Color _kChipBg = Color(0xFFE8F2EC);
+import '../../l10n/app_localizations.dart';
 
 // Time filter options (within selected day)
 enum TimeFilter { all, hour1, hour6 }
@@ -19,7 +15,7 @@ enum TimeFilter { all, hour1, hour6 }
 class HistoryScreen extends ConsumerStatefulWidget {
   final String? kitId;
   final DateTime? targetTime;
-  final bool embedded; // When true, hides FAB (used in PageView container)
+  final bool embedded;
   const HistoryScreen({
     super.key,
     this.kitId,
@@ -32,9 +28,9 @@ class HistoryScreen extends ConsumerStatefulWidget {
 }
 
 class _HistoryScreenState extends ConsumerState<HistoryScreen> {
-  DateTime? selectedDate; // null = today
+  DateTime? selectedDate;
   TimeFilter _timeFilter = TimeFilter.all;
-  bool _sortDesc = true; // true = newest first, false = oldest first
+  bool _sortDesc = true;
   bool _inited = false;
 
   final ScrollController _scroll = ScrollController();
@@ -45,7 +41,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   bool _isLoading = false;
   Timer? _refreshTimer;
 
-  // Lazy loading pagination
   int _displayCount = 10;
   static const int _pageSize = 10;
 
@@ -180,14 +175,14 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     }
   }
 
-  String _formatDate(DateTime date) {
+  String _formatDate(DateTime date, AppLocalizations l10n) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
     final dateOnly = DateTime(date.year, date.month, date.day);
 
-    if (dateOnly == today) return 'Today';
-    if (dateOnly == yesterday) return 'Yesterday';
+    if (dateOnly == today) return l10n.commonToday;
+    if (dateOnly == yesterday) return l10n.commonYesterday;
     return DateFormat('EEE, d MMM').format(date);
   }
 
@@ -227,6 +222,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     final currentKit = ref.watch(currentKitIdProvider);
     final unread = ref.watch(unreadNotificationCountProvider);
     final filtered = _getFiltered();
+    final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_pendingTargetTime != null && filtered.isNotEmpty) {
@@ -236,20 +233,20 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     });
 
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: _kBg,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         primary: !widget.embedded,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: _kPrimary),
+          icon: Icon(Icons.arrow_back, color: colorScheme.primary),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'History',
+        title: Text(
+          l10n.historyTitle,
           style: TextStyle(
-            color: _kPrimary,
+            color: colorScheme.primary,
             fontWeight: FontWeight.w900,
             fontSize: 20,
             letterSpacing: .2,
@@ -266,34 +263,34 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: _kChipBg,
+                  color: colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
                   currentKit,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: _kPrimary,
+                    color: colorScheme.primary,
                   ),
                 ),
               ),
             ),
           if (_isLoading)
-            const Padding(
-              padding: EdgeInsets.all(16),
+            Padding(
+              padding: const EdgeInsets.all(16),
               child: SizedBox(
                 width: 20,
                 height: 20,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: _kPrimary,
+                  color: colorScheme.primary,
                 ),
               ),
             )
           else
             IconButton(
-              icon: const Icon(Icons.refresh, color: _kPrimary),
+              icon: Icon(Icons.refresh, color: colorScheme.primary),
               onPressed: () {
                 if (currentKit != null) {
                   _loadData(currentKit, days: selectedDate != null ? 7 : 1);
@@ -303,7 +300,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         ],
       ),
       body: currentKit == null
-          ? _buildNoKit()
+          ? _buildNoKit(context, l10n)
           : Column(
               children: [
                 Padding(
@@ -312,38 +309,38 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                     children: [
                       Expanded(
                         child: GestureDetector(
-                          onTap: () => _showDatePicker(currentKit),
+                          onTap: () => _showDatePicker(currentKit, colorScheme),
                           child: Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 14,
                               vertical: 12,
                             ),
                             decoration: BoxDecoration(
-                              color: _kChipBg,
+                              color: colorScheme.surfaceContainerHighest,
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Row(
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.calendar_today_outlined,
                                   size: 18,
-                                  color: _kPrimary,
+                                  color: colorScheme.primary,
                                 ),
                                 const SizedBox(width: 10),
                                 Text(
                                   selectedDate == null
-                                      ? 'Today'
-                                      : _formatDate(selectedDate!),
-                                  style: const TextStyle(
+                                      ? l10n.commonToday
+                                      : _formatDate(selectedDate!, l10n),
+                                  style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500,
-                                    color: _kPrimary,
+                                    color: colorScheme.primary,
                                   ),
                                 ),
                                 const Spacer(),
                                 Icon(
                                   Icons.keyboard_arrow_down,
-                                  color: _kPrimary.withOpacity(0.5),
+                                  color: colorScheme.primary.withValues(alpha: 0.5),
                                 ),
                               ],
                             ),
@@ -382,11 +379,11 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                     child: Row(
                       children: [
-                        _filterChip('All', TimeFilter.all),
+                        _filterChip(context, l10n.commonAll, TimeFilter.all),
                         const SizedBox(width: 8),
-                        _filterChip('1h', TimeFilter.hour1),
+                        _filterChip(context, '1h', TimeFilter.hour1),
                         const SizedBox(width: 8),
-                        _filterChip('6h', TimeFilter.hour6),
+                        _filterChip(context, '6h', TimeFilter.hour6),
                         const Spacer(),
                         GestureDetector(
                           onTap: () => setState(() => _sortDesc = !_sortDesc),
@@ -396,7 +393,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
-                              color: _kChipBg,
+                              color: colorScheme.surfaceContainerHighest,
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: Row(
@@ -407,15 +404,15 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                       ? Icons.arrow_downward
                                       : Icons.arrow_upward,
                                   size: 14,
-                                  color: _kPrimary,
+                                  color: colorScheme.primary,
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  _sortDesc ? 'New' : 'Old',
-                                  style: const TextStyle(
+                                  _sortDesc ? l10n.commonNew : l10n.commonOld,
+                                  style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
-                                    color: _kPrimary,
+                                    color: colorScheme.primary,
                                   ),
                                 ),
                               ],
@@ -427,15 +424,15 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   ),
                 Expanded(
                   child: filtered.isEmpty
-                      ? _buildEmpty()
-                      : _buildList(filtered, currentKit),
+                      ? _buildEmpty(context, l10n)
+                      : _buildList(context, filtered, currentKit, l10n),
                 ),
               ],
             ),
       floatingActionButton: widget.embedded
           ? null
           : FloatingActionButton(
-              backgroundColor: _kPrimary,
+              backgroundColor: colorScheme.primary,
               onPressed: () {
                 Navigator.pushNamed(
                   context,
@@ -446,16 +443,16 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               child: Badge(
                 isLabelVisible: unread > 0,
                 label: Text(unread > 9 ? '9+' : '$unread'),
-                child: const Icon(
+                child: Icon(
                   Icons.notifications_outlined,
-                  color: Colors.white,
+                  color: colorScheme.onPrimary,
                 ),
               ),
             ),
     );
   }
 
-  void _showDatePicker(String currentKit) async {
+  void _showDatePicker(String currentKit, ColorScheme colorScheme) async {
     final picked = await showDatePicker(
       context: context,
       initialDate: selectedDate ?? DateTime.now(),
@@ -463,9 +460,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       lastDate: DateTime.now(),
       builder: (context, child) {
         return Theme(
-          data: Theme.of(
-            context,
-          ).copyWith(colorScheme: const ColorScheme.light(primary: _kPrimary)),
+          data: Theme.of(context).copyWith(
+            colorScheme: colorScheme,
+          ),
           child: child!,
         );
       },
@@ -486,8 +483,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     }
   }
 
-  Widget _filterChip(String label, TimeFilter filter) {
+  Widget _filterChip(BuildContext context, String label, TimeFilter filter) {
     final isSelected = _timeFilter == filter;
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -501,7 +500,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? _kPrimary : _kChipBg,
+          color: isSelected ? colorScheme.primary : colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(18),
         ),
         child: Text(
@@ -509,39 +508,43 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: isSelected ? Colors.white : _kPrimary,
+            color: isSelected ? colorScheme.onPrimary : colorScheme.primary,
           ),
         ),
       ),
     );
   }
 
-  Widget _buildNoKit() {
+  Widget _buildNoKit(BuildContext context, AppLocalizations l10n) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.sensors_off, size: 48, color: _kPrimary.withOpacity(0.4)),
+          Icon(Icons.sensors_off, size: 48, color: colorScheme.primary.withValues(alpha: 0.4)),
           const SizedBox(height: 16),
-          const Text(
-            'No kit selected',
+          Text(
+            l10n.historyNoKitSelected,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
-              color: _kPrimary,
+              color: colorScheme.primary,
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Select a kit from Monitor first',
-            style: TextStyle(fontSize: 14, color: _kPrimary.withOpacity(0.6)),
+            l10n.historySelectKitFirst,
+            style: TextStyle(fontSize: 14, color: colorScheme.primary.withValues(alpha: 0.6)),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildEmpty() {
+  Widget _buildEmpty(BuildContext context, AppLocalizations l10n) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -549,30 +552,31 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           Icon(
             Icons.inbox_outlined,
             size: 48,
-            color: _kPrimary.withOpacity(0.4),
+            color: colorScheme.primary.withValues(alpha: 0.4),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'No data',
+          Text(
+            l10n.historyNoData,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
-              color: _kPrimary,
+              color: colorScheme.primary,
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            'No readings for this period',
-            style: TextStyle(fontSize: 14, color: _kPrimary.withOpacity(0.6)),
+            l10n.historyNoReadings,
+            style: TextStyle(fontSize: 14, color: colorScheme.primary.withValues(alpha: 0.6)),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildList(List<Map<String, dynamic>> data, String kitId) {
+  Widget _buildList(BuildContext context, List<Map<String, dynamic>> data, String kitId, AppLocalizations l10n) {
     final displayData = data.take(_displayCount).toList();
     final hasMore = data.length > _displayCount;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scrollbar(
       controller: _scroll,
@@ -588,10 +592,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               child: Center(
                 child: Text(
-                  'Scroll untuk lihat lebih banyak (${data.length - _displayCount} lagi)',
+                  l10n.historyScrollMore(data.length - _displayCount),
                   style: TextStyle(
                     fontSize: 12,
-                    color: _kPrimary.withOpacity(0.5),
+                    color: colorScheme.primary.withValues(alpha: 0.5),
                   ),
                 ),
               ),
@@ -609,7 +613,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             margin: const EdgeInsets.only(bottom: 8),
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colorScheme.surface,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
@@ -620,14 +624,14 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                     Icon(
                       Icons.access_time,
                       size: 14,
-                      color: _kPrimary.withOpacity(0.5),
+                      color: colorScheme.primary.withValues(alpha: 0.5),
                     ),
                     const SizedBox(width: 6),
                     Text(
                       DateFormat('HH:mm:ss').format(date),
                       style: TextStyle(
                         fontSize: 12,
-                        color: _kPrimary.withOpacity(0.6),
+                        color: colorScheme.primary.withValues(alpha: 0.6),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -636,18 +640,19 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    _sensorValue('pH', t.ph.toStringAsFixed(2)),
-                    _sensorValue('TDS', '${t.ppm.toInt()} ppm'),
+                    _sensorValue(context, l10n.sensorPh, t.ph.toStringAsFixed(2)),
+                    _sensorValue(context, l10n.sensorTds, '${t.ppm.toInt()} ppm'),
                   ],
                 ),
                 const SizedBox(height: 8),
                 Row(
                   children: [
                     _sensorValue(
-                      'Humidity',
+                      context,
+                      l10n.sensorHumidity,
                       '${t.humidity.toStringAsFixed(1)}%',
                     ),
-                    _sensorValue('Temp', '${t.tempC.toStringAsFixed(1)}°C'),
+                    _sensorValue(context, l10n.sensorTemp, '${t.tempC.toStringAsFixed(1)}°C'),
                   ],
                 ),
               ],
@@ -658,20 +663,22 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     );
   }
 
-  Widget _sensorValue(String label, String value) {
+  Widget _sensorValue(BuildContext context, String label, String value) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Expanded(
       child: Row(
         children: [
           Text(
             '$label: ',
-            style: TextStyle(fontSize: 13, color: _kPrimary.withOpacity(0.6)),
+            style: TextStyle(fontSize: 13, color: colorScheme.primary.withValues(alpha: 0.6)),
           ),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: _kPrimary,
+              color: colorScheme.primary,
             ),
           ),
         ],

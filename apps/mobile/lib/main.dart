@@ -8,6 +8,10 @@ import 'package:fountaine/firebase_options.dart';
 import 'package:fountaine/app/routes.dart';
 import 'package:fountaine/providers/provider/api_provider.dart';
 import 'package:fountaine/services/api_service.dart';
+import 'package:fountaine/l10n/app_localizations.dart';
+import 'package:fountaine/providers/provider/locale_provider.dart';
+import 'package:fountaine/providers/provider/theme_provider.dart';
+import 'package:fountaine/theme/app_theme.dart';
 
 class NavKey {
   static final navKey = GlobalKey<NavigatorState>();
@@ -114,22 +118,29 @@ Future<void> main() async {
   );
 }
 
-class FountaineApp extends StatelessWidget {
+class FountaineApp extends ConsumerWidget {
   const FountaineApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final locale = ref.watch(localeProvider);
+    final themeMode = ref.watch(themeProvider);
+
     return MaterialApp(
       navigatorKey: NavKey.navKey,
       title: 'Flutter-CEA-System',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF65FFF0),
-          brightness: Brightness.light,
-        ),
-        useMaterial3: true,
-      ),
+      
+      // Theme
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeMode,
+      
+      // Localization
+      locale: locale,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      
       routes: Routes.routes,
       onGenerateRoute: onGenerateRoute,
     );

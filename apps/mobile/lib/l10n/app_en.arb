@@ -1,0 +1,256 @@
+{
+  "@@locale": "en",
+  
+  "@@_sectionSettings": "=== SETTINGS SCREEN ===",
+  "settingsTitle": "Settings",
+  "settingsAccountSetting": "Account Setting",
+  "settingsProfile": "Profile",
+  "settingsTheme": "Theme",
+  "settingsChangeLanguage": "Change language",
+  "settingsPrivacy": "Privacy",
+  "settingsLegal": "Legal",
+  "settingsTerms": "Terms and Condition",
+  "settingsPrivacyPolicy": "Privacy policy",
+  "settingsHelp": "Help",
+  "settingsLogout": "Logout",
+  "settingsVersion": "Version {version}",
+  "@settingsVersion": {
+    "description": "App version display",
+    "placeholders": {
+      "version": { "type": "String" }
+    }
+  },
+  
+  "@@_sectionTheme": "=== THEME SELECTOR ===",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "themeSystem": "System",
+  "themeSelectTitle": "Select Theme",
+  
+  "@@_sectionLanguage": "=== LANGUAGE SELECTOR ===",
+  "languageEnglish": "English",
+  "languageIndonesia": "Bahasa Indonesia",
+  "languageSelectTitle": "Select Language",
+  
+  "@@_sectionCommon": "=== COMMON / SHARED ===",
+  "commonCancel": "Cancel",
+  "commonConfirm": "Confirm",
+  "commonView": "View",
+  "commonFeatureComingSoon": "Feature coming soon",
+  "commonLinkNotSet": "Link not available yet",
+  "commonActive": "ACTIVE",
+  "commonDelete": "Delete",
+  "commonLast": "Last",
+  "commonToday": "Today",
+  "commonYesterday": "Yesterday",
+  "commonNew": "New",
+  "commonOld": "Old",
+  "commonAll": "All",
+  "commonOk": "OK",
+  "commonSaving": "Saving...",
+  "commonSuccess": "Success 🎉",
+  "commonFailed": "Failed 😣",
+  "commonEmail": "Email",
+  
+  "@@_sectionLogout": "=== LOGOUT DIALOG ===",
+  "logoutConfirmTitle": "Confirm Logout",
+  "logoutConfirmMessage": "Are you sure you want to log out?",
+  
+  "@@_sectionHome": "=== HOME SCREEN ===",
+  "homeYourLocation": "Your location",
+  "homeAllFeatures": "All Features",
+  "homeMonitoring": "Monitoring",
+  "homeMonitoringDesc": "Check your plant's health",
+  "homeNotification": "Notification",
+  "homeNotificationDesc": "View past records",
+  "homeAddKit": "Add Kit",
+  "homeAddKitDesc": "Connect new devices",
+  "homeSetting": "Setting",
+  "homeSettingDesc": "Manage your account",
+  
+  "@@_sectionProfile": "=== PROFILE SCREEN ===",
+  "profileTitle": "Profile",
+  "profileUserId": "User ID",
+  "profileEmail": "Email",
+  "profileKitName": "Kit Name",
+  "profileKitId": "Kit ID",
+  "profileEditProfile": "Edit Profile",
+  "profileDefaultKitName": "Your Kit Name",
+  "profileDefaultKitId": "SUF-XXXX-XXXX",
+  
+  "@@_sectionAuthLogin": "=== AUTH: LOGIN SCREEN ===",
+  "authLoginTitle": "Hello Again!",
+  "authLoginSubtitle": "Welcome Back You've Been Missed!",
+  "authEmailLabel": "Email Address",
+  "authEmailHint": "example@email.com",
+  "authPasswordLabel": "Password",
+  "authPasswordHint": "Enter your password",
+  "authRecoveryPassword": "Recovery Password",
+  "authSignIn": "Sign In",
+  "authSignInGoogle": "Sign in with Google",
+  "authNoAccount": "Don't Have An Account? ",
+  "authSignUpFree": "Sign Up For Free",
+  
+  "@@_sectionAuthRegister": "=== AUTH: REGISTER SCREEN ===",
+  "authRegisterTitle": "Create Account",
+  "authRegisterSubtitle": "Let's Create Account Together",
+  "authNameLabel": "Your Name",
+  "authNameHint": "Full name",
+  "authLocationLabel": "Location",
+  "authLocationHint": "Your city",
+  "authSignUp": "Sign Up",
+  
+  "@@_sectionAuthVerify": "=== AUTH: VERIFY EMAIL SCREEN ===",
+  "authVerifyTitle": "Welcome to Fountaine",
+  "authVerifyDesc": "Thank you for registering.\nPlease verify your email address:\n{email}",
+  "@authVerifyDesc": {
+    "description": "Verification email message",
+    "placeholders": {
+      "email": { "type": "String" }
+    }
+  },
+  "authVerifyBanner": "Email Verification",
+  "authCopyEmail": "Copy Email",
+  "authOpenEmail": "Open Email",
+  "authResendEmail": "Resend Verification Email",
+  "authRefreshStatus": "Refresh Status",
+  "authNeedHelp": "Need help?",
+  "authHelpTips": "• Check Spam/Promotions folder.\n• Wait 1-2 minutes then press \"Refresh Status\".\n• Make sure email is correct.\n• Try \"Resend Verification Email\".",
+  "authBackToLogin": "Back to Login",
+  "authLogout": "Logout",
+  "authMustBeLoggedIn": "You must be logged in to add a kit",
+  
+  "@@_sectionAuthForgot": "=== AUTH: FORGOT PASSWORD SCREEN ===",
+  "authForgotPasswordTitle": "Forgot Password",
+  "authForgotPasswordHeader": "Forgot Password?",
+  "authForgotPasswordDesc": "Enter your registered email. We will send you a link to reset your password.",
+  "authForgotPasswordHint": "example: you@domain.com",
+  "authForgotPasswordInfo": "We will send password reset instructions to this email. Link valid for 24 hours.",
+  "authForgotPasswordSend": "Send Reset Link",
+  "authForgotPasswordSuccess": "Success",
+  "authForgotPasswordSuccessMsg": "Password reset link has been sent to {email}.\nCheck your inbox or spam folder.",
+  "@authForgotPasswordSuccessMsg": {
+    "description": "Success message after sending reset email",
+    "placeholders": {
+      "email": { "type": "String" }
+    }
+  },
+  "authForgotPasswordFailed": "Failed to send reset: {error}",
+  "@authForgotPasswordFailed": {
+    "description": "Error message when reset fails",
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "authForgotPasswordTip": "Tip: If you don't receive the email, check your Spam folder or try again in a few minutes.",
+  
+  "@@_sectionValidation": "=== VALIDATION MESSAGES ===",
+  "validationEmailEmpty": "Email cannot be empty",
+  "validationEmailInvalid": "Invalid email format",
+  "validationNameEmpty": "Name cannot be empty",
+  "validationLocationEmpty": "Location cannot be empty",
+  
+  "@@_sectionMonitor": "=== MONITOR SCREEN ===",
+  "monitorYourKit": "Your Kit",
+  "monitorSelectKit": "Select Kit",
+  "monitorLongPressDelete": "Long press to delete",
+  "monitorDeleteKit": "Delete Kit",
+  "monitorDeleteKitConfirm": "Are you sure you want to remove \"{kitId}\" from your kit list?",
+  "@monitorDeleteKitConfirm": {
+    "description": "Confirmation before deleting kit",
+    "placeholders": {
+      "kitId": { "type": "String" }
+    }
+  },
+  "monitorKitRemoved": "Kit \"{kitId}\" removed from your list",
+  "@monitorKitRemoved": {
+    "description": "Success message after kit deleted",
+    "placeholders": {
+      "kitId": { "type": "String" }
+    }
+  },
+  "monitorMode": "Mode",
+  "monitorAuto": "AUTO",
+  "monitorManual": "MANUAL",
+  "monitorAutoControlActive": "Auto Control Active",
+  "monitorAllParametersSafe": "All Parameters Safe",
+  "monitorLatestAdjustment": "Latest adjustment",
+  "monitorNoAdjustmentNeeded": "No adjustment needed",
+  
+  "@@_sectionSensors": "=== SENSOR LABELS ===",
+  "sensorPh": "pH",
+  "sensorTds": "TDS",
+  "sensorHumidity": "Humidity",
+  "sensorAirTemp": "Air Temp",
+  "sensorWaterTemp": "Water Temp",
+  "sensorWaterLevel": "Water Level",
+  "sensorTemp": "Temp",
+  
+  "@@_sectionActions": "=== ACTUATOR ACTIONS ===",
+  "actionPhUp": "PH UP",
+  "actionPhDown": "PH DOWN",
+  "actionNutrient": "NUTRIENT",
+  "actionRefill": "REFILL",
+  
+  "@@_sectionHistory": "=== HISTORY SCREEN ===",
+  "historyTitle": "History",
+  "historyNoKitSelected": "No kit selected",
+  "historySelectKitFirst": "Select a kit from Monitor first",
+  "historyNoData": "No data",
+  "historyNoReadings": "No readings for this period",
+  "historyScrollMore": "Scroll to see more ({count} more)",
+  "@historyScrollMore": {
+    "description": "Pagination hint showing remaining items",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  
+  "@@_sectionNotification": "=== NOTIFICATION SCREEN ===",
+  "notificationTitle": "Notification",
+  "notificationMarkAllRead": "Mark all read",
+  "notificationDeleteAll": "Delete all",
+  "notificationFilterInfo": "Info",
+  "notificationFilterWarning": "Warning",
+  "notificationFilterUrgent": "Urgent",
+  "notificationEmptyTitle": "No notifications (for this filter)",
+  "notificationEmptyDesc": "Your system is operating normally. No issues detected.",
+  "notificationShowAll": "Show All",
+  "notificationScrollMore": "Scroll to see more",
+  "notificationJustNow": "just now",
+  "notificationMinutesAgo": "{minutes}m ago",
+  "@notificationMinutesAgo": {
+    "description": "Time ago in minutes",
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
+  "notificationHoursAgo": "{hours}h ago",
+  "@notificationHoursAgo": {
+    "description": "Time ago in hours",
+    "placeholders": {
+      "hours": { "type": "int" }
+    }
+  },
+  "notificationDaysAgo": "{days}d ago",
+  "@notificationDaysAgo": {
+    "description": "Time ago in days",
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "notificationNew": "NEW",
+  
+  "@@_sectionAddKit": "=== ADD KIT SCREEN ===",
+  "addKitTitle": "Add Kit",
+  "addKitSubtitle": "Add your hydroponic kit to start monitoring.",
+  "addKitNameLabel": "Kit Name",
+  "addKitNameHint": "e.g. Hydroponic Monitoring System",
+  "addKitIdLabel": "Kit ID",
+  "addKitIdHint": "e.g. SUF-UINJKT-HM-F2000",
+  "addKitSaveButton": "Save Kit",
+  "addKitSuccess": "Kit added successfully",
+  "addKitNameRequired": "Kit name is required",
+  "addKitIdRequired": "Kit ID is required",
+  "addKitIdTooShort": "Kit ID is too short"
+}
