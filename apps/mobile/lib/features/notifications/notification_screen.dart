@@ -10,25 +10,66 @@ const Color kBg = Color(0xFFF3F9F4);
 const Color kChipBg = Color(0xFFE8F2EC);
 
 class NotificationScreen extends ConsumerStatefulWidget {
-  final bool embedded; // When true, used in PageView container
+  final bool embedded;
   const NotificationScreen({super.key, this.embedded = false});
+
   @override
   ConsumerState<NotificationScreen> createState() => _NotificationScreenState();
 }
 
 class _NotificationScreenState extends ConsumerState<NotificationScreen> {
-  // default 'info' saat buka langsung
   String? _filter = 'info';
   bool _inited = false;
 
+  final ScrollController _scroll = ScrollController();
+
+  int _displayCount = 10;
+  static const int _pageSize = 10;
+
   String _norm(String? s) => (s ?? '').trim().toLowerCase();
 
-  // ''/all -> null (All), info/warning/urgent valid, lainnya fallback 'info'
   String? _sanitizeFilter(String? raw) {
     final k = _norm(raw);
-    if (k.isEmpty || k == 'all') return null; // All
+    if (k.isEmpty || k == 'all') return null;
     if (k == 'info' || k == 'warning' || k == 'urgent') return k;
     return 'info';
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _scroll.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scroll.removeListener(_onScroll);
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  void _resetScroll() {
+    if (_scroll.hasClients) {
+      _scroll.jumpTo(0);
+    }
+  }
+
+  void _onScroll() {
+    if (!_scroll.hasClients) return;
+
+    if (_scroll.position.atEdge && _scroll.position.pixels != 0) {
+      if (_displayCount < _currentListLength()) {
+        setState(() {
+          _displayCount += _pageSize;
+        });
+      }
+    }
+  }
+
+  int _currentListLength() {
+    final eff = _sanitizeFilter(_filter);
+    final list = ref.read(filteredNotificationProvider(eff));
+    return list.length;
   }
 
   @override
@@ -43,14 +84,6 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
 
     _filter = _sanitizeFilter(fromArgs) ?? 'info';
     _inited = true;
-
-    assert(() {
-      // ignore: avoid_print
-      print('[NotificationScreen] args=$fromArgs -> _filter=$_filter');
-      return true;
-    }());
-
-    setState(() {});
   }
 
   IconData _icon(String? levelRaw) {
@@ -85,35 +118,23 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Nilai efektif tersanitasi
     final eff = _sanitizeFilter(_filter);
 
-    // Ambil via provider (robust: null/''/all => All)
     final all = ref.watch(notificationListProvider);
     List<NotificationItem> list = ref.watch(filteredNotificationProvider(eff));
 
-    // DOUBLE-GUARD: walau sudah difilter provider, saring ulang lokal
     if (eff != null) {
       final key = _norm(eff);
       list = list.where((n) => _norm(n.level) == key).toList();
     }
 
-    assert(() {
-      // ignore: avoid_print
-      final first = list.isNotEmpty ? _norm(list.first.level) : '-';
-      print(
-        '[NotificationScreen] build eff=$eff, first=$first, '
-        'counts: info=${all.where((e) => _norm(e.level) == 'info').length}, '
-        'warn=${all.where((e) => _norm(e.level) == 'warning').length}, '
-        'urg=${all.where((e) => _norm(e.level) == 'urgent').length}',
-      );
-      return true;
-    }());
+    final notifier = ref.read(notificationListProvider.notifier);
+
+    final displayList = list.take(_displayCount).toList();
+    final hasMore = list.length > _displayCount;
 
     int countLevel(String lvl) =>
         all.where((e) => _norm(e.level) == _norm(lvl)).length;
-
-    final notifier = ref.read(notificationListProvider.notifier);
 
     return Scaffold(
       backgroundColor: kBg,
@@ -121,7 +142,7 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
         backgroundColor: kBg,
         elevation: 0,
         centerTitle: true,
-        primary: !widget.embedded, // Disable SafeArea when embedded in container
+        primary: !widget.embedded,
         title: const Text(
           'Notification',
           style: TextStyle(
@@ -133,46 +154,16 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
         ),
         actions: [
           PopupMenuButton<String>(
-            tooltip: 'More',
             icon: const Icon(Icons.more_vert, color: kPrimary),
             onSelected: (v) async {
               switch (v) {
                 case 'read':
                   notifier.markAllRead();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('All marked as read')),
-                  );
+                  _resetScroll();
                   break;
                 case 'delete':
-                  final ok =
-                      await showDialog<bool>(
-                        context: context,
-                        builder: (ctx) => AlertDialog(
-                          title: const Text('Delete all notifications?'),
-                          content: const Text(
-                            'This action cannot be undone.',
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(ctx, false),
-                              child: const Text('Cancel'),
-                            ),
-                            FilledButton(
-                              onPressed: () => Navigator.pop(ctx, true),
-                              child: const Text('Delete'),
-                            ),
-                          ],
-                        ),
-                      ) ??
-                      false;
-                  if (ok) {
-                    notifier.clearAll();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('All notifications deleted'),
-                      ),
-                    );
-                  }
+                  notifier.clearAll();
+                  _resetScroll();
                   break;
               }
             },
@@ -183,64 +174,42 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(12, 6, 12, 20),
-        children: [
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: _Glass(
-              borderRadius: 14,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 8,
-                vertical: 6,
-              ),
-              child: _FilterChips(
-                value: eff,
-                onChanged: (newKey) =>
-                    setState(() => _filter = _sanitizeFilter(newKey)),
-                infoCount: countLevel('info'),
-                warningCount: countLevel('warning'),
-                urgentCount: countLevel('urgent'),
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          if (list.isEmpty)
-            _EmptyState(onExploreAll: () => setState(() => _filter = null))
-          else
-            ...list.map(
-              (n) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                child: Dismissible(
-                  key: ValueKey(n.id),
-                  direction: DismissDirection.endToStart,
-                  background: const _SwipeBg(),
-                  confirmDismiss: (_) async {
-                    return await showDialog<bool>(
-                          context: context,
-                          builder: (ctx) => AlertDialog(
-                            title: const Text('Delete notification?'),
-                            content: Text(n.message),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(ctx, false),
-                                child: const Text('Cancel'),
-                              ),
-                              FilledButton(
-                                onPressed: () => Navigator.pop(ctx, true),
-                                child: const Text('Delete'),
-                              ),
-                            ],
-                          ),
-                        ) ??
-                        false;
-                  },
-                  onDismissed: (_) {
-                    notifier.delete(n.id);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Notification deleted')),
+      body: Scrollbar(
+        controller: _scroll,
+        thumbVisibility: true,
+        interactive: true,
+        child: ListView(
+          controller: _scroll,
+          padding: const EdgeInsets.fromLTRB(12, 6, 12, 20),
+          children: [
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: _Glass(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                child: _FilterChips(
+                  value: eff,
+                  onChanged: (newKey) {
+                    setState(() {
+                      _filter = _sanitizeFilter(newKey);
+                      _displayCount = _pageSize;
+                    });
+                    WidgetsBinding.instance.addPostFrameCallback(
+                      (_) => _resetScroll(),
                     );
                   },
+                  infoCount: countLevel('info'),
+                  warningCount: countLevel('warning'),
+                  urgentCount: countLevel('urgent'),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            if (displayList.isEmpty)
+              _EmptyState(onExploreAll: () => setState(() => _filter = null))
+            else ...[
+              ...displayList.map(
+                (n) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
                   child: _NotificationCard(
                     title: n.title,
                     message: n.message,
@@ -265,14 +234,26 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
                   ),
                 ),
               ),
-            ),
-        ],
+              if (hasMore)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Center(
+                    child: Text(
+                      'Scroll untuk lihat lebih banyak',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: kPrimary.withOpacity(.5),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ],
+        ),
       ),
     );
   }
 }
-
-// Subwidgets
 
 class _Glass extends StatelessWidget {
   const _Glass({this.child, this.padding, this.borderRadius = 14});
