@@ -7,6 +7,7 @@ import 'package:fountaine/features/auth/register_screen.dart';
 import 'package:fountaine/features/auth/verify_screen.dart';
 import 'package:fountaine/features/auth/forgot_password_screen.dart';
 import 'package:fountaine/features/history/history_screen.dart';
+import 'package:fountaine/features/history/history_notification_container.dart';
 import 'package:fountaine/features/home/home_screen.dart';
 import 'package:fountaine/features/monitor/monitor_screen.dart';
 import 'package:fountaine/features/settings/settings_screen.dart';
@@ -79,11 +80,12 @@ Route<dynamic>? onGenerateRoute(RouteSettings settings) {
         settings: settings,
       );
 
-    // HISTORY SCREEN
+    // HISTORY SCREEN (now uses container with PageView)
     case Routes.history:
       final args = settings.arguments;
       String? kitId;
       DateTime? target;
+      int initialPage = 0; // 0 = History, 1 = Notification
 
       if (args is HistoryRouteArgs) {
         kitId = args.kitId;
@@ -91,10 +93,15 @@ Route<dynamic>? onGenerateRoute(RouteSettings settings) {
       } else if (args is Map) {
         kitId = args['kitId'] as String?;
         target = args['targetTime'] as DateTime?;
+        initialPage = (args['initialPage'] as int?) ?? 0;
       }
 
       return MaterialPageRoute(
-        builder: (_) => HistoryScreen(kitId: kitId, targetTime: target),
+        builder: (_) => HistoryNotificationContainer(
+          kitId: kitId,
+          targetTime: target,
+          initialPage: initialPage,
+        ),
         settings: settings,
       );
 

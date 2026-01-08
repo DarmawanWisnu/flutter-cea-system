@@ -86,9 +86,8 @@ class HomeScreen extends StatelessWidget {
                       child: Image.asset(
                         'assets/images/weather_icon.png',
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                          color: primary.withOpacity(0.3),
-                        ),
+                        errorBuilder: (_, __, ___) =>
+                            Container(color: primary.withOpacity(0.3)),
                       ),
                     ),
                   ),
@@ -111,19 +110,6 @@ class HomeScreen extends StatelessWidget {
                               size: 18 * s,
                             ),
                             onPressed: () {},
-                          ),
-                        ),
-                        CircleAvatar(
-                          backgroundColor: Colors.white,
-                          radius: 20 * s,
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.notifications_none,
-                              color: primary,
-                              size: 18 * s,
-                            ),
-                            onPressed: () =>
-                                Navigator.pushNamed(context, Routes.history),
                           ),
                         ),
                       ],

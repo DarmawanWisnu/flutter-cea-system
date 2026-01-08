@@ -3,6 +3,7 @@ scale 3240*1710
 skinparam monochrome true
 skinparam ranksep 50
 skinparam nodesep 30
+skinparam defaultFontSize 20
 title Class Diagram - Arsitektur Sistem Flutter CEA System
 
 ' =================== UI LAYER ===================

@@ -4,6 +4,7 @@ skinparam monochrome true
 skinparam shadowing false
 left to right direction
 skinparam actorStyle stick
+skinparam defaultFontSize 20
 
 actor "User" as User
 

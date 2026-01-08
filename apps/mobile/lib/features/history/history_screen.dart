@@ -19,7 +19,13 @@ enum TimeFilter { all, hour1, hour6 }
 class HistoryScreen extends ConsumerStatefulWidget {
   final String? kitId;
   final DateTime? targetTime;
-  const HistoryScreen({super.key, this.kitId, this.targetTime});
+  final bool embedded; // When true, hides FAB (used in PageView container)
+  const HistoryScreen({
+    super.key,
+    this.kitId,
+    this.targetTime,
+    this.embedded = false,
+  });
 
   @override
   ConsumerState<HistoryScreen> createState() => _HistoryScreenState();
@@ -60,11 +66,11 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       } else {
         // Try to get current kit from: 1) local provider, 2) backend preference, 3) first kit
         String? kitToLoad = ref.read(currentKitIdProvider);
-        
+
         if (kitToLoad == null) {
           final api = ref.read(apiServiceProvider);
           final user = ref.read(authProvider);
-          
+
           // Get user's kit list first (filtered by userId)
           List<Map<String, dynamic>> userKits = [];
           try {
@@ -72,10 +78,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           } catch (_) {
             // Error loading kits
           }
-          
+
           final kitIds = userKits.map((k) => k["id"] as String).toList();
 
-          
           // Try backend preference first (but validate it exists in user's kit list)
           if (user != null && kitIds.isNotEmpty) {
             try {
@@ -83,26 +88,22 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               if (savedKit != null && kitIds.contains(savedKit)) {
                 kitToLoad = savedKit;
                 ref.read(currentKitIdProvider.notifier).state = savedKit;
-
               }
             } catch (_) {
               // Error loading preference
             }
           }
-          
+
           // Fallback to first kit from user's list
           if (kitToLoad == null && kitIds.isNotEmpty) {
             kitToLoad = kitIds.first;
             ref.read(currentKitIdProvider.notifier).state = kitToLoad;
-
           }
         }
-        
+
         if (kitToLoad != null) {
           await _loadData(kitToLoad, days: 1);
-        } else {
-
-        }
+        } else {}
       }
 
       if (mounted) setState(() {});
@@ -130,15 +131,11 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     setState(() => _isLoading = true);
     final limit = days == 1 ? 2880 : 20160;
 
-
-
     try {
       final api = ref.read(apiServiceProvider);
       final res = await api.getJson(
         "/telemetry/history?deviceId=$kitId&days=$days&limit=$limit",
       );
-
-
 
       final List items = res["items"] ?? [];
       _entries = items.map((e) {
@@ -146,8 +143,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         final ts = e["ingestTime"] as int;
         return {"t": t, "ts": ts};
       }).toList();
-      
-
     } catch (_) {
       _entries = [];
     }
@@ -171,10 +166,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     final now = DateTime.now();
     final targetDate = selectedDate ?? DateTime(now.year, now.month, now.day);
 
-
-    
-
-
     // First filter by date
     var filtered = _entries.where((e) {
       final ts = e['ts'] as int;
@@ -183,8 +174,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           d.month == targetDate.month &&
           d.day == targetDate.day;
     }).toList();
-    
-
 
     // Then filter by time (only for today)
     if (selectedDate == null && _timeFilter != TimeFilter.all) {
@@ -226,6 +215,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         backgroundColor: _kBg,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
+        primary: !widget.embedded, // Disable SafeArea when embedded in container
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: _kPrimary),
           onPressed: () => Navigator.pop(context),
@@ -245,7 +235,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             Center(
               child: Container(
                 margin: const EdgeInsets.only(right: 8),
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: _kChipBg,
                   borderRadius: BorderRadius.circular(16),
@@ -266,7 +259,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               child: SizedBox(
                 width: 20,
                 height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2, color: _kPrimary),
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: _kPrimary,
+                ),
               ),
             )
           else
@@ -374,7 +370,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                         GestureDetector(
                           onTap: () => setState(() => _sortDesc = !_sortDesc),
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
                             decoration: BoxDecoration(
                               color: _kChipBg,
                               borderRadius: BorderRadius.circular(16),
@@ -383,7 +382,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
-                                  _sortDesc ? Icons.arrow_downward : Icons.arrow_upward,
+                                  _sortDesc
+                                      ? Icons.arrow_downward
+                                      : Icons.arrow_upward,
                                   size: 14,
                                   color: _kPrimary,
                                 ),
@@ -412,21 +413,27 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                 ),
               ],
             ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: _kPrimary,
-        onPressed: () {
-          Navigator.pushNamed(
-            context,
-            '/notifications',
-            arguments: const NotificationRouteArgs(initialFilter: 'info'),
-          );
-        },
-        child: Badge(
-          isLabelVisible: unread > 0,
-          label: Text(unread > 9 ? '9+' : '$unread'),
-          child: const Icon(Icons.notifications_outlined, color: Colors.white),
-        ),
-      ),
+      // Only show FAB when not embedded in PageView container
+      floatingActionButton: widget.embedded
+          ? null
+          : FloatingActionButton(
+              backgroundColor: _kPrimary,
+              onPressed: () {
+                Navigator.pushNamed(
+                  context,
+                  '/notifications',
+                  arguments: const NotificationRouteArgs(initialFilter: 'info'),
+                );
+              },
+              child: Badge(
+                isLabelVisible: unread > 0,
+                label: Text(unread > 9 ? '9+' : '$unread'),
+                child: const Icon(
+                  Icons.notifications_outlined,
+                  color: Colors.white,
+                ),
+              ),
+            ),
     );
   }
 
@@ -438,9 +445,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       lastDate: DateTime.now(),
       builder: (context, child) {
         return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(primary: _kPrimary),
-          ),
+          data: Theme.of(
+            context,
+          ).copyWith(colorScheme: const ColorScheme.light(primary: _kPrimary)),
           child: child!,
         );
       },
@@ -448,7 +455,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
     if (picked != null) {
       final today = DateTime.now();
-      final isToday = picked.year == today.year &&
+      final isToday =
+          picked.year == today.year &&
           picked.month == today.month &&
           picked.day == today.day;
 
@@ -512,7 +520,11 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.inbox_outlined, size: 48, color: _kPrimary.withOpacity(0.4)),
+          Icon(
+            Icons.inbox_outlined,
+            size: 48,
+            color: _kPrimary.withOpacity(0.4),
+          ),
           const SizedBox(height: 16),
           const Text(
             'No data',
@@ -533,11 +545,15 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   }
 
   Widget _buildList(List<Map<String, dynamic>> data, String kitId) {
-    return ListView.builder(
+    return Scrollbar(
       controller: _scroll,
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-      itemCount: data.length,
-      itemBuilder: (context, index) {
+      thumbVisibility: true, // Always show scrollbar
+      interactive: true, // Allow dragging the scrollbar
+      child: ListView.builder(
+        controller: _scroll,
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+        itemCount: data.length,
+        itemBuilder: (context, index) {
         final item = data[index];
         final Telemetry t = item['t'];
         final ts = item['ts'] as int;
@@ -559,7 +575,11 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               // Time
               Row(
                 children: [
-                  Icon(Icons.access_time, size: 14, color: _kPrimary.withOpacity(0.5)),
+                  Icon(
+                    Icons.access_time,
+                    size: 14,
+                    color: _kPrimary.withOpacity(0.5),
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     DateFormat('HH:mm:ss').format(date),
@@ -590,6 +610,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           ),
         );
       },
+      ),
     );
   }
 
@@ -599,10 +620,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         children: [
           Text(
             '$label: ',
-            style: TextStyle(
-              fontSize: 13,
-              color: _kPrimary.withOpacity(0.6),
-            ),
+            style: TextStyle(fontSize: 13, color: _kPrimary.withOpacity(0.6)),
           ),
           Text(
             value,
@@ -623,7 +641,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
     for (final it in data) {
       final ts = it['ts'] as int;
-      final diff = DateTime.fromMillisecondsSinceEpoch(ts).difference(target).abs();
+      final diff = DateTime.fromMillisecondsSinceEpoch(
+        ts,
+      ).difference(target).abs();
       if (diff < best) {
         best = diff;
         keyTs = ts;

@@ -1,6 +1,7 @@
 @startuml
 scale 6
 skinparam monochrome true
+skinparam defaultFontSize 20
 title Activity Diagram - Monitor
 
 |User|

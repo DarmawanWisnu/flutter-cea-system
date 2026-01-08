@@ -1,6 +1,7 @@
 @startuml
 scale 3
 skinparam monochrome true
+skinparam defaultFontSize 20
 title Sequence Diagram - Register
 
 actor "User" as User

@@ -904,8 +904,194 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
               ),
               SizedBox(height: 20 * s),
             ],
-          ),
+          )
+        else
+          // Auto mode - show latest actuator info
+          _buildAutoModeInfo(s, currentKitId),
       ],
+    );
+  }
+
+  // Auto Mode Info Card - shows latest actuator control info
+  Widget _buildAutoModeInfo(double s, String kitId) {
+    return FutureBuilder<Map<String, dynamic>?>(
+      future: ref.read(apiServiceProvider).getLatestActuatorEvent(kitId),
+      builder: (context, snapshot) {
+        final event = snapshot.data;
+        final hasActions = event != null && (
+          (event['phUp'] as int? ?? 0) > 0 ||
+          (event['phDown'] as int? ?? 0) > 0 ||
+          (event['nutrientAdd'] as int? ?? 0) > 0 ||
+          (event['refill'] as int? ?? 0) > 0
+        );
+
+        // Parse timestamp - check multiple possible field names
+        String timeStr = '--:--:--';
+        if (event != null) {
+          // Try different field names
+          final rawTime = event['createdAt'] ?? event['created_at'] ?? event['timestamp'] ?? event['ingestTime'];
+          if (rawTime != null) {
+            DateTime? dt;
+            if (rawTime is int) {
+              // Unix timestamp in milliseconds
+              dt = DateTime.fromMillisecondsSinceEpoch(rawTime);
+            } else {
+              dt = DateTime.tryParse(rawTime.toString());
+            }
+            if (dt != null) {
+              final local = dt.toLocal();
+              timeStr = '${local.hour.toString().padLeft(2, '0')}:'
+                  '${local.minute.toString().padLeft(2, '0')}:'
+                  '${local.second.toString().padLeft(2, '0')}';
+            }
+          }
+        }
+
+        return Container(
+          padding: EdgeInsets.all(16 * s),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                _kPrimary.withOpacity(0.08),
+                _kPrimary.withOpacity(0.03),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(16 * s),
+            border: Border.all(
+              color: _kPrimary.withOpacity(0.15),
+              width: 1,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header row
+              Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(8 * s),
+                    decoration: BoxDecoration(
+                      color: hasActions ? _kPrimary : _kGreen,
+                      borderRadius: BorderRadius.circular(10 * s),
+                    ),
+                    child: Icon(
+                      hasActions ? Icons.smart_toy_rounded : Icons.check_circle,
+                      color: Colors.white,
+                      size: 20 * s,
+                    ),
+                  ),
+                  SizedBox(width: 12 * s),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          hasActions ? 'Auto Control Active' : 'All Parameters Safe',
+                          style: TextStyle(
+                            fontSize: 14 * s,
+                            fontWeight: FontWeight.w700,
+                            color: _kPrimary,
+                          ),
+                        ),
+                        SizedBox(height: 2 * s),
+                        Text(
+                          hasActions ? 'Latest adjustment' : 'No adjustment needed',
+                          style: TextStyle(
+                            fontSize: 11 * s,
+                            color: _kPrimary.withOpacity(0.6),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+
+              // Show actions grid if there are actions
+              if (hasActions) ...[
+                SizedBox(height: 14 * s),
+                Wrap(
+                  spacing: 8 * s,
+                  runSpacing: 8 * s,
+                  children: [
+                    if ((event!['phUp'] as int? ?? 0) > 0)
+                      _actionChip(s, 'pH Up', '${event['phUp']}s', Icons.arrow_upward),
+                    if ((event['phDown'] as int? ?? 0) > 0)
+                      _actionChip(s, 'pH Down', '${event['phDown']}s', Icons.arrow_downward),
+                    if ((event['nutrientAdd'] as int? ?? 0) > 0)
+                      _actionChip(s, 'Nutrient', '${event['nutrientAdd']}s', Icons.water_drop),
+                    if ((event['refill'] as int? ?? 0) > 0)
+                      _actionChip(s, 'Refill', '${event['refill']}s', Icons.refresh),
+                  ],
+                ),
+              ],
+
+              // Timestamp
+              SizedBox(height: 12 * s),
+              Row(
+                children: [
+                  Icon(
+                    Icons.schedule,
+                    size: 14 * s,
+                    color: _kPrimary.withOpacity(0.5),
+                  ),
+                  SizedBox(width: 4 * s),
+                  Text(
+                    timeStr,
+                    style: TextStyle(
+                      fontSize: 12 * s,
+                      fontWeight: FontWeight.w500,
+                      color: _kPrimary.withOpacity(0.6),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // Action chip for auto mode info
+  Widget _actionChip(double s, String label, String value, IconData icon) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12 * s, vertical: 8 * s),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20 * s),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 4,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14 * s, color: _kPrimary),
+          SizedBox(width: 6 * s),
+          Text(
+            '$label: ',
+            style: TextStyle(
+              fontSize: 11 * s,
+              color: _kPrimary.withOpacity(0.7),
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 12 * s,
+              fontWeight: FontWeight.w700,
+              color: _kPrimary,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

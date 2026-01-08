@@ -2,6 +2,7 @@
 scale 2
 skinparam monochrome true
 skinparam shadowing false
+skinparam defaultFontSize 20
 title Logical Database Design - Flutter CEA System
 
 entity "kits" as kits {

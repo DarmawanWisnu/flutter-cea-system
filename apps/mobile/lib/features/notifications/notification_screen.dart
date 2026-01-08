@@ -10,7 +10,8 @@ const Color kBg = Color(0xFFF3F9F4);
 const Color kChipBg = Color(0xFFE8F2EC);
 
 class NotificationScreen extends ConsumerStatefulWidget {
-  const NotificationScreen({super.key});
+  final bool embedded; // When true, used in PageView container
+  const NotificationScreen({super.key, this.embedded = false});
   @override
   ConsumerState<NotificationScreen> createState() => _NotificationScreenState();
 }
@@ -120,6 +121,7 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
         backgroundColor: kBg,
         elevation: 0,
         centerTitle: true,
+        primary: !widget.embedded, // Disable SafeArea when embedded in container
         title: const Text(
           'Notification',
           style: TextStyle(
