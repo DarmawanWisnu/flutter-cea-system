@@ -6,7 +6,6 @@ import 'package:fountaine/features/auth/login_screen.dart';
 import 'package:fountaine/features/auth/register_screen.dart';
 import 'package:fountaine/features/auth/verify_screen.dart';
 import 'package:fountaine/features/auth/forgot_password_screen.dart';
-import 'package:fountaine/features/history/history_screen.dart';
 import 'package:fountaine/features/history/history_notification_container.dart';
 import 'package:fountaine/features/home/home_screen.dart';
 import 'package:fountaine/features/monitor/monitor_screen.dart';

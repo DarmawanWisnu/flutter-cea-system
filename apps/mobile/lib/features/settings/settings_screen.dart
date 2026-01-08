@@ -31,7 +31,7 @@ class SettingsScreen extends ConsumerWidget {
 
               try {
                 await ref.read(authProvider.notifier).signOut();
-                
+
                 // Reset kit state to prevent data leak between accounts
                 ref.read(currentKitIdProvider.notifier).state = null;
                 ref.invalidate(apiKitsListProvider);
@@ -120,18 +120,21 @@ class SettingsScreen extends ConsumerWidget {
 
   Future<void> _testConnection(BuildContext context, WidgetRef ref) async {
     final url = ref.read(apiBaseUrlProvider);
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Testing connection...')),
-    );
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Testing connection...')));
 
     try {
-      final response = await http.get(
-        Uri.parse('$url/health'),
-        headers: {
-          'ngrok-skip-browser-warning': 'true',  // Skip ngrok browser warning
-        },
-      ).timeout(const Duration(seconds: 5));
+      final response = await http
+          .get(
+            Uri.parse('$url/health'),
+            headers: {
+              'ngrok-skip-browser-warning':
+                  'true', // Skip ngrok browser warning
+            },
+          )
+          .timeout(const Duration(seconds: 5));
 
       if (!context.mounted) return;
 
@@ -154,7 +157,9 @@ class SettingsScreen extends ConsumerWidget {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('✗ Connection failed: ${e.toString().split(':').last.trim()}'),
+          content: Text(
+            '✗ Connection failed: ${e.toString().split(':').last.trim()}',
+          ),
           backgroundColor: Colors.red.shade600,
         ),
       );
@@ -360,6 +365,15 @@ class SettingsScreen extends ConsumerWidget {
                 onTap: () => Navigator.pushNamed(context, Routes.profile),
               ),
               _buildTile(
+                icon: Icons.dark_mode_outlined,
+                label: 'Theme',
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Feature coming soon')),
+                  );
+                },
+              ),
+              _buildTile(
                 icon: Icons.language,
                 label: 'Change language',
                 onTap: () {
@@ -377,100 +391,6 @@ class SettingsScreen extends ConsumerWidget {
                   );
                 },
               ),
-
-              SizedBox(height: 24 * s),
-
-              // Developer Settings
-              Text(
-                'Developer Settings',
-                style: TextStyle(
-                  fontSize: 16 * s,
-                  fontWeight: FontWeight.w700,
-                  color: _primary,
-                ),
-              ),
-              SizedBox(height: 12 * s),
-
-              // Current API URL Display
-              Container(
-                padding: EdgeInsets.all(16 * s),
-                margin: EdgeInsets.only(bottom: 10 * s),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(14 * s),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.cloud_outlined, color: _primary, size: 20 * s),
-                        SizedBox(width: 8 * s),
-                        Text(
-                          'Server URL',
-                          style: TextStyle(
-                            fontSize: 14 * s,
-                            fontWeight: FontWeight.w600,
-                            color: _primary,
-                          ),
-                        ),
-                        const Spacer(),
-                        if (ref.watch(customApiUrlProvider.notifier).isCustomUrl)
-                          Container(
-                            padding: EdgeInsets.symmetric(horizontal: 8 * s, vertical: 2 * s),
-                            decoration: BoxDecoration(
-                              color: Colors.orange.shade100,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              'Custom',
-                              style: TextStyle(
-                                fontSize: 10 * s,
-                                color: Colors.orange.shade800,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                    SizedBox(height: 8 * s),
-                    Text(
-                      ref.watch(apiBaseUrlProvider),
-                      style: TextStyle(
-                        fontSize: 12 * s,
-                        color: _muted,
-                        fontFamily: 'monospace',
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-
-              _buildTile(
-                icon: Icons.edit_outlined,
-                label: 'Change Server URL',
-                onTap: () => _showUrlDialog(context, ref),
-              ),
-              _buildTile(
-                icon: Icons.wifi_tethering,
-                label: 'Test Connection',
-                onTap: () => _testConnection(context, ref),
-              ),
-              if (ref.watch(customApiUrlProvider.notifier).isCustomUrl)
-                _buildTile(
-                  icon: Icons.restart_alt,
-                  label: 'Reset to Default',
-                  onTap: () async {
-                    await ref.read(customApiUrlProvider.notifier).resetToDefault();
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Reset to default URL')),
-                      );
-                    }
-                  },
-                ),
 
               SizedBox(height: 24 * s),
 
