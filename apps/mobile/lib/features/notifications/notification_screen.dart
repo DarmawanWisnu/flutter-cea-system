@@ -132,7 +132,7 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
     final hasMore = list.length > _displayCount;
 
     int countLevel(String lvl) =>
-        all.where((e) => _norm(e.level) == _norm(lvl)).length;
+        all.where((e) => _norm(e.level) == _norm(lvl) && !e.isRead).length;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -172,90 +172,98 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
           ),
         ],
       ),
-      body: Scrollbar(
-        controller: _scroll,
-        thumbVisibility: true,
-        interactive: true,
-        child: ListView(
+      body: RefreshIndicator(
+        onRefresh: () async {
+          notifier.markAllRead();
+          _resetScroll();
+        },
+        color: colorScheme.primary,
+        backgroundColor: colorScheme.surface,
+        child: Scrollbar(
           controller: _scroll,
-          padding: const EdgeInsets.fromLTRB(12, 6, 12, 20),
-          children: [
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: _Glass(
-                colorScheme: colorScheme,
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                child: _FilterChips(
-                  value: eff,
+          thumbVisibility: true,
+          interactive: true,
+          child: ListView(
+            controller: _scroll,
+            padding: const EdgeInsets.fromLTRB(12, 6, 12, 20),
+            children: [
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: _Glass(
                   colorScheme: colorScheme,
-                  l10n: l10n,
-                  onChanged: (newKey) {
-                    setState(() {
-                      _filter = _sanitizeFilter(newKey);
-                      _displayCount = _pageSize;
-                    });
-                    WidgetsBinding.instance.addPostFrameCallback(
-                      (_) => _resetScroll(),
-                    );
-                  },
-                  infoCount: countLevel('info'),
-                  warningCount: countLevel('warning'),
-                  urgentCount: countLevel('urgent'),
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            if (displayList.isEmpty)
-              _EmptyState(
-                colorScheme: colorScheme,
-                l10n: l10n,
-                onExploreAll: () => setState(() => _filter = null),
-              )
-            else ...[
-              ...displayList.map(
-                (n) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 6),
-                  child: _NotificationCard(
-                    title: n.title,
-                    message: n.message,
-                    meta:
-                        '${n.kitName ?? "Unknown Kit"} • ${_ago(n.timestamp, l10n)}',
-                    icon: _icon(n.level),
-                    accent: _accent(n.level),
-                    isRead: n.isRead,
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                  child: _FilterChips(
+                    value: eff,
                     colorScheme: colorScheme,
-                    newLabel: l10n.notificationNew,
-                    onTap: () {
-                      notifier.markRead(n.id);
-                      Navigator.pushNamed(
-                        context,
-                        '/history',
-                        arguments: HistoryRouteArgs(
-                          targetTime: n.timestamp,
-                          kitName: n.kitName,
-                          kitId: n.kitName,
-                          reason: n.message,
-                        ),
+                    l10n: l10n,
+                    onChanged: (newKey) {
+                      setState(() {
+                        _filter = _sanitizeFilter(newKey);
+                        _displayCount = _pageSize;
+                      });
+                      WidgetsBinding.instance.addPostFrameCallback(
+                        (_) => _resetScroll(),
                       );
                     },
+                    infoCount: countLevel('info'),
+                    warningCount: countLevel('warning'),
+                    urgentCount: countLevel('urgent'),
                   ),
                 ),
               ),
-              if (hasMore)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: Center(
-                    child: Text(
-                      l10n.notificationScrollMore,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: colorScheme.primary.withValues(alpha: 0.5),
-                      ),
+              const SizedBox(height: 8),
+              if (displayList.isEmpty)
+                _EmptyState(
+                  colorScheme: colorScheme,
+                  l10n: l10n,
+                  onExploreAll: () => setState(() => _filter = null),
+                )
+              else ...[
+                ...displayList.map(
+                  (n) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    child: _NotificationCard(
+                      title: n.title,
+                      message: n.message,
+                      meta:
+                          '${n.kitName ?? "Unknown Kit"} • ${_ago(n.timestamp, l10n)}',
+                      icon: _icon(n.level),
+                      accent: _accent(n.level),
+                      isRead: n.isRead,
+                      colorScheme: colorScheme,
+                      newLabel: l10n.notificationNew,
+                      onTap: () {
+                        notifier.markRead(n.id);
+                        Navigator.pushNamed(
+                          context,
+                          '/history',
+                          arguments: HistoryRouteArgs(
+                            targetTime: n.timestamp,
+                            kitName: n.kitName,
+                            kitId: n.kitName,
+                            reason: n.message,
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),
+                if (hasMore)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Center(
+                      child: Text(
+                        l10n.notificationScrollMore,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: colorScheme.primary.withValues(alpha: 0.5),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

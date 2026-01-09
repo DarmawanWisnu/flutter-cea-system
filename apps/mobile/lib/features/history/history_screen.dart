@@ -578,87 +578,94 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     final hasMore = data.length > _displayCount;
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Scrollbar(
-      controller: _scroll,
-      thumbVisibility: true,
-      interactive: true,
-      child: ListView.builder(
+    return RefreshIndicator(
+      onRefresh: () async {
+        await _loadData(kitId, days: selectedDate != null ? 7 : 1);
+      },
+      color: colorScheme.primary,
+      backgroundColor: colorScheme.surface,
+      child: Scrollbar(
         controller: _scroll,
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-        itemCount: displayData.length + (hasMore ? 1 : 0),
-        itemBuilder: (context, index) {
-          if (index == displayData.length && hasMore) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: Center(
-                child: Text(
-                  l10n.historyScrollMore(data.length - _displayCount),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: colorScheme.primary.withValues(alpha: 0.5),
-                  ),
-                ),
-              ),
-            );
-          }
-
-          final item = displayData[index];
-          final Telemetry t = item['t'];
-          final ts = item['ts'] as int;
-          final date = DateTime.fromMillisecondsSinceEpoch(ts);
-          final key = _itemKeys.putIfAbsent(ts, () => GlobalKey());
-
-          return Container(
-            key: key,
-            margin: const EdgeInsets.only(bottom: 8),
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: colorScheme.surface,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.access_time,
-                      size: 14,
+        thumbVisibility: true,
+        interactive: true,
+        child: ListView.builder(
+          controller: _scroll,
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+          itemCount: displayData.length + (hasMore ? 1 : 0),
+          itemBuilder: (context, index) {
+            if (index == displayData.length && hasMore) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Center(
+                  child: Text(
+                    l10n.historyScrollMore(data.length - _displayCount),
+                    style: TextStyle(
+                      fontSize: 12,
                       color: colorScheme.primary.withValues(alpha: 0.5),
                     ),
-                    const SizedBox(width: 6),
-                    Text(
-                      DateFormat('HH:mm:ss').format(date),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: colorScheme.primary.withValues(alpha: 0.6),
-                        fontWeight: FontWeight.w500,
+                  ),
+                ),
+              );
+            }
+
+            final item = displayData[index];
+            final Telemetry t = item['t'];
+            final ts = item['ts'] as int;
+            final date = DateTime.fromMillisecondsSinceEpoch(ts);
+            final key = _itemKeys.putIfAbsent(ts, () => GlobalKey());
+
+            return Container(
+              key: key,
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: colorScheme.surface,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.access_time,
+                        size: 14,
+                        color: colorScheme.primary.withValues(alpha: 0.5),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    _sensorValue(context, l10n.sensorPh, t.ph.toStringAsFixed(2)),
-                    _sensorValue(context, l10n.sensorTds, '${t.ppm.toInt()} ppm'),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    _sensorValue(
-                      context,
-                      l10n.sensorHumidity,
-                      '${t.humidity.toStringAsFixed(1)}%',
-                    ),
-                    _sensorValue(context, l10n.sensorTemp, '${t.tempC.toStringAsFixed(1)}°C'),
-                  ],
-                ),
-              ],
-            ),
-          );
-        },
+                      const SizedBox(width: 6),
+                      Text(
+                        DateFormat('HH:mm:ss').format(date),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: colorScheme.primary.withValues(alpha: 0.6),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      _sensorValue(context, l10n.sensorPh, t.ph.toStringAsFixed(2)),
+                      _sensorValue(context, l10n.sensorTds, '${t.ppm.toInt()} ppm'),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      _sensorValue(
+                        context,
+                        l10n.sensorHumidity,
+                        '${t.humidity.toStringAsFixed(1)}%',
+                      ),
+                      _sensorValue(context, l10n.sensorTemp, '${t.tempC.toStringAsFixed(1)}°C'),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
