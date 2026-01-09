@@ -47,6 +47,8 @@ dependencies:
   intl: ^0.20.2                      # history_screen.dart
   url_launcher: ^6.3.0               # verify_screen.dart
   shared_preferences: ^2.5.4         # url_settings_provider.dart
+  geolocator: ^10.1.0                # GPS location for weather
+  geocoding: ^2.1.1                  # Reverse geocoding (coords -> city name)
 
   # ============================================
   # UNUSED LIBRARIES (Not currently used)

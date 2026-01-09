@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fountaine/app/routes.dart';
 import 'package:fountaine/l10n/app_localizations.dart';
+import 'package:fountaine/providers/provider/location_provider.dart';
+import 'package:fountaine/providers/provider/weather_provider.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -11,6 +13,10 @@ class HomeScreen extends ConsumerWidget {
     final s = MediaQuery.of(context).size.width / 375.0;
     final colorScheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
+    
+    // Watch location and weather providers
+    final location = ref.watch(locationProvider);
+    final weather = ref.watch(weatherProvider);
 
     Widget featureCard({
       required String title,
@@ -78,17 +84,20 @@ class HomeScreen extends ConsumerWidget {
               height: 180 * s,
               child: Stack(
                 children: [
-                  // hero background image
+                  // hero background - dynamic gradient based on time
                   Positioned.fill(
                     child: ClipRRect(
                       borderRadius: BorderRadius.vertical(
                         bottom: Radius.circular(28 * s),
                       ),
-                      child: Image.asset(
-                        'assets/images/weather_icon.png',
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) =>
-                            Container(color: colorScheme.primary.withValues(alpha: 0.3)),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: _getTimeBasedGradient(),
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -145,7 +154,7 @@ class HomeScreen extends ConsumerWidget {
                             ),
                             SizedBox(width: 6 * s),
                             Text(
-                              'Tangerang, Banten',
+                              location.cityName,
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 16 * s,
@@ -180,31 +189,35 @@ class HomeScreen extends ConsumerWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            '23°C',
-                            style: TextStyle(
-                              fontSize: 28 * s,
-                              fontWeight: FontWeight.w800,
-                              color: colorScheme.primary,
-                            ),
-                          ),
+                          weather.isLoading
+                              ? SizedBox(
+                                  width: 24 * s,
+                                  height: 24 * s,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: colorScheme.primary,
+                                  ),
+                                )
+                              : Text(
+                                  '${weather.temperature.round()}°C',
+                                  style: TextStyle(
+                                    fontSize: 28 * s,
+                                    fontWeight: FontWeight.w800,
+                                    color: colorScheme.primary,
+                                  ),
+                                ),
                           SizedBox(height: 6 * s),
                           Text(
-                            'Tangerang, Banten',
+                            location.cityName,
                             style: TextStyle(fontSize: 16 * s, color: colorScheme.primary),
                           ),
                         ],
                       ),
                       const Spacer(),
-                      Image.asset(
-                        'assets/images/rain_icon.png',
-                        width: 72 * s,
-                        height: 72 * s,
-                        errorBuilder: (_, __, ___) => Icon(
-                          Icons.cloud,
-                          size: 72 * s,
-                          color: colorScheme.primary.withValues(alpha: 0.3),
-                        ),
+                      Icon(
+                        _getWeatherIcon(weather.weatherCode),
+                        size: 72 * s,
+                        color: colorScheme.primary.withValues(alpha: 0.8),
                       ),
                     ],
                   ),
@@ -402,5 +415,40 @@ class HomeScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  /// Get gradient colors based on time of day
+  List<Color> _getTimeBasedGradient() {
+    final hour = DateTime.now().hour;
+    
+    if (hour >= 5 && hour < 7) {
+      // Dawn - soft orange to pink
+      return const [Color(0xFFFF9A8B), Color(0xFFFF6A88)];
+    } else if (hour >= 7 && hour < 12) {
+      // Morning - light blue to cyan
+      return const [Color(0xFF74EBD5), Color(0xFFACB6E5)];
+    } else if (hour >= 12 && hour < 17) {
+      // Afternoon - sky blue to deeper blue
+      return const [Color(0xFF56CCF2), Color(0xFF2F80ED)];
+    } else if (hour >= 17 && hour < 20) {
+      // Evening - orange to purple sunset
+      return const [Color(0xFFFFA751), Color(0xFFFFE259)];
+    } else {
+      // Night - dark blue to purple
+      return const [Color(0xFF2C3E50), Color(0xFF4CA1AF)];
+    }
+  }
+
+  /// Get weather icon based on WMO weather code
+  IconData _getWeatherIcon(int code) {
+    if (code == 0) return Icons.wb_sunny;
+    if (code <= 3) return Icons.cloud;
+    if (code <= 48) return Icons.foggy;
+    if (code <= 55) return Icons.grain;
+    if (code <= 65) return Icons.water_drop;
+    if (code <= 75) return Icons.ac_unit;
+    if (code <= 82) return Icons.water_drop;
+    if (code >= 95) return Icons.flash_on;
+    return Icons.cloud;
   }
 }

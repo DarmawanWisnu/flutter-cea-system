@@ -1,6 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- ✅ Izinkan koneksi internet -->
     <uses-permission android:name="android.permission.INTERNET" />
+    
+    <!-- ✅ Izinkan akses lokasi untuk cuaca -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <application
         android:label="fountaine"
