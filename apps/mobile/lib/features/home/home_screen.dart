@@ -102,30 +102,6 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   ),
 
-                  // top controls
-                  Positioned(
-                    top: 12 * s,
-                    left: 18 * s,
-                    right: 18 * s,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        CircleAvatar(
-                          backgroundColor: Colors.white70,
-                          radius: 20 * s,
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.grid_view_rounded,
-                              color: colorScheme.primary,
-                              size: 18 * s,
-                            ),
-                            onPressed: () {},
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
                   // location block
                   Positioned(
                     top: 60 * s,
@@ -176,7 +152,7 @@ class HomeScreen extends ConsumerWidget {
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 18 * s),
                 child: GestureDetector(
-                  onTap: () => ref.read(weatherProvider.notifier).refresh(),
+                  onTap: () => ref.read(weatherProvider.notifier).refreshAll(),
                   child: Container(
                     padding: EdgeInsets.symmetric(
                       horizontal: 18 * s,

@@ -104,12 +104,20 @@ class WeatherNotifier extends Notifier<WeatherState> {
     await Future.delayed(const Duration(milliseconds: 500));
     await fetchWeather();
     
-    // Setup auto-refresh every 30 minutes
+    // Setup auto-refresh every 30 minutes (both location and weather)
     _autoRefreshTimer?.cancel();
     _autoRefreshTimer = Timer.periodic(
       const Duration(minutes: 30),
-      (_) => fetchWeather(),
+      (_) => refreshAll(),
     );
+  }
+
+  /// Refresh both location and weather
+  Future<void> refreshAll() async {
+    // First refresh location
+    await ref.read(locationProvider.notifier).fetchLocation();
+    // Then fetch weather with new location
+    await fetchWeather();
   }
 
   /// Fetch weather from Open-Meteo API
