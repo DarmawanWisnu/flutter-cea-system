@@ -1028,13 +1028,9 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
-    // Light mode: dark island, Dark mode: subtle dark surface
-    final bgColor = isDark 
-        ? colorScheme.surfaceContainerHighest 
-        : colorScheme.inverseSurface;
-    final textColor = isDark 
-        ? colorScheme.onSurface 
-        : colorScheme.onInverseSurface;
+    // Both themes: use primary color from theme
+    final bgColor = colorScheme.primary;
+    final textColor = colorScheme.onPrimary;
     
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
