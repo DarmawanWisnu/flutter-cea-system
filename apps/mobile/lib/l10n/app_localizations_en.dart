@@ -400,6 +400,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actionRefill => 'REFILL';
 
   @override
+  String get actionPhUpSent => 'pH Up command sent';
+
+  @override
+  String get actionPhDownSent => 'pH Down command sent';
+
+  @override
+  String get actionNutrientSent => 'Nutrient command sent';
+
+  @override
+  String get actionRefillSent => 'Refill command sent';
+
+  @override
   String get historyTitle => 'History';
 
   @override

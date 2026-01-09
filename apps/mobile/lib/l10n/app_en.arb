@@ -191,6 +191,10 @@
   "actionPhDown": "PH DOWN",
   "actionNutrient": "NUTRIENT",
   "actionRefill": "REFILL",
+  "actionPhUpSent": "pH Up command sent",
+  "actionPhDownSent": "pH Down command sent",
+  "actionNutrientSent": "Nutrient command sent",
+  "actionRefillSent": "Refill command sent",
   
   "@@_sectionHistory": "=== HISTORY SCREEN ===",
   "historyTitle": "History",

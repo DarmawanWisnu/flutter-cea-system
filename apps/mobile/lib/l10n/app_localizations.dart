@@ -848,6 +848,30 @@ abstract class AppLocalizations {
   /// **'REFILL'**
   String get actionRefill;
 
+  /// No description provided for @actionPhUpSent.
+  ///
+  /// In en, this message translates to:
+  /// **'pH Up command sent'**
+  String get actionPhUpSent;
+
+  /// No description provided for @actionPhDownSent.
+  ///
+  /// In en, this message translates to:
+  /// **'pH Down command sent'**
+  String get actionPhDownSent;
+
+  /// No description provided for @actionNutrientSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrient command sent'**
+  String get actionNutrientSent;
+
+  /// No description provided for @actionRefillSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Refill command sent'**
+  String get actionRefillSent;
+
   /// No description provided for @historyTitle.
   ///
   /// In en, this message translates to:

@@ -791,6 +791,7 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
                       ref
                           .read(monitorTelemetryProvider(currentKitId).notifier)
                           .phUp();
+                      _showCommandSnackBar(context, l10n.actionPhUpSent);
                     }),
                   ),
                   SizedBox(width: 10 * s),
@@ -799,6 +800,7 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
                       ref
                           .read(monitorTelemetryProvider(currentKitId).notifier)
                           .phDown();
+                      _showCommandSnackBar(context, l10n.actionPhDownSent);
                     }),
                   ),
                 ],
@@ -811,6 +813,7 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
                       ref
                           .read(monitorTelemetryProvider(currentKitId).notifier)
                           .nutrientAdd();
+                      _showCommandSnackBar(context, l10n.actionNutrientSent);
                     }),
                   ),
                   SizedBox(width: 10 * s),
@@ -819,6 +822,7 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
                       ref
                           .read(monitorTelemetryProvider(currentKitId).notifier)
                           .refill();
+                      _showCommandSnackBar(context, l10n.actionRefillSent);
                     }),
                   ),
                 ],
@@ -1012,32 +1016,125 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
   }
 
   Widget _actionBtn(BuildContext context, double s, String label, VoidCallback onTap) {
-    final colorScheme = Theme.of(context).colorScheme;
-    
-    return InkWell(
+    return _PressableActionButton(
+      label: label,
+      scaleFactor: s,
       onTap: onTap,
-      borderRadius: BorderRadius.circular(10 * s),
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 14 * s),
-        decoration: BoxDecoration(
-          color: colorScheme.surface,
-          borderRadius: BorderRadius.circular(10 * s),
-          border: Border.all(color: colorScheme.primary.withValues(alpha: 0.2), width: 1),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Center(
+    );
+  }
+
+  void _showCommandSnackBar(BuildContext context, String message) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    // Light mode: dark island, Dark mode: subtle dark surface
+    final bgColor = isDark 
+        ? colorScheme.surfaceContainerHighest 
+        : colorScheme.inverseSurface;
+    final textColor = isDark 
+        ? colorScheme.onSurface 
+        : colorScheme.onInverseSurface;
+    
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Center(
           child: Text(
-            label,
+            message,
+            textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 13 * s,
-              fontWeight: FontWeight.w700,
-              color: colorScheme.primary,
+              color: textColor,
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+              letterSpacing: 0.2,
+            ),
+          ),
+        ),
+        backgroundColor: bgColor.withValues(alpha: 0.95),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(50),
+        ),
+        elevation: 8,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        width: null,
+        margin: EdgeInsets.only(
+          left: screenWidth * 0.18,
+          right: screenWidth * 0.18,
+          bottom: 24,
+        ),
+        duration: const Duration(milliseconds: 1500),
+      ),
+    );
+  }
+}
+
+class _PressableActionButton extends StatefulWidget {
+  final String label;
+  final double scaleFactor;
+  final VoidCallback onTap;
+
+  const _PressableActionButton({
+    required this.label,
+    required this.scaleFactor,
+    required this.onTap,
+  });
+
+  @override
+  State<_PressableActionButton> createState() => _PressableActionButtonState();
+}
+
+class _PressableActionButtonState extends State<_PressableActionButton> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final s = widget.scaleFactor;
+
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) {
+        setState(() => _isPressed = false);
+        widget.onTap();
+      },
+      onTapCancel: () => setState(() => _isPressed = false),
+      child: AnimatedScale(
+        scale: _isPressed ? 0.95 : 1.0,
+        duration: const Duration(milliseconds: 100),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 100),
+          padding: EdgeInsets.symmetric(vertical: 14 * s),
+          decoration: BoxDecoration(
+            color: _isPressed 
+                ? colorScheme.primary.withValues(alpha: 0.15) 
+                : colorScheme.surface,
+            borderRadius: BorderRadius.circular(10 * s),
+            border: Border.all(
+              color: _isPressed 
+                  ? colorScheme.primary 
+                  : colorScheme.primary.withValues(alpha: 0.2), 
+              width: _isPressed ? 2 : 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: _isPressed 
+                    ? colorScheme.primary.withValues(alpha: 0.2) 
+                    : Colors.black.withValues(alpha: 0.03),
+                blurRadius: _isPressed ? 10 : 6,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Center(
+            child: Text(
+              widget.label,
+              style: TextStyle(
+                fontSize: 13 * s,
+                fontWeight: FontWeight.w700,
+                color: colorScheme.primary,
+              ),
             ),
           ),
         ),

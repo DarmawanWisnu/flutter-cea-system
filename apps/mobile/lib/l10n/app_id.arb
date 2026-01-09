@@ -155,6 +155,10 @@
   "actionPhDown": "PH TURUN",
   "actionNutrient": "NUTRISI",
   "actionRefill": "ISI ULANG",
+  "actionPhUpSent": "Perintah pH Naik terkirim",
+  "actionPhDownSent": "Perintah pH Turun terkirim",
+  "actionNutrientSent": "Perintah Nutrisi terkirim",
+  "actionRefillSent": "Perintah Isi Ulang terkirim",
   
   "@@_sectionHistory": "=== HISTORY SCREEN ===",
   "historyTitle": "Riwayat",

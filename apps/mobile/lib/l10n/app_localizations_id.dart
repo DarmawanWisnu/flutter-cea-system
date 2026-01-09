@@ -400,6 +400,18 @@ class AppLocalizationsId extends AppLocalizations {
   String get actionRefill => 'ISI ULANG';
 
   @override
+  String get actionPhUpSent => 'Perintah pH Naik terkirim';
+
+  @override
+  String get actionPhDownSent => 'Perintah pH Turun terkirim';
+
+  @override
+  String get actionNutrientSent => 'Perintah Nutrisi terkirim';
+
+  @override
+  String get actionRefillSent => 'Perintah Isi Ulang terkirim';
+
+  @override
   String get historyTitle => 'Riwayat';
 
   @override
