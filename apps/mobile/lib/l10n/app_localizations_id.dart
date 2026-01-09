@@ -158,6 +158,90 @@ class AppLocalizationsId extends AppLocalizations {
   String get homeSettingDesc => 'Kelola akun Anda';
 
   @override
+  String get weatherClear => 'Cerah';
+
+  @override
+  String get weatherPartlyCloudy => 'Berawan sebagian';
+
+  @override
+  String get weatherFoggy => 'Berkabut';
+
+  @override
+  String get weatherDrizzle => 'Gerimis';
+
+  @override
+  String get weatherRain => 'Hujan';
+
+  @override
+  String get weatherSnow => 'Salju';
+
+  @override
+  String get weatherRainShowers => 'Hujan deras';
+
+  @override
+  String get weatherThunderstorm => 'Badai petir';
+
+  @override
+  String get weatherUnknown => 'Tidak diketahui';
+
+  @override
+  String get daySun => 'Min';
+
+  @override
+  String get dayMon => 'Sen';
+
+  @override
+  String get dayTue => 'Sel';
+
+  @override
+  String get dayWed => 'Rab';
+
+  @override
+  String get dayThu => 'Kam';
+
+  @override
+  String get dayFri => 'Jum';
+
+  @override
+  String get daySat => 'Sab';
+
+  @override
+  String get monthJan => 'Januari';
+
+  @override
+  String get monthFeb => 'Februari';
+
+  @override
+  String get monthMar => 'Maret';
+
+  @override
+  String get monthApr => 'April';
+
+  @override
+  String get monthMay => 'Mei';
+
+  @override
+  String get monthJun => 'Juni';
+
+  @override
+  String get monthJul => 'Juli';
+
+  @override
+  String get monthAug => 'Agustus';
+
+  @override
+  String get monthSep => 'September';
+
+  @override
+  String get monthOct => 'Oktober';
+
+  @override
+  String get monthNov => 'November';
+
+  @override
+  String get monthDec => 'Desember';
+
+  @override
   String get profileTitle => 'Profil';
 
   @override

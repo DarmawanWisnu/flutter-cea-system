@@ -13,7 +13,7 @@ class HomeScreen extends ConsumerWidget {
     final s = MediaQuery.of(context).size.width / 375.0;
     final colorScheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
-    
+
     // Watch location and weather providers
     final location = ref.watch(locationProvider);
     final weather = ref.watch(weatherProvider);
@@ -47,7 +47,10 @@ class HomeScreen extends ConsumerWidget {
               SizedBox(height: 6 * s),
               Text(
                 subtitle,
-                style: TextStyle(fontSize: 13 * s, color: colorScheme.onSurfaceVariant),
+                style: TextStyle(
+                  fontSize: 13 * s,
+                  color: colorScheme.onSurfaceVariant,
+                ),
               ),
               const Spacer(),
               Align(
@@ -63,7 +66,11 @@ class HomeScreen extends ConsumerWidget {
                       width: 110 * s,
                       height: 90 * s,
                       color: colorScheme.primary.withValues(alpha: 0.1),
-                      child: Icon(Icons.image, size: 32 * s, color: colorScheme.primary),
+                      child: Icon(
+                        Icons.image,
+                        size: 32 * s,
+                        color: colorScheme.primary,
+                      ),
                     ),
                   ),
                 ),
@@ -156,7 +163,7 @@ class HomeScreen extends ConsumerWidget {
                   child: Container(
                     padding: EdgeInsets.symmetric(
                       horizontal: 18 * s,
-                      vertical: 18 * s,
+                      vertical: 16 * s,
                     ),
                     decoration: BoxDecoration(
                       color: colorScheme.surface,
@@ -171,48 +178,78 @@ class HomeScreen extends ConsumerWidget {
                     ),
                     child: Row(
                       children: [
+                        // Left side: Time and Date
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            Text(
+                              _formatTime(),
+                              style: TextStyle(
+                                fontSize: 24 * s,
+                                fontWeight: FontWeight.w600,
+                                color: colorScheme.primary,
+                                height: 1.1,
+                              ),
+                            ),
+                            SizedBox(height: 2 * s),
+                            Text(
+                              _formatDate(l10n),
+                              style: TextStyle(
+                                fontSize: 13 * s,
+                                color: colorScheme.primary.withValues(
+                                  alpha: 0.7,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const Spacer(),
+                        // Right side: Weather icon, description, temp
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Icon(
+                              _getWeatherIcon(weather.weatherCode),
+                              size: 36 * s,
+                              color: colorScheme.primary,
+                            ),
+                            SizedBox(height: 4 * s),
                             weather.isLoading
                                 ? SizedBox(
-                                    width: 24 * s,
-                                    height: 24 * s,
+                                    width: 16 * s,
+                                    height: 16 * s,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
                                       color: colorScheme.primary,
                                     ),
                                   )
-                                : Text(
-                                    '${weather.temperature.round()}°C',
-                                    style: TextStyle(
-                                      fontSize: 28 * s,
-                                      fontWeight: FontWeight.w800,
-                                      color: colorScheme.primary,
-                                    ),
+                                : Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        _getWeatherDescription(
+                                          weather.weatherCode,
+                                          l10n,
+                                        ),
+                                        style: TextStyle(
+                                          fontSize: 13 * s,
+                                          color: colorScheme.primary.withValues(
+                                            alpha: 0.7,
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(width: 8 * s),
+                                      Text(
+                                        '${weather.temperature.round()}°C',
+                                        style: TextStyle(
+                                          fontSize: 16 * s,
+                                          fontWeight: FontWeight.w600,
+                                          color: colorScheme.primary,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                            SizedBox(height: 6 * s),
-                            Row(
-                              children: [
-                                Text(
-                                  location.cityName,
-                                  style: TextStyle(fontSize: 14 * s, color: colorScheme.primary),
-                                ),
-                                SizedBox(width: 6 * s),
-                                Icon(
-                                  Icons.refresh,
-                                  size: 12 * s,
-                                  color: colorScheme.primary.withValues(alpha: 0.5),
-                                ),
-                              ],
-                            ),
                           ],
-                        ),
-                        const Spacer(),
-                        Icon(
-                          _getWeatherIcon(weather.weatherCode),
-                          size: 72 * s,
-                          color: colorScheme.primary.withValues(alpha: 0.8),
                         ),
                       ],
                     ),
@@ -342,7 +379,7 @@ class HomeScreen extends ConsumerWidget {
                         onTap: () =>
                             Navigator.pushNamed(context, Routes.monitor),
                         child: Icon(
-                          Icons.people_outline,
+                          Icons.dashboard_outlined,
                           color: colorScheme.onSurfaceVariant,
                           size: 26 * s,
                         ),
@@ -356,7 +393,7 @@ class HomeScreen extends ConsumerWidget {
                         onTap: () =>
                             Navigator.pushNamed(context, Routes.history),
                         child: Icon(
-                          Icons.park_outlined,
+                          Icons.history_outlined,
                           color: colorScheme.onSurfaceVariant,
                           size: 26 * s,
                         ),
@@ -367,7 +404,7 @@ class HomeScreen extends ConsumerWidget {
                         onTap: () =>
                             Navigator.pushNamed(context, Routes.settings),
                         child: Icon(
-                          Icons.person_outline,
+                          Icons.settings_outlined,
                           color: colorScheme.onSurfaceVariant,
                           size: 26 * s,
                         ),
@@ -416,22 +453,22 @@ class HomeScreen extends ConsumerWidget {
   /// Get gradient colors based on weather and time of day
   List<Color> _getWeatherGradient(int weatherCode) {
     final hour = DateTime.now().hour;
-    
+
     // Thunderstorm (95-99) - dark stormy colors
     if (weatherCode >= 95) {
       return const [Color(0xFF2D3436), Color(0xFF636E72)];
     }
-    
+
     // Rain/Drizzle (51-82) - gray rainy colors
     if (weatherCode >= 51 && weatherCode <= 82) {
       return const [Color(0xFF4B6584), Color(0xFF778CA3)];
     }
-    
-    // Fog (45-48) - misty colors  
+
+    // Fog (45-48) - misty colors
     if (weatherCode >= 45 && weatherCode <= 48) {
       return const [Color(0xFF8395A7), Color(0xFFC8D6E5)];
     }
-    
+
     // Cloudy (1-3) - slightly muted colors based on time
     if (weatherCode >= 1 && weatherCode <= 3) {
       if (hour >= 17 || hour < 7) {
@@ -439,7 +476,7 @@ class HomeScreen extends ConsumerWidget {
       }
       return const [Color(0xFF74B9FF), Color(0xFFA29BFE)];
     }
-    
+
     // Clear (0) - bright colors based on time
     if (hour >= 5 && hour < 7) {
       // Dawn - soft orange to pink
@@ -470,5 +507,137 @@ class HomeScreen extends ConsumerWidget {
     if (code <= 82) return Icons.water_drop;
     if (code >= 95) return Icons.flash_on;
     return Icons.cloud;
+  }
+
+  /// Format current time hour:minute with timezone (WIB/WITA/WIT)
+  String _formatTime() {
+    final now = DateTime.now();
+    final hour = now.hour.toString().padLeft(2, '0');
+    final minute = now.minute.toString().padLeft(2, '0');
+
+    String timezone = '';
+    final offset = now.timeZoneOffset.inHours;
+    if (offset == 7) {
+      timezone = 'WIB';
+    } else if (offset == 8) {
+      timezone = 'WITA';
+    } else if (offset == 9) {
+      timezone = 'WIT';
+    }
+
+    return '$hour:$minute $timezone';
+  }
+
+  /// Format date like "Jum, 09 Januari"
+  String _formatDate(AppLocalizations l10n) {
+    final now = DateTime.now();
+
+    String dayName;
+    switch (now.weekday) {
+      case DateTime.monday:
+        dayName = l10n.dayMon;
+        break;
+      case DateTime.tuesday:
+        dayName = l10n.dayTue;
+        break;
+      case DateTime.wednesday:
+        dayName = l10n.dayWed;
+        break;
+      case DateTime.thursday:
+        dayName = l10n.dayThu;
+        break;
+      case DateTime.friday:
+        dayName = l10n.dayFri;
+        break;
+      case DateTime.saturday:
+        dayName = l10n.daySat;
+        break;
+      case DateTime.sunday:
+        dayName = l10n.daySun;
+        break;
+      default:
+        dayName = '';
+    }
+
+    String monthName;
+    switch (now.month) {
+      case DateTime.january:
+        monthName = l10n.monthJan;
+        break;
+      case DateTime.february:
+        monthName = l10n.monthFeb;
+        break;
+      case DateTime.march:
+        monthName = l10n.monthMar;
+        break;
+      case DateTime.april:
+        monthName = l10n.monthApr;
+        break;
+      case DateTime.may:
+        monthName = l10n.monthMay;
+        break;
+      case DateTime.june:
+        monthName = l10n.monthJun;
+        break;
+      case DateTime.july:
+        monthName = l10n.monthJul;
+        break;
+      case DateTime.august:
+        monthName = l10n.monthAug;
+        break;
+      case DateTime.september:
+        monthName = l10n.monthSep;
+        break;
+      case DateTime.october:
+        monthName = l10n.monthOct;
+        break;
+      case DateTime.november:
+        monthName = l10n.monthNov;
+        break;
+      case DateTime.december:
+        monthName = l10n.monthDec;
+        break;
+      default:
+        monthName = '';
+    }
+
+    return '$dayName, ${now.day.toString().padLeft(2, '0')} $monthName';
+  }
+
+  /// Get localized weather description based on WMO code
+  String _getWeatherDescription(int code, AppLocalizations l10n) {
+    switch (code) {
+      case 0:
+        return l10n.weatherClear;
+      case 1:
+      case 2:
+      case 3:
+        return l10n.weatherPartlyCloudy;
+      case 45:
+      case 48:
+        return l10n.weatherFoggy;
+      case 51:
+      case 53:
+      case 55:
+        return l10n.weatherDrizzle;
+      case 61:
+      case 63:
+      case 65:
+        return l10n.weatherRain;
+      case 71:
+      case 73:
+      case 75:
+        return l10n.weatherSnow;
+      case 80:
+      case 81:
+      case 82:
+        return l10n.weatherRainShowers;
+      case 95:
+      case 96:
+      case 99:
+        return l10n.weatherThunderstorm;
+      default:
+        return l10n.weatherUnknown;
+    }
   }
 }
