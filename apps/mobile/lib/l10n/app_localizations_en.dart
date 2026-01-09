@@ -233,6 +233,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authLocationHint => 'Your city';
 
   @override
+  String get authLocationError =>
+      'Unable to get location. Please enter manually.';
+
+  @override
   String get authSignUp => 'Sign Up';
 
   @override

@@ -95,7 +95,7 @@ class HomeScreen extends ConsumerWidget {
                           gradient: LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
-                            colors: _getTimeBasedGradient(),
+                            colors: _getWeatherGradient(weather.weatherCode),
                           ),
                         ),
                       ),
@@ -170,56 +170,76 @@ class HomeScreen extends ConsumerWidget {
               ),
             ),
 
-            // Weather card overlapping
+            // Weather card overlapping - tap to refresh
             Transform.translate(
               offset: Offset(0, -28 * s),
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 18 * s),
-                child: Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 18 * s,
-                    vertical: 18 * s,
-                  ),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surface,
-                    borderRadius: BorderRadius.circular(16 * s),
-                  ),
-                  child: Row(
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          weather.isLoading
-                              ? SizedBox(
-                                  width: 24 * s,
-                                  height: 24 * s,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: colorScheme.primary,
+                child: GestureDetector(
+                  onTap: () => ref.read(weatherProvider.notifier).refresh(),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 18 * s,
+                      vertical: 18 * s,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surface,
+                      borderRadius: BorderRadius.circular(16 * s),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            weather.isLoading
+                                ? SizedBox(
+                                    width: 24 * s,
+                                    height: 24 * s,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: colorScheme.primary,
+                                    ),
+                                  )
+                                : Text(
+                                    '${weather.temperature.round()}°C',
+                                    style: TextStyle(
+                                      fontSize: 28 * s,
+                                      fontWeight: FontWeight.w800,
+                                      color: colorScheme.primary,
+                                    ),
                                   ),
-                                )
-                              : Text(
-                                  '${weather.temperature.round()}°C',
-                                  style: TextStyle(
-                                    fontSize: 28 * s,
-                                    fontWeight: FontWeight.w800,
-                                    color: colorScheme.primary,
-                                  ),
+                            SizedBox(height: 6 * s),
+                            Row(
+                              children: [
+                                Text(
+                                  location.cityName,
+                                  style: TextStyle(fontSize: 14 * s, color: colorScheme.primary),
                                 ),
-                          SizedBox(height: 6 * s),
-                          Text(
-                            location.cityName,
-                            style: TextStyle(fontSize: 16 * s, color: colorScheme.primary),
-                          ),
-                        ],
-                      ),
-                      const Spacer(),
-                      Icon(
-                        _getWeatherIcon(weather.weatherCode),
-                        size: 72 * s,
-                        color: colorScheme.primary.withValues(alpha: 0.8),
-                      ),
-                    ],
+                                SizedBox(width: 6 * s),
+                                Icon(
+                                  Icons.refresh,
+                                  size: 12 * s,
+                                  color: colorScheme.primary.withValues(alpha: 0.5),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const Spacer(),
+                        Icon(
+                          _getWeatherIcon(weather.weatherCode),
+                          size: 72 * s,
+                          color: colorScheme.primary.withValues(alpha: 0.8),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -417,10 +437,34 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  /// Get gradient colors based on time of day
-  List<Color> _getTimeBasedGradient() {
+  /// Get gradient colors based on weather and time of day
+  List<Color> _getWeatherGradient(int weatherCode) {
     final hour = DateTime.now().hour;
     
+    // Thunderstorm (95-99) - dark stormy colors
+    if (weatherCode >= 95) {
+      return const [Color(0xFF2D3436), Color(0xFF636E72)];
+    }
+    
+    // Rain/Drizzle (51-82) - gray rainy colors
+    if (weatherCode >= 51 && weatherCode <= 82) {
+      return const [Color(0xFF4B6584), Color(0xFF778CA3)];
+    }
+    
+    // Fog (45-48) - misty colors  
+    if (weatherCode >= 45 && weatherCode <= 48) {
+      return const [Color(0xFF8395A7), Color(0xFFC8D6E5)];
+    }
+    
+    // Cloudy (1-3) - slightly muted colors based on time
+    if (weatherCode >= 1 && weatherCode <= 3) {
+      if (hour >= 17 || hour < 7) {
+        return const [Color(0xFF4B6584), Color(0xFF576574)];
+      }
+      return const [Color(0xFF74B9FF), Color(0xFFA29BFE)];
+    }
+    
+    // Clear (0) - bright colors based on time
     if (hour >= 5 && hour < 7) {
       // Dawn - soft orange to pink
       return const [Color(0xFFFF9A8B), Color(0xFFFF6A88)];

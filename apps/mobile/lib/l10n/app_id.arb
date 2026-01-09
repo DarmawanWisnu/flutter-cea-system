@@ -92,6 +92,7 @@
   "authNameHint": "Nama lengkap",
   "authLocationLabel": "Lokasi",
   "authLocationHint": "Kota Anda",
+  "authLocationError": "Tidak dapat mengambil lokasi. Silakan isi manual.",
   "authSignUp": "Daftar",
   
   "@@_sectionAuthVerify": "=== AUTH: VERIFY EMAIL SCREEN ===",

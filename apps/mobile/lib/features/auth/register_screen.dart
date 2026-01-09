@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fountaine/app/routes.dart';
 import 'package:fountaine/utils/validators.dart';
 import 'package:fountaine/providers/provider/auth_provider.dart';
+import 'package:fountaine/providers/provider/location_provider.dart';
 import 'package:fountaine/utils/firebase_error_handler.dart';
 import 'package:fountaine/l10n/app_localizations.dart';
 
@@ -21,6 +22,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _loading = false;
   bool _obscure = true;
+  bool _loadingLocation = false;
 
   Future<void> _doRegister() async {
     if (!_formKey.currentState!.validate()) return;
@@ -262,11 +264,44 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       ),
                       Padding(
                         padding: EdgeInsets.only(right: 12 * s),
-                        child: Icon(
-                          Icons.location_on,
-                          color: colorScheme.primary,
-                          size: 22 * s,
-                        ),
+                        child: _loadingLocation
+                            ? SizedBox(
+                                width: 22 * s,
+                                height: 22 * s,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: colorScheme.primary,
+                                ),
+                              )
+                            : IconButton(
+                                splashRadius: 22 * s,
+                                onPressed: () async {
+                                  setState(() => _loadingLocation = true);
+                                  try {
+                                    await ref.read(locationProvider.notifier).fetchLocation();
+                                    final location = ref.read(locationProvider);
+                                    if (location.error == null) {
+                                      _locationCtrl.text = location.cityName;
+                                    } else {
+                                      if (mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text(l10n.authLocationError),
+                                            backgroundColor: Colors.orange.shade700,
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  } finally {
+                                    if (mounted) setState(() => _loadingLocation = false);
+                                  }
+                                },
+                                icon: Icon(
+                                  Icons.my_location,
+                                  color: colorScheme.primary,
+                                  size: 22 * s,
+                                ),
+                              ),
                       ),
                     ],
                   ),

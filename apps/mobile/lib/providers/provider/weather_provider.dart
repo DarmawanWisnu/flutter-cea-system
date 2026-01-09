@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
@@ -81,24 +82,17 @@ class WeatherState {
     }
   }
 
-  /// Get appropriate icon based on weather code
-  String get iconAsset {
-    if (weatherCode == 0) return 'clear';
-    if (weatherCode <= 3) return 'cloudy';
-    if (weatherCode <= 48) return 'foggy';
-    if (weatherCode <= 55) return 'drizzle';
-    if (weatherCode <= 65) return 'rain';
-    if (weatherCode <= 75) return 'snow';
-    if (weatherCode <= 82) return 'rain';
-    return 'thunder';
-  }
+  /// Check if weather is rainy/stormy
+  bool get isRainy => weatherCode >= 51 && weatherCode <= 99;
 
-  /// Check if it's currently raining
-  bool get isRaining => weatherCode >= 51 && weatherCode <= 82;
+  /// Check if it's thunderstorm
+  bool get isThunderstorm => weatherCode >= 95;
 }
 
 /// Weather provider that fetches data from Open-Meteo API
 class WeatherNotifier extends Notifier<WeatherState> {
+  Timer? _autoRefreshTimer;
+
   @override
   WeatherState build() {
     _init();
@@ -109,6 +103,13 @@ class WeatherNotifier extends Notifier<WeatherState> {
     // Wait a bit for location to be ready
     await Future.delayed(const Duration(milliseconds: 500));
     await fetchWeather();
+    
+    // Setup auto-refresh every 30 minutes
+    _autoRefreshTimer?.cancel();
+    _autoRefreshTimer = Timer.periodic(
+      const Duration(minutes: 30),
+      (_) => fetchWeather(),
+    );
   }
 
   /// Fetch weather from Open-Meteo API
@@ -153,7 +154,7 @@ class WeatherNotifier extends Notifier<WeatherState> {
     }
   }
 
-  /// Refresh weather data
+  /// Manual refresh weather data (called on tap)
   Future<void> refresh() async {
     await fetchWeather();
   }

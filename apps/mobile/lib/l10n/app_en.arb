@@ -98,6 +98,7 @@
   "authNameHint": "Full name",
   "authLocationLabel": "Location",
   "authLocationHint": "Your city",
+  "authLocationError": "Unable to get location. Please enter manually.",
   "authSignUp": "Sign Up",
   
   "@@_sectionAuthVerify": "=== AUTH: VERIFY EMAIL SCREEN ===",

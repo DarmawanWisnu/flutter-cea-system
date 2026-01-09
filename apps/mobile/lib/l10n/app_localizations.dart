@@ -542,6 +542,12 @@ abstract class AppLocalizations {
   /// **'Your city'**
   String get authLocationHint;
 
+  /// No description provided for @authLocationError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to get location. Please enter manually.'**
+  String get authLocationError;
+
   /// No description provided for @authSignUp.
   ///
   /// In en, this message translates to:

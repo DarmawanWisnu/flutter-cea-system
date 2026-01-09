@@ -233,6 +233,10 @@ class AppLocalizationsId extends AppLocalizations {
   String get authLocationHint => 'Kota Anda';
 
   @override
+  String get authLocationError =>
+      'Tidak dapat mengambil lokasi. Silakan isi manual.';
+
+  @override
   String get authSignUp => 'Daftar';
 
   @override
