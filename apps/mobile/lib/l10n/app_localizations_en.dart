@@ -24,6 +24,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsChangeLanguage => 'Change language';
 
   @override
+  String get settingsPlantConfiguration => 'Plant Configuration';
+
+  @override
   String get settingsPrivacy => 'Privacy';
 
   @override
@@ -143,7 +146,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeNotification => 'Notification';
 
   @override
-  String get homeNotificationDesc => 'View past records';
+  String get homeNotificationDesc => 'View history';
 
   @override
   String get homeAddKit => 'Add Kit';
@@ -603,4 +606,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addKitIdTooShort => 'Kit ID is too short';
+
+  @override
+  String get bottomSheetActivePlant => 'Active Plant';
+
+  @override
+  String get bottomSheetIdealParams => 'Ideal Parameters';
+
+  @override
+  String get bottomSheetPhIdeal => 'pH Ideal';
+
+  @override
+  String get bottomSheetNutrientIdeal => 'Nutrient (PPM)';
+
+  @override
+  String get bottomSheetWaterTempIdeal => 'Water Temp';
+
+  @override
+  String get bottomSheetWaterLevelIdeal => 'Water Level';
+
+  @override
+  String get bottomSheetViewDetails => 'View Details';
+
+  @override
+  String get bottomSheetNoActivePlant => 'No active plant';
+
+  @override
+  String get bottomSheetAddKitFirst => 'Add a kit to start monitoring';
+
+  @override
+  String get plantNameLettuce => 'Lettuce';
+
+  @override
+  String get bottomSheetWaterLevelInfo => 'Low – High';
 }

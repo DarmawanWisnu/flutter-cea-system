@@ -7,6 +7,7 @@
   "settingsProfile": "Profile",
   "settingsTheme": "Theme",
   "settingsChangeLanguage": "Change language",
+  "settingsPlantConfiguration": "Plant Configuration",
   "settingsPrivacy": "Privacy",
   "settingsLegal": "Legal",
   "settingsTerms": "Terms and Condition",
@@ -287,5 +288,18 @@
   "addKitSuccess": "Kit added successfully",
   "addKitNameRequired": "Kit name is required",
   "addKitIdRequired": "Kit ID is required",
-  "addKitIdTooShort": "Kit ID is too short"
+  "addKitIdTooShort": "Kit ID is too short",
+
+  "@@_sectionMonitoringSheet": "=== MONITORING INFO BOTTOM SHEET ===",
+  "bottomSheetActivePlant": "Active Plant",
+  "bottomSheetIdealParams": "Ideal Parameters",
+  "bottomSheetPhIdeal": "pH Ideal",
+  "bottomSheetNutrientIdeal": "Nutrient (PPM)",
+  "bottomSheetWaterTempIdeal": "Water Temp",
+  "bottomSheetWaterLevelIdeal": "Water Level",
+  "bottomSheetViewDetails": "View Details",
+  "bottomSheetNoActivePlant": "No active plant",
+  "bottomSheetAddKitFirst": "Add a kit to start monitoring",
+  "plantNameLettuce": "Lettuce",
+  "bottomSheetWaterLevelInfo": "Low – High"
 }

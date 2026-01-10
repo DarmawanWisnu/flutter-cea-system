@@ -7,6 +7,7 @@
   "settingsProfile": "Profil",
   "settingsTheme": "Tema",
   "settingsChangeLanguage": "Ubah bahasa",
+  "settingsPlantConfiguration": "Konfigurasi Tanaman",
   "settingsPrivacy": "Privasi",
   "settingsLegal": "Legal",
   "settingsTerms": "Syarat dan Ketentuan",
@@ -227,5 +228,18 @@
   "addKitSuccess": "Kit berhasil ditambahkan",
   "addKitNameRequired": "Nama kit wajib diisi",
   "addKitIdRequired": "ID Kit wajib diisi",
-  "addKitIdTooShort": "ID Kit terlalu pendek"
+  "addKitIdTooShort": "ID Kit terlalu pendek",
+
+  "@@_sectionMonitoringSheet": "=== MONITORING INFO BOTTOM SHEET ===",
+  "bottomSheetActivePlant": "Tanaman Aktif",
+  "bottomSheetIdealParams": "Parameter Ideal",
+  "bottomSheetPhIdeal": "pH Ideal",
+  "bottomSheetNutrientIdeal": "Nutrisi (PPM)",
+  "bottomSheetWaterTempIdeal": "Suhu Air",
+  "bottomSheetWaterLevelIdeal": "Level Air",
+  "bottomSheetViewDetails": "Lihat Detail",
+  "bottomSheetNoActivePlant": "Tidak ada tanaman aktif",
+  "bottomSheetAddKitFirst": "Tambahkan kit untuk mulai memantau",
+  "plantNameLettuce": "Selada",
+  "bottomSheetWaterLevelInfo": "Rendah – Tinggi"
 }

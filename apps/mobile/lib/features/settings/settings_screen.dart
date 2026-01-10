@@ -409,6 +409,12 @@ class SettingsScreen extends ConsumerWidget {
 
               SizedBox(height: 20 * s),
 
+              // Scrollable content
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
               // Account Header
               Container(
                 padding: EdgeInsets.all(16 * s),
@@ -491,6 +497,16 @@ class SettingsScreen extends ConsumerWidget {
               ),
               _buildTile(
                 context: context,
+                icon: Icons.eco_outlined,
+                label: l10n.settingsPlantConfiguration,
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(l10n.commonFeatureComingSoon)),
+                  );
+                },
+              ),
+              _buildTile(
+                context: context,
                 icon: Icons.privacy_tip_outlined,
                 label: l10n.settingsPrivacy,
                 onTap: () {
@@ -544,7 +560,7 @@ class SettingsScreen extends ConsumerWidget {
                 },
               ),
 
-              const Spacer(),
+              SizedBox(height: 24 * s),
 
               // Logout
               Center(
@@ -578,6 +594,11 @@ class SettingsScreen extends ConsumerWidget {
                 child: Text(
                   l10n.settingsVersion('1.0.0'),
                   style: TextStyle(fontSize: 13 * s, color: colorScheme.onSurfaceVariant),
+                ),
+              ),
+              SizedBox(height: 12 * s),
+                    ],
+                  ),
                 ),
               ),
             ],

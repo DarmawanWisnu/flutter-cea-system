@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fountaine/app/routes.dart';
+import 'package:fountaine/features/home/widgets/monitoring_info_bottom_sheet.dart';
 import 'package:fountaine/l10n/app_localizations.dart';
 import 'package:fountaine/providers/provider/location_provider.dart';
 import 'package:fountaine/providers/provider/weather_provider.dart';
@@ -23,10 +24,11 @@ class HomeScreen extends ConsumerWidget {
       required String subtitle,
       required String assetImage,
       required VoidCallback onTap,
+      VoidCallback? onLongPress,
     }) {
-      return InkWell(
+      return GestureDetector(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16 * s),
+        onLongPress: onLongPress,
         child: Container(
           decoration: BoxDecoration(
             color: colorScheme.surface,
@@ -79,6 +81,10 @@ class HomeScreen extends ConsumerWidget {
           ),
         ),
       );
+    }
+
+    void showMonitoringInfoSheet() {
+      MonitoringInfoBottomSheet.show(context);
     }
 
     return Scaffold(
@@ -295,6 +301,7 @@ class HomeScreen extends ConsumerWidget {
                       subtitle: l10n.homeMonitoringDesc,
                       assetImage: 'assets/images/feature_monitor.png',
                       onTap: () => Navigator.pushNamed(context, Routes.monitor),
+                      onLongPress: showMonitoringInfoSheet,
                     ),
                     featureCard(
                       title: l10n.homeNotification,

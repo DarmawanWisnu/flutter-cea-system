@@ -38,4 +38,8 @@ class ThresholdConst {
   // Water level thresholds (0-3 scale: 0=empty, 1=low, 2=medium, 3=high)
   static const double wlMin = 1.2;
   static const double wlMax = 2.5;
+
+  // Tank capacity (internal use)
+  static const int tankVolumeMl = 10000; // 10 Liters
+  static const double pumpFlowMlS = 1.58; // ml per second
 }

@@ -128,6 +128,12 @@ abstract class AppLocalizations {
   /// **'Change language'**
   String get settingsChangeLanguage;
 
+  /// No description provided for @settingsPlantConfiguration.
+  ///
+  /// In en, this message translates to:
+  /// **'Plant Configuration'**
+  String get settingsPlantConfiguration;
+
   /// No description provided for @settingsPrivacy.
   ///
   /// In en, this message translates to:
@@ -365,7 +371,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeNotificationDesc.
   ///
   /// In en, this message translates to:
-  /// **'View past records'**
+  /// **'View history'**
   String get homeNotificationDesc;
 
   /// No description provided for @homeAddKit.
@@ -1237,6 +1243,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Kit ID is too short'**
   String get addKitIdTooShort;
+
+  /// No description provided for @bottomSheetActivePlant.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Plant'**
+  String get bottomSheetActivePlant;
+
+  /// No description provided for @bottomSheetIdealParams.
+  ///
+  /// In en, this message translates to:
+  /// **'Ideal Parameters'**
+  String get bottomSheetIdealParams;
+
+  /// No description provided for @bottomSheetPhIdeal.
+  ///
+  /// In en, this message translates to:
+  /// **'pH Ideal'**
+  String get bottomSheetPhIdeal;
+
+  /// No description provided for @bottomSheetNutrientIdeal.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrient (PPM)'**
+  String get bottomSheetNutrientIdeal;
+
+  /// No description provided for @bottomSheetWaterTempIdeal.
+  ///
+  /// In en, this message translates to:
+  /// **'Water Temp'**
+  String get bottomSheetWaterTempIdeal;
+
+  /// No description provided for @bottomSheetWaterLevelIdeal.
+  ///
+  /// In en, this message translates to:
+  /// **'Water Level'**
+  String get bottomSheetWaterLevelIdeal;
+
+  /// No description provided for @bottomSheetViewDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'View Details'**
+  String get bottomSheetViewDetails;
+
+  /// No description provided for @bottomSheetNoActivePlant.
+  ///
+  /// In en, this message translates to:
+  /// **'No active plant'**
+  String get bottomSheetNoActivePlant;
+
+  /// No description provided for @bottomSheetAddKitFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a kit to start monitoring'**
+  String get bottomSheetAddKitFirst;
+
+  /// No description provided for @plantNameLettuce.
+  ///
+  /// In en, this message translates to:
+  /// **'Lettuce'**
+  String get plantNameLettuce;
+
+  /// No description provided for @bottomSheetWaterLevelInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Low – High'**
+  String get bottomSheetWaterLevelInfo;
 }
 
 class _AppLocalizationsDelegate

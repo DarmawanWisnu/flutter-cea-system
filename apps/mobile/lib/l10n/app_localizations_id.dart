@@ -24,6 +24,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get settingsChangeLanguage => 'Ubah bahasa';
 
   @override
+  String get settingsPlantConfiguration => 'Konfigurasi Tanaman';
+
+  @override
   String get settingsPrivacy => 'Privasi';
 
   @override
@@ -143,7 +146,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get homeNotification => 'Notifikasi';
 
   @override
-  String get homeNotificationDesc => 'Lihat rekaman sebelumnya';
+  String get homeNotificationDesc => 'Riwayat tanaman';
 
   @override
   String get homeAddKit => 'Tambah Kit';
@@ -605,4 +608,37 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get addKitIdTooShort => 'ID Kit terlalu pendek';
+
+  @override
+  String get bottomSheetActivePlant => 'Tanaman Aktif';
+
+  @override
+  String get bottomSheetIdealParams => 'Parameter Ideal';
+
+  @override
+  String get bottomSheetPhIdeal => 'pH Ideal';
+
+  @override
+  String get bottomSheetNutrientIdeal => 'Nutrisi (PPM)';
+
+  @override
+  String get bottomSheetWaterTempIdeal => 'Suhu Air';
+
+  @override
+  String get bottomSheetWaterLevelIdeal => 'Level Air';
+
+  @override
+  String get bottomSheetViewDetails => 'Lihat Detail';
+
+  @override
+  String get bottomSheetNoActivePlant => 'Tidak ada tanaman aktif';
+
+  @override
+  String get bottomSheetAddKitFirst => 'Tambahkan kit untuk mulai memantau';
+
+  @override
+  String get plantNameLettuce => 'Selada';
+
+  @override
+  String get bottomSheetWaterLevelInfo => 'Rendah – Tinggi';
 }
