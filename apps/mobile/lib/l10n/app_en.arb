@@ -62,7 +62,7 @@
   "homeMonitoring": "Monitoring",
   "homeMonitoringDesc": "Check your plant's health",
   "homeNotification": "Notification",
-  "homeNotificationDesc": "View past records",
+  "homeNotificationDesc": "View history",
   "homeAddKit": "Add Kit",
   "homeAddKitDesc": "Connect new devices",
   "homeSetting": "Setting",
