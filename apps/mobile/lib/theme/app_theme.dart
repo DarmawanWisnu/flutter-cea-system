@@ -72,12 +72,20 @@ class AppTheme {
         useMaterial3: true,
         brightness: Brightness.dark,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: accentColor,
+          seedColor: const Color(0xFF01F9C6),
           brightness: Brightness.dark,
-          primary: accentColor,
-          onPrimary: Colors.black,
+          // Primary / High emphasis - Bright Teal (#01F9C6)
+          // Used for: primary text, headings, icons, numbers, CTAs, active states
+          primary: const Color(0xFF01F9C6),
+          // Text/icons on primary backgrounds
+          onPrimary: const Color(0xFF0A0A0A),
+          // Card/tile/dialog backgrounds
           surface: const Color(0xFF1E1E1E),
-          onSurface: Colors.white,
+          // Primary readable text (near-white)
+          onSurface: const Color(0xFFF5F5F5),
+          // Secondary / Medium emphasis - Deep Sea (#3B9C9C)
+          // Used for: descriptions, labels, helper text, secondary info
+          onSurfaceVariant: const Color(0xFF3B9C9C),
         ),
         scaffoldBackgroundColor: const Color(0xFF121212),
         appBarTheme: const AppBarTheme(
@@ -94,8 +102,8 @@ class AppTheme {
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: accentColor,
-            foregroundColor: Colors.black,
+            backgroundColor: const Color(0xFF01F9C6),
+            foregroundColor: const Color(0xFF0A0A0A),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(14),
             ),
@@ -103,8 +111,8 @@ class AppTheme {
         ),
         outlinedButtonTheme: OutlinedButtonThemeData(
           style: OutlinedButton.styleFrom(
-            foregroundColor: accentColor,
-            side: BorderSide(color: accentColor.withValues(alpha: 0.3)),
+            foregroundColor: const Color(0xFF01F9C6),
+            side: BorderSide(color: const Color(0xFF01F9C6).withValues(alpha: 0.3)),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(14),
             ),
@@ -112,7 +120,7 @@ class AppTheme {
         ),
         textButtonTheme: TextButtonThemeData(
           style: TextButton.styleFrom(
-            foregroundColor: accentColor,
+            foregroundColor: const Color(0xFF01F9C6),
           ),
         ),
         dialogTheme: DialogThemeData(
