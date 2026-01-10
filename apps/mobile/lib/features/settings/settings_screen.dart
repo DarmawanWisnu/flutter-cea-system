@@ -15,7 +15,7 @@ class SettingsScreen extends ConsumerWidget {
   void _confirmLogout(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -67,9 +67,30 @@ class SettingsScreen extends ConsumerWidget {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildThemeOption(context, ref, ThemeMode.light, l10n.themeLight, currentTheme, Icons.light_mode_outlined),
-            _buildThemeOption(context, ref, ThemeMode.dark, l10n.themeDark, currentTheme, Icons.dark_mode_outlined),
-            _buildThemeOption(context, ref, ThemeMode.system, l10n.themeSystem, currentTheme, Icons.settings_suggest_outlined),
+            _buildThemeOption(
+              context,
+              ref,
+              ThemeMode.light,
+              l10n.themeLight,
+              currentTheme,
+              Icons.light_mode_outlined,
+            ),
+            _buildThemeOption(
+              context,
+              ref,
+              ThemeMode.dark,
+              l10n.themeDark,
+              currentTheme,
+              Icons.dark_mode_outlined,
+            ),
+            _buildThemeOption(
+              context,
+              ref,
+              ThemeMode.system,
+              l10n.themeSystem,
+              currentTheme,
+              Icons.settings_suggest_outlined,
+            ),
           ],
         ),
       ),
@@ -86,9 +107,12 @@ class SettingsScreen extends ConsumerWidget {
   ) {
     final isSelected = currentTheme == mode;
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return ListTile(
-      leading: Icon(icon, color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant),
+      leading: Icon(
+        icon,
+        color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
+      ),
       title: Text(
         label,
         style: TextStyle(
@@ -118,8 +142,22 @@ class SettingsScreen extends ConsumerWidget {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildLanguageOption(context, ref, const Locale('en'), l10n.languageEnglish, currentLocale, '🇺🇸'),
-            _buildLanguageOption(context, ref, const Locale('id'), l10n.languageIndonesia, currentLocale, '🇮🇩'),
+            _buildLanguageOption(
+              context,
+              ref,
+              const Locale('en'),
+              l10n.languageEnglish,
+              currentLocale,
+              '🇺🇸',
+            ),
+            _buildLanguageOption(
+              context,
+              ref,
+              const Locale('id'),
+              l10n.languageIndonesia,
+              currentLocale,
+              '🇮🇩',
+            ),
           ],
         ),
       ),
@@ -136,7 +174,7 @@ class SettingsScreen extends ConsumerWidget {
   ) {
     final isSelected = currentLocale.languageCode == locale.languageCode;
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return ListTile(
       leading: Text(flag, style: const TextStyle(fontSize: 24)),
       title: Text(
@@ -156,119 +194,119 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showUrlDialog(BuildContext context, WidgetRef ref) {
-    final controller = TextEditingController(
-      text: ref.read(customApiUrlProvider),
-    );
+  // void _showUrlDialog(BuildContext context, WidgetRef ref) {
+  //   final controller = TextEditingController(
+  //     text: ref.read(customApiUrlProvider),
+  //   );
 
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: const Text('Change Server URL'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Enter the ngrok or server URL:',
-              style: TextStyle(fontSize: 14, color: Colors.grey),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: controller,
-              decoration: InputDecoration(
-                hintText: 'https://example.ngrok-free.app',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 10,
-                ),
-              ),
-              keyboardType: TextInputType.url,
-              style: const TextStyle(fontFamily: 'monospace', fontSize: 13),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Default: ${ref.read(customApiUrlProvider.notifier).defaultUrl}',
-              style: const TextStyle(fontSize: 11, color: Colors.grey),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              final newUrl = controller.text.trim();
-              if (newUrl.isNotEmpty) {
-                await ref.read(customApiUrlProvider.notifier).setUrl(newUrl);
-                if (context.mounted) {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('URL updated to: $newUrl')),
-                  );
-                }
-              }
-            },
-            child: const Text('Save'),
-          ),
-        ],
-      ),
-    );
-  }
+  //   showDialog(
+  //     context: context,
+  //     builder: (_) => AlertDialog(
+  //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+  //       title: const Text('Change Server URL'),
+  //       content: Column(
+  //         mainAxisSize: MainAxisSize.min,
+  //         crossAxisAlignment: CrossAxisAlignment.start,
+  //         children: [
+  //           const Text(
+  //             'Enter the ngrok or server URL:',
+  //             style: TextStyle(fontSize: 14, color: Colors.grey),
+  //           ),
+  //           const SizedBox(height: 12),
+  //           TextField(
+  //             controller: controller,
+  //             decoration: InputDecoration(
+  //               hintText: 'https://example.ngrok-free.app',
+  //               border: OutlineInputBorder(
+  //                 borderRadius: BorderRadius.circular(8),
+  //               ),
+  //               contentPadding: const EdgeInsets.symmetric(
+  //                 horizontal: 12,
+  //                 vertical: 10,
+  //               ),
+  //             ),
+  //             keyboardType: TextInputType.url,
+  //             style: const TextStyle(fontFamily: 'monospace', fontSize: 13),
+  //           ),
+  //           const SizedBox(height: 8),
+  //           Text(
+  //             'Default: ${ref.read(customApiUrlProvider.notifier).defaultUrl}',
+  //             style: const TextStyle(fontSize: 11, color: Colors.grey),
+  //           ),
+  //         ],
+  //       ),
+  //       actions: [
+  //         TextButton(
+  //           onPressed: () => Navigator.pop(context),
+  //           child: const Text('Cancel'),
+  //         ),
+  //         TextButton(
+  //           onPressed: () async {
+  //             final newUrl = controller.text.trim();
+  //             if (newUrl.isNotEmpty) {
+  //               await ref.read(customApiUrlProvider.notifier).setUrl(newUrl);
+  //               if (context.mounted) {
+  //                 Navigator.pop(context);
+  //                 ScaffoldMessenger.of(context).showSnackBar(
+  //                   SnackBar(content: Text('URL updated to: $newUrl')),
+  //                 );
+  //               }
+  //             }
+  //           },
+  //           child: const Text('Save'),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
-  Future<void> _testConnection(BuildContext context, WidgetRef ref) async {
-    final url = ref.read(apiBaseUrlProvider);
+  // Future<void> _testConnection(BuildContext context, WidgetRef ref) async {
+  //   final url = ref.read(apiBaseUrlProvider);
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Testing connection...')));
+  //   ScaffoldMessenger.of(
+  //     context,
+  //   ).showSnackBar(const SnackBar(content: Text('Testing connection...')));
 
-    try {
-      final response = await http
-          .get(
-            Uri.parse('$url/health'),
-            headers: {
-              'ngrok-skip-browser-warning':
-                  'true', // Skip ngrok browser warning
-            },
-          )
-          .timeout(const Duration(seconds: 5));
+  //   try {
+  //     final response = await http
+  //         .get(
+  //           Uri.parse('$url/health'),
+  //           headers: {
+  //             'ngrok-skip-browser-warning':
+  //                 'true', // Skip ngrok browser warning
+  //           },
+  //         )
+  //         .timeout(const Duration(seconds: 5));
 
-      if (!context.mounted) return;
+  //     if (!context.mounted) return;
 
-      if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('✓ Connection successful!'),
-            backgroundColor: Colors.green.shade600,
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('✗ Server returned: ${response.statusCode}'),
-            backgroundColor: Colors.orange.shade600,
-          ),
-        );
-      }
-    } catch (e) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '✗ Connection failed: ${e.toString().split(':').last.trim()}',
-          ),
-          backgroundColor: Colors.red.shade600,
-        ),
-      );
-    }
-  }
+  //     if (response.statusCode == 200) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(
+  //           content: const Text('✓ Connection successful!'),
+  //           backgroundColor: Colors.green.shade600,
+  //         ),
+  //       );
+  //     } else {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(
+  //           content: Text('✗ Server returned: ${response.statusCode}'),
+  //           backgroundColor: Colors.orange.shade600,
+  //         ),
+  //       );
+  //     }
+  //   } catch (e) {
+  //     if (!context.mounted) return;
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: Text(
+  //           '✗ Connection failed: ${e.toString().split(':').last.trim()}',
+  //         ),
+  //         backgroundColor: Colors.red.shade600,
+  //       ),
+  //     );
+  //   }
+  // }
 
   Widget _buildTile({
     required BuildContext context,
@@ -278,7 +316,7 @@ class SettingsScreen extends ConsumerWidget {
     bool showArrow = true,
   }) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(14),
@@ -322,7 +360,7 @@ class SettingsScreen extends ConsumerWidget {
     required VoidCallback onTap,
   }) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(14),
@@ -347,7 +385,11 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ),
             ),
-            Icon(Icons.open_in_new_rounded, size: 18, color: colorScheme.primary),
+            Icon(
+              Icons.open_in_new_rounded,
+              size: 18,
+              color: colorScheme.primary,
+            ),
           ],
         ),
       ),
@@ -415,188 +457,201 @@ class SettingsScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-              // Account Header
-              Container(
-                padding: EdgeInsets.all(16 * s),
-                decoration: BoxDecoration(
-                  color: colorScheme.surface,
-                  borderRadius: BorderRadius.circular(14 * s),
-                ),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 24 * s,
-                      backgroundColor: colorScheme.primary,
-                      child: Icon(
-                        Icons.person,
-                        color: colorScheme.onPrimary,
-                        size: 24 * s,
+                      // Account Header
+                      Container(
+                        padding: EdgeInsets.all(16 * s),
+                        decoration: BoxDecoration(
+                          color: colorScheme.surface,
+                          borderRadius: BorderRadius.circular(14 * s),
+                        ),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 24 * s,
+                              backgroundColor: colorScheme.primary,
+                              child: Icon(
+                                Icons.person,
+                                color: colorScheme.onPrimary,
+                                size: 24 * s,
+                              ),
+                            ),
+                            SizedBox(width: 12 * s),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    name,
+                                    style: TextStyle(
+                                      fontSize: 16 * s,
+                                      fontWeight: FontWeight.w700,
+                                      color: colorScheme.primary,
+                                    ),
+                                  ),
+                                  SizedBox(height: 2 * s),
+                                  Text(
+                                    email,
+                                    style: TextStyle(
+                                      fontSize: 13 * s,
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () =>
+                                  Navigator.pushNamed(context, Routes.profile),
+                              child: Text(l10n.commonView),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    SizedBox(width: 12 * s),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            name,
+
+                      SizedBox(height: 24 * s),
+
+                      // Account
+                      Text(
+                        l10n.settingsAccountSetting,
+                        style: TextStyle(
+                          fontSize: 16 * s,
+                          fontWeight: FontWeight.w700,
+                          color: colorScheme.primary,
+                        ),
+                      ),
+                      SizedBox(height: 12 * s),
+
+                      _buildTile(
+                        context: context,
+                        icon: Icons.person_outline,
+                        label: l10n.settingsProfile,
+                        onTap: () =>
+                            Navigator.pushNamed(context, Routes.profile),
+                      ),
+                      _buildTile(
+                        context: context,
+                        icon: Icons.dark_mode_outlined,
+                        label: l10n.settingsTheme,
+                        onTap: () => _showThemeDialog(context, ref),
+                      ),
+                      _buildTile(
+                        context: context,
+                        icon: Icons.language,
+                        label: l10n.settingsChangeLanguage,
+                        onTap: () => _showLanguageDialog(context, ref),
+                      ),
+                      _buildTile(
+                        context: context,
+                        icon: Icons.eco_outlined,
+                        label: l10n.settingsPlantConfiguration,
+                        onTap: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(l10n.commonFeatureComingSoon),
+                            ),
+                          );
+                        },
+                      ),
+                      _buildTile(
+                        context: context,
+                        icon: Icons.privacy_tip_outlined,
+                        label: l10n.settingsPrivacy,
+                        onTap: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(l10n.commonFeatureComingSoon),
+                            ),
+                          );
+                        },
+                      ),
+
+                      SizedBox(height: 24 * s),
+
+                      // Legal
+                      Text(
+                        l10n.settingsLegal,
+                        style: TextStyle(
+                          fontSize: 16 * s,
+                          fontWeight: FontWeight.w700,
+                          color: colorScheme.primary,
+                        ),
+                      ),
+                      SizedBox(height: 12 * s),
+
+                      _buildLinkTile(
+                        context: context,
+                        icon: Icons.article_outlined,
+                        label: l10n.settingsTerms,
+                        onTap: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(l10n.commonLinkNotSet)),
+                          );
+                        },
+                      ),
+                      _buildLinkTile(
+                        context: context,
+                        icon: Icons.security_outlined,
+                        label: l10n.settingsPrivacyPolicy,
+                        onTap: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(l10n.commonLinkNotSet)),
+                          );
+                        },
+                      ),
+                      _buildLinkTile(
+                        context: context,
+                        icon: Icons.info_outline,
+                        label: l10n.settingsHelp,
+                        onTap: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(l10n.commonLinkNotSet)),
+                          );
+                        },
+                      ),
+
+                      SizedBox(height: 24 * s),
+
+                      // Logout
+                      Center(
+                        child: OutlinedButton(
+                          onPressed: () => _confirmLogout(context, ref),
+                          style: OutlinedButton.styleFrom(
+                            backgroundColor: colorScheme.surface,
+                            side: BorderSide(
+                              color: colorScheme.primary.withValues(alpha: 0.2),
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 60 * s,
+                              vertical: 14 * s,
+                            ),
+                          ),
+                          child: Text(
+                            l10n.settingsLogout,
                             style: TextStyle(
                               fontSize: 16 * s,
                               fontWeight: FontWeight.w700,
                               color: colorScheme.primary,
+                              decoration: TextDecoration.underline,
                             ),
                           ),
-                          SizedBox(height: 2 * s),
-                          Text(
-                            email,
-                            style: TextStyle(fontSize: 13 * s, color: colorScheme.onSurfaceVariant),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
-                    TextButton(
-                      onPressed: () =>
-                          Navigator.pushNamed(context, Routes.profile),
-                      child: Text(l10n.commonView),
-                    ),
-                  ],
-                ),
-              ),
 
-              SizedBox(height: 24 * s),
-
-              // Account
-              Text(
-                l10n.settingsAccountSetting,
-                style: TextStyle(
-                  fontSize: 16 * s,
-                  fontWeight: FontWeight.w700,
-                  color: colorScheme.primary,
-                ),
-              ),
-              SizedBox(height: 12 * s),
-
-              _buildTile(
-                context: context,
-                icon: Icons.person_outline,
-                label: l10n.settingsProfile,
-                onTap: () => Navigator.pushNamed(context, Routes.profile),
-              ),
-              _buildTile(
-                context: context,
-                icon: Icons.dark_mode_outlined,
-                label: l10n.settingsTheme,
-                onTap: () => _showThemeDialog(context, ref),
-              ),
-              _buildTile(
-                context: context,
-                icon: Icons.language,
-                label: l10n.settingsChangeLanguage,
-                onTap: () => _showLanguageDialog(context, ref),
-              ),
-              _buildTile(
-                context: context,
-                icon: Icons.eco_outlined,
-                label: l10n.settingsPlantConfiguration,
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(l10n.commonFeatureComingSoon)),
-                  );
-                },
-              ),
-              _buildTile(
-                context: context,
-                icon: Icons.privacy_tip_outlined,
-                label: l10n.settingsPrivacy,
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(l10n.commonFeatureComingSoon)),
-                  );
-                },
-              ),
-
-              SizedBox(height: 24 * s),
-
-              // Legal
-              Text(
-                l10n.settingsLegal,
-                style: TextStyle(
-                  fontSize: 16 * s,
-                  fontWeight: FontWeight.w700,
-                  color: colorScheme.primary,
-                ),
-              ),
-              SizedBox(height: 12 * s),
-
-              _buildLinkTile(
-                context: context,
-                icon: Icons.article_outlined,
-                label: l10n.settingsTerms,
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(l10n.commonLinkNotSet)),
-                  );
-                },
-              ),
-              _buildLinkTile(
-                context: context,
-                icon: Icons.security_outlined,
-                label: l10n.settingsPrivacyPolicy,
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(l10n.commonLinkNotSet)),
-                  );
-                },
-              ),
-              _buildLinkTile(
-                context: context,
-                icon: Icons.info_outline,
-                label: l10n.settingsHelp,
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(l10n.commonLinkNotSet)),
-                  );
-                },
-              ),
-
-              SizedBox(height: 24 * s),
-
-              // Logout
-              Center(
-                child: OutlinedButton(
-                  onPressed: () => _confirmLogout(context, ref),
-                  style: OutlinedButton.styleFrom(
-                    backgroundColor: colorScheme.surface,
-                    side: BorderSide(color: colorScheme.primary.withValues(alpha: 0.2)),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 60 * s,
-                      vertical: 14 * s,
-                    ),
-                  ),
-                  child: Text(
-                    l10n.settingsLogout,
-                    style: TextStyle(
-                      fontSize: 16 * s,
-                      fontWeight: FontWeight.w700,
-                      color: colorScheme.primary,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ),
-              ),
-
-              SizedBox(height: 12 * s),
-              Center(
-                child: Text(
-                  l10n.settingsVersion('1.0.0'),
-                  style: TextStyle(fontSize: 13 * s, color: colorScheme.onSurfaceVariant),
-                ),
-              ),
-              SizedBox(height: 12 * s),
+                      SizedBox(height: 12 * s),
+                      Center(
+                        child: Text(
+                          l10n.settingsVersion('1.0.0'),
+                          style: TextStyle(
+                            fontSize: 13 * s,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 12 * s),
                     ],
                   ),
                 ),
