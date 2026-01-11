@@ -76,7 +76,7 @@ class AppTheme {
           brightness: Brightness.dark,
           // Primary / High emphasis - Bright Teal (#01F9C6)
           // Used for: primary text, headings, icons, numbers, CTAs, active states
-          primary: const Color(0xFF01F9C6),
+          primary: const Color(0xFF7FFFD4),
           // Text/icons on primary backgrounds
           onPrimary: const Color(0xFF0A0A0A),
           // Card/tile/dialog backgrounds
