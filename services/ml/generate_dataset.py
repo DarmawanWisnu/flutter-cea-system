@@ -27,24 +27,6 @@ def parse_telemetry(row):
         return None
 
 def calculate_actuator_values(ph, ppm, wl, temp=25.0, humidity=70.0, water_temp=22.0):
-    """
-    Calculate actuator durations for ML with MULTI-VARIABLE interactions.
-    
-    ML handles BOTH zones:
-    - INSIDE threshold: Maintain stability around target
-    - OUTSIDE threshold: Correction with multi-variable optimization
-    
-    Key difference from RB:
-    - RB: Independent per parameter
-    - ML: Considers parameter interactions to reduce waste
-    
-    Multi-Variable Interactions:
-    1. pH + Nutrient: Skip nutrient if pH unstable
-    2. Temp + Nutrient: Reduce dose at high temp
-    3. Humidity + WL: More refill at low humidity
-    4. WaterTemp + Cooling: Refill for cooling
-    """
-    # Thresholds
     PH_MIN, PH_MAX = 5.5, 6.5
     PH_TARGET = 6.0
     PPM_MIN, PPM_MAX = 560, 840
@@ -52,7 +34,6 @@ def calculate_actuator_values(ph, ppm, wl, temp=25.0, humidity=70.0, water_temp=
     WL_MIN, WL_MAX = 1.2, 2.5
     WL_TARGET = 1.8
     
-    # Constants
     TANK_VOLUME_ML = 10000
     PUMP_FLOW_MLS = 1.58
     
@@ -61,84 +42,61 @@ def calculate_actuator_values(ph, ppm, wl, temp=25.0, humidity=70.0, water_temp=
     nutrientSec = 0
     refillSec = 0
     
-    # ============ pH CONTROL ============
     ph_stable = PH_MIN <= ph <= PH_MAX
     
     if ph < PH_TARGET:
         error = PH_TARGET - ph
         if ph < PH_MIN:
-            # OUTSIDE: Full correction
             phUpSec = min(50, error * 50)
         else:
-            # INSIDE: Gentle maintenance
             phUpSec = min(25, error * 50)
     elif ph > PH_TARGET:
         error = ph - PH_TARGET
         if ph > PH_MAX:
-            # OUTSIDE: Full correction
             phDownSec = min(50, error * 50)
         else:
-            # INSIDE: Gentle maintenance
             phDownSec = min(25, error * 50)
-    
-    # ============ NUTRIENT CONTROL + MULTI-VARIABLE ============
-    # Interaction #1: Skip nutrient if pH not stable
-    # Interaction #3: Reduce dose if temp high
     
     if ppm < PPM_TARGET:
         error = PPM_TARGET - ppm
         base_sec = (error / 100) * 63
         
-        # Interaction #1: pH + Nutrient
         if not ph_stable:
-            # pH not stable, skip nutrient (would be wasted)
             nutrientSec = 0
         else:
-            # Interaction #3: Temp + Nutrient
             if temp > 28:
-                # High temp = faster absorption, reduce dose by 30%
                 nutrientSec = min(45, base_sec * 0.7)
             else:
                 if ppm < PPM_MIN:
-                    nutrientSec = min(63, base_sec)  # OUTSIDE: full
+                    nutrientSec = min(63, base_sec)
                 else:
-                    nutrientSec = min(50, base_sec)  # INSIDE: gentle
-    
-    # ============ REFILL / DILUTION CONTROL + MULTI-VARIABLE ============
-    # Interaction #5: More refill if humidity low
-    # Interaction #7: Refill for cooling if water temp high
+                    nutrientSec = min(50, base_sec)
     
     base_refill = 0
-    WL_REFILL_TRIGGER = 1.3  # Lowered to match source data (mean WL ~1.26)
+    WL_REFILL_TRIGGER = 1.3
     
-    # Water level correction - only when WL is low enough
     if wl < WL_REFILL_TRIGGER:
         error = WL_TARGET - wl
         if wl < WL_MIN:
-            base_refill = 60  # OUTSIDE: fixed full
+            base_refill = 60
         else:
-            base_refill = min(30, error * 30)  # INSIDE: gentler proportional
+            base_refill = min(30, error * 30)
     
-    # PPM dilution (if PPM high)
     if ppm > PPM_TARGET and wl < WL_MAX:
         error = ppm - PPM_TARGET
         if ppm > PPM_MAX:
             v_air_ml = TANK_VOLUME_ML * ((ppm / PPM_MAX) - 1)
             dilution_sec = min(120, v_air_ml / PUMP_FLOW_MLS)
         else:
-            v_air_ml = TANK_VOLUME_ML * (error / ppm) * 0.3  # Reduced from 0.5
-            dilution_sec = min(45, v_air_ml / PUMP_FLOW_MLS)  # Reduced max
+            v_air_ml = TANK_VOLUME_ML * (error / ppm) * 0.3
+            dilution_sec = min(45, v_air_ml / PUMP_FLOW_MLS)
         base_refill = max(base_refill, dilution_sec)
     
-    # Interaction #5: Humidity + WL (less aggressive)
-    if humidity < 40 and wl < WL_REFILL_TRIGGER:  # Changed from 50 to 40
-        # Low humidity = faster evaporation, add 10% more (reduced from 20%)
+    if humidity < 40 and wl < WL_REFILL_TRIGGER:
         base_refill = base_refill * 1.1
     
-    # Interaction #7: Water Temp + Cooling (less aggressive)
-    if water_temp > 28 and wl < WL_MAX:  # Changed from 26 to 28
-        # High water temp, add small refill for cooling
-        base_refill = max(base_refill, 10)  # Reduced from 15
+    if water_temp > 28 and wl < WL_MAX:
+        base_refill = max(base_refill, 10)
     
     refillSec = min(120, base_refill)
     

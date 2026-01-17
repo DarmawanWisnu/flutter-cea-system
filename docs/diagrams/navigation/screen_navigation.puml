@@ -1,0 +1,118 @@
+@startuml
+scale 2
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontSize 18
+skinparam ArrowThickness 2
+skinparam StateBorderThickness 2
+
+title Diagram Navigasi Screen\nAplikasi Monitoring dan Otomasi Hidroponik
+
+' ========================================
+' State Definitions
+' ========================================
+
+state "Register" as Register {
+  Register : Pendaftaran akun baru
+  Register : Input: nama, email, password
+}
+
+state "Login" as Login {
+  Login : Autentikasi pengguna
+  Login : Input: email, password
+  Login : Validasi kredensial
+}
+
+state "Home Page" as Home {
+  Home : Dashboard utama
+  Home : Ringkasan status sistem
+  Home : Navigasi ke fitur utama
+}
+
+state "Monitoring Parameter" as Monitoring {
+  Monitoring : Data sensor realtime
+  Monitoring : pH, PPM, Temperature
+  Monitoring : Water Level
+  Monitoring : Mode Auto / Manual
+  Monitoring : Kontrol Aktuator
+}
+
+state "Riwayat Data" as History {
+  History : Histori data sensor
+  History : Filter berdasarkan waktu
+  History : Grafik dan tabel
+}
+
+state "Notifikasi" as Notification {
+  Notification : Daftar notifikasi
+  Notification : Kondisi abnormal
+  Notification : Peringatan sistem
+}
+
+state "Settings" as Settings {
+  Settings : Pengaturan aplikasi
+  Settings : Ganti Tema (Light/Dark)
+  Settings : Ganti Bahasa (ID/EN)
+  Settings : Logout
+}
+
+state "Profile" as Profile {
+  Profile : Informasi pengguna
+  Profile : Edit profile
+  Profile : Update data akun
+}
+
+' ========================================
+' Start & End Points
+' ========================================
+
+[*] --> Register : Buka Aplikasi\n(Pengguna Baru)
+[*] --> Login : Buka Aplikasi\n(Pengguna Terdaftar)
+
+' ========================================
+' Authentication Flow
+' ========================================
+
+Register --> Login : Registrasi\nberhasil
+Login --> Home : Validasi\nberhasil
+
+' ========================================
+' Main Navigation from Home
+' ========================================
+
+Home --> Monitoring : Buka\nMonitoring
+Home --> History : Buka\nRiwayat
+Home --> Notification : Buka\nNotifikasi
+Home --> Settings : Buka\nSettings
+Home --> Profile : Buka\nProfile
+
+' ========================================
+' Return Navigation to Home
+' ========================================
+
+Monitoring --> Home : Kembali
+History --> Home : Kembali
+Notification --> Home : Kembali
+Settings --> Home : Kembali
+Profile --> Home : Kembali
+
+' ========================================
+' Settings Navigation
+' ========================================
+
+Settings --> Profile : Edit\nProfile
+Profile --> Settings : Kembali
+
+' ========================================
+' Logout Flow
+' ========================================
+
+Settings --> Login : Logout\n(Akhiri Sesi)
+
+' ========================================
+' End State
+' ========================================
+
+Login --> [*] : Tutup Aplikasi
+
+@enduml

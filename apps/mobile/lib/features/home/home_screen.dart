@@ -108,7 +108,7 @@ class HomeScreen extends ConsumerWidget {
                           gradient: LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
-                            colors: _getWeatherGradient(weather.weatherCode),
+                            colors: _getWeatherGradient(weather.effectiveWeather),
                           ),
                         ),
                       ),
@@ -215,7 +215,7 @@ class HomeScreen extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Icon(
-                              _getWeatherIcon(weather.weatherCode),
+                              _getWeatherIcon(weather.effectiveWeather),
                               size: 36 * s,
                               color: colorScheme.primary,
                             ),
@@ -234,7 +234,7 @@ class HomeScreen extends ConsumerWidget {
                                     children: [
                                       Text(
                                         _getWeatherDescription(
-                                          weather.weatherCode,
+                                          weather.effectiveWeather,
                                           l10n,
                                         ),
                                         style: TextStyle(
@@ -457,63 +457,83 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  /// Get gradient colors based on weather and time of day
-  List<Color> _getWeatherGradient(int weatherCode) {
+  /// Get gradient colors based on effective weather and time of day
+  List<Color> _getWeatherGradient(EffectiveWeatherType weather) {
     final hour = DateTime.now().hour;
 
-    // Thunderstorm (95-99) - dark stormy colors
-    if (weatherCode >= 95) {
-      return const [Color(0xFF2D3436), Color(0xFF636E72)];
-    }
+    // Weather-based gradients (priority over time)
+    switch (weather) {
+      case EffectiveWeatherType.thunderstorm:
+        // Dark stormy colors
+        return const [Color(0xFF2D3436), Color(0xFF636E72)];
 
-    // Rain/Drizzle (51-82) - gray rainy colors
-    if (weatherCode >= 51 && weatherCode <= 82) {
-      return const [Color(0xFF4B6584), Color(0xFF778CA3)];
-    }
+      case EffectiveWeatherType.heavyRain:
+        // Dark gray rainy colors
+        return const [Color(0xFF3D5A73), Color(0xFF5D768E)];
 
-    // Fog (45-48) - misty colors
-    if (weatherCode >= 45 && weatherCode <= 48) {
-      return const [Color(0xFF8395A7), Color(0xFFC8D6E5)];
-    }
+      case EffectiveWeatherType.rain:
+        // Gray rainy colors
+        return const [Color(0xFF4B6584), Color(0xFF778CA3)];
 
-    // Cloudy (1-3) - slightly muted colors based on time
-    if (weatherCode >= 1 && weatherCode <= 3) {
-      if (hour >= 17 || hour < 7) {
-        return const [Color(0xFF4B6584), Color(0xFF576574)];
-      }
-      return const [Color(0xFF74B9FF), Color(0xFFA29BFE)];
-    }
+      case EffectiveWeatherType.drizzle:
+        // Light gray colors
+        return const [Color(0xFF6D8299), Color(0xFF8FA4B8)];
 
-    // Clear (0) - bright colors based on time
-    if (hour >= 5 && hour < 7) {
-      // Dawn - soft orange to pink
-      return const [Color(0xFFFF9A8B), Color(0xFFFF6A88)];
-    } else if (hour >= 7 && hour < 12) {
-      // Morning - light blue to cyan
-      return const [Color(0xFF74EBD5), Color(0xFFACB6E5)];
-    } else if (hour >= 12 && hour < 17) {
-      // Afternoon - sky blue to deeper blue
-      return const [Color(0xFF56CCF2), Color(0xFF2F80ED)];
-    } else if (hour >= 17 && hour < 20) {
-      // Evening - orange to purple sunset
-      return const [Color(0xFFFFA751), Color(0xFFFFE259)];
-    } else {
-      // Night - dark blue to purple
-      return const [Color(0xFF2C3E50), Color(0xFF4CA1AF)];
+      case EffectiveWeatherType.snow:
+        // Cool white/blue
+        return const [Color(0xFFB8C6DB), Color(0xFFF5F7FA)];
+
+      case EffectiveWeatherType.foggy:
+        // Misty colors
+        return const [Color(0xFF8395A7), Color(0xFFC8D6E5)];
+
+      case EffectiveWeatherType.partlyCloudy:
+        // Slightly muted colors based on time
+        if (hour >= 17 || hour < 7) {
+          return const [Color(0xFF4B6584), Color(0xFF576574)];
+        }
+        return const [Color(0xFF74B9FF), Color(0xFFA29BFE)];
+
+      case EffectiveWeatherType.clear:
+        // Bright colors based on time of day
+        if (hour >= 5 && hour < 7) {
+          // Dawn - soft orange to pink
+          return const [Color(0xFFFF9A8B), Color(0xFFFF6A88)];
+        } else if (hour >= 7 && hour < 12) {
+          // Morning - light blue to cyan
+          return const [Color(0xFF74EBD5), Color(0xFFACB6E5)];
+        } else if (hour >= 12 && hour < 17) {
+          // Afternoon - sky blue to deeper blue
+          return const [Color(0xFF56CCF2), Color(0xFF2F80ED)];
+        } else if (hour >= 17 && hour < 20) {
+          // Evening - orange to purple sunset
+          return const [Color(0xFFFFA751), Color(0xFFFFE259)];
+        } else {
+          // Night - dark blue to purple
+          return const [Color(0xFF2C3E50), Color(0xFF4CA1AF)];
+        }
     }
   }
 
-  /// Get weather icon based on WMO weather code
-  IconData _getWeatherIcon(int code) {
-    if (code == 0) return Icons.wb_sunny;
-    if (code <= 3) return Icons.cloud;
-    if (code <= 48) return Icons.foggy;
-    if (code <= 55) return Icons.grain;
-    if (code <= 65) return Icons.water_drop;
-    if (code <= 75) return Icons.ac_unit;
-    if (code <= 82) return Icons.water_drop;
-    if (code >= 95) return Icons.flash_on;
-    return Icons.cloud;
+  /// Get weather icon based on effective weather type
+  IconData _getWeatherIcon(EffectiveWeatherType weather) {
+    switch (weather) {
+      case EffectiveWeatherType.clear:
+        return Icons.wb_sunny;
+      case EffectiveWeatherType.partlyCloudy:
+        return Icons.cloud;
+      case EffectiveWeatherType.foggy:
+        return Icons.foggy;
+      case EffectiveWeatherType.drizzle:
+        return Icons.grain;
+      case EffectiveWeatherType.rain:
+      case EffectiveWeatherType.heavyRain:
+        return Icons.water_drop;
+      case EffectiveWeatherType.snow:
+        return Icons.ac_unit;
+      case EffectiveWeatherType.thunderstorm:
+        return Icons.flash_on;
+    }
   }
 
   /// Format current time hour:minute with timezone (WIB/WITA/WIT)
@@ -611,40 +631,28 @@ class HomeScreen extends ConsumerWidget {
     return '$dayName, ${now.day.toString().padLeft(2, '0')} $monthName';
   }
 
-  /// Get localized weather description based on WMO code
-  String _getWeatherDescription(int code, AppLocalizations l10n) {
-    switch (code) {
-      case 0:
+  /// Get localized weather description based on effective weather type
+  String _getWeatherDescription(
+    EffectiveWeatherType weather,
+    AppLocalizations l10n,
+  ) {
+    switch (weather) {
+      case EffectiveWeatherType.clear:
         return l10n.weatherClear;
-      case 1:
-      case 2:
-      case 3:
+      case EffectiveWeatherType.partlyCloudy:
         return l10n.weatherPartlyCloudy;
-      case 45:
-      case 48:
+      case EffectiveWeatherType.foggy:
         return l10n.weatherFoggy;
-      case 51:
-      case 53:
-      case 55:
+      case EffectiveWeatherType.drizzle:
         return l10n.weatherDrizzle;
-      case 61:
-      case 63:
-      case 65:
+      case EffectiveWeatherType.rain:
         return l10n.weatherRain;
-      case 71:
-      case 73:
-      case 75:
+      case EffectiveWeatherType.heavyRain:
+        return l10n.weatherHeavyRain;
+      case EffectiveWeatherType.snow:
         return l10n.weatherSnow;
-      case 80:
-      case 81:
-      case 82:
-        return l10n.weatherRainShowers;
-      case 95:
-      case 96:
-      case 99:
+      case EffectiveWeatherType.thunderstorm:
         return l10n.weatherThunderstorm;
-      default:
-        return l10n.weatherUnknown;
     }
   }
 }

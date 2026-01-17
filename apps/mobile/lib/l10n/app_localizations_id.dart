@@ -182,6 +182,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get weatherRainShowers => 'Hujan deras';
 
   @override
+  String get weatherHeavyRain => 'Hujan lebat';
+
+  @override
   String get weatherThunderstorm => 'Badai petir';
 
   @override

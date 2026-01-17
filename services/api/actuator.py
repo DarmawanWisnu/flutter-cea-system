@@ -9,6 +9,7 @@ import logging
 
 # Environment configuration
 ML_PREDICT_URL = os.getenv("ML_PREDICT_URL", "http://127.0.0.1:8000/ml/predict")
+# ML_PREDICT_URL = os.getenv("ML_PREDICT_URL", "http://127.0.0.1:9999/invalid")  # Wrong port
 
 # ANSI Color Codes for professional terminal output
 class Colors:

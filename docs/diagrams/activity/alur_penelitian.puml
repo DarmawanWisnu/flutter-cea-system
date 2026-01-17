@@ -23,6 +23,8 @@ partition "Perancangan" {
     :Perancangan Database\n(Logical dan Physical = PostgreSQL);
   split again
     :Perancangan Desain UI\n(Prototyping Tools = Figma);
+  split again
+    :Perancangan Machine Learning\n(Model: Random Forest Regressor);
   end split
 }
 

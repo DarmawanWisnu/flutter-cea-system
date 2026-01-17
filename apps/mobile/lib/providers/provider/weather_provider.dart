@@ -4,10 +4,27 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'location_provider.dart';
 
-/// Weather state containing temperature and weather code
+/// Effective weather type computed from weather code AND precipitation data.
+/// This provides more accurate weather representation for tropical regions.
+enum EffectiveWeatherType {
+  clear,
+  partlyCloudy,
+  foggy,
+  drizzle,
+  rain,
+  heavyRain,
+  thunderstorm,
+  snow,
+}
+
+/// Weather state containing temperature, weather code, and precipitation data
 class WeatherState {
   final double temperature;
   final int weatherCode;
+  final double rain;
+  final double precipitation;
+  final double showers;
+  final EffectiveWeatherType effectiveWeather;
   final bool isLoading;
   final String? error;
   final DateTime? lastUpdated;
@@ -15,6 +32,10 @@ class WeatherState {
   const WeatherState({
     required this.temperature,
     required this.weatherCode,
+    this.rain = 0.0,
+    this.precipitation = 0.0,
+    this.showers = 0.0,
+    this.effectiveWeather = EffectiveWeatherType.clear,
     this.isLoading = false,
     this.error,
     this.lastUpdated,
@@ -31,6 +52,10 @@ class WeatherState {
   WeatherState copyWith({
     double? temperature,
     int? weatherCode,
+    double? rain,
+    double? precipitation,
+    double? showers,
+    EffectiveWeatherType? effectiveWeather,
     bool? isLoading,
     String? error,
     DateTime? lastUpdated,
@@ -38,55 +63,26 @@ class WeatherState {
     return WeatherState(
       temperature: temperature ?? this.temperature,
       weatherCode: weatherCode ?? this.weatherCode,
+      rain: rain ?? this.rain,
+      precipitation: precipitation ?? this.precipitation,
+      showers: showers ?? this.showers,
+      effectiveWeather: effectiveWeather ?? this.effectiveWeather,
       isLoading: isLoading ?? this.isLoading,
       error: error,
       lastUpdated: lastUpdated ?? this.lastUpdated,
     );
   }
 
-  /// Get weather description from WMO weather code
-  String get description {
-    switch (weatherCode) {
-      case 0:
-        return 'Clear sky';
-      case 1:
-      case 2:
-      case 3:
-        return 'Partly cloudy';
-      case 45:
-      case 48:
-        return 'Foggy';
-      case 51:
-      case 53:
-      case 55:
-        return 'Drizzle';
-      case 61:
-      case 63:
-      case 65:
-        return 'Rain';
-      case 71:
-      case 73:
-      case 75:
-        return 'Snow';
-      case 80:
-      case 81:
-      case 82:
-        return 'Rain showers';
-      case 95:
-        return 'Thunderstorm';
-      case 96:
-      case 99:
-        return 'Thunderstorm with hail';
-      default:
-        return 'Unknown';
-    }
-  }
-
-  /// Check if weather is rainy/stormy
-  bool get isRainy => weatherCode >= 51 && weatherCode <= 99;
+  /// Check if weather is rainy/stormy based on effective weather
+  bool get isRainy =>
+      effectiveWeather == EffectiveWeatherType.drizzle ||
+      effectiveWeather == EffectiveWeatherType.rain ||
+      effectiveWeather == EffectiveWeatherType.heavyRain ||
+      effectiveWeather == EffectiveWeatherType.thunderstorm;
 
   /// Check if it's thunderstorm
-  bool get isThunderstorm => weatherCode >= 95;
+  bool get isThunderstorm =>
+      effectiveWeather == EffectiveWeatherType.thunderstorm;
 }
 
 /// Weather provider that fetches data from Open-Meteo API
@@ -103,7 +99,7 @@ class WeatherNotifier extends Notifier<WeatherState> {
     // Wait a bit for location to be ready
     await Future.delayed(const Duration(milliseconds: 500));
     await fetchWeather();
-    
+
     // Setup auto-refresh every 30 minutes (both location and weather)
     _autoRefreshTimer?.cancel();
     _autoRefreshTimer = Timer.periodic(
@@ -120,18 +116,80 @@ class WeatherNotifier extends Notifier<WeatherState> {
     await fetchWeather();
   }
 
-  /// Fetch weather from Open-Meteo API
+  /// Compute effective weather type from weather code and precipitation data.
+  /// Weather codes indicating rain take priority, then precipitation amounts.
+  EffectiveWeatherType _computeEffectiveWeather({
+    required int weatherCode,
+    required double rain,
+    required double precipitation,
+    required double showers,
+  }) {
+    // PRIORITAS 1: Weather code eksplisit hujan (HARUS diproses duluan!)
+    // Thunderstorm (95-99) - highest priority
+    if (weatherCode >= 95) return EffectiveWeatherType.thunderstorm;
+
+    // Rain showers (80-82) - KRUSIAL untuk hujan konvektif tropis
+    if (weatherCode >= 80 && weatherCode <= 82) {
+      return EffectiveWeatherType.rain;
+    }
+
+    // Rain (61-65)
+    if (weatherCode >= 61 && weatherCode <= 65) {
+      return EffectiveWeatherType.rain;
+    }
+
+    // Drizzle (51-55)
+    if (weatherCode >= 51 && weatherCode <= 55) {
+      return EffectiveWeatherType.drizzle;
+    }
+
+    // PRIORITAS 2: Presipitasi aktual (untuk kasus weather code tidak update)
+    // Total semua sumber presipitasi
+    final totalPrecip = precipitation + rain + showers;
+
+    // Heavy rain: >= 5.0 mm (threshold lebih rendah untuk tropis)
+    if (totalPrecip >= 5.0) return EffectiveWeatherType.heavyRain;
+
+    // Moderate rain: >= 1.0 mm
+    if (totalPrecip >= 1.0) return EffectiveWeatherType.rain;
+
+    // Light rain/drizzle: any measurable precipitation > 0
+    if (totalPrecip > 0) return EffectiveWeatherType.drizzle;
+
+    // PRIORITAS 3: Kondisi atmosfer lainnya
+    // Snow (71-75)
+    if (weatherCode >= 71 && weatherCode <= 75) {
+      return EffectiveWeatherType.snow;
+    }
+
+    // Fog (45-48)
+    if (weatherCode >= 45 && weatherCode <= 48) {
+      return EffectiveWeatherType.foggy;
+    }
+
+    // Partly cloudy (1-3)
+    if (weatherCode >= 1 && weatherCode <= 3) {
+      return EffectiveWeatherType.partlyCloudy;
+    }
+
+    // Clear (0)
+    return EffectiveWeatherType.clear;
+  }
+
+  /// Fetch weather from Open-Meteo API including precipitation data
   Future<void> fetchWeather() async {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
       final location = ref.read(locationProvider);
-      
+
+      // Enhanced API URL with precipitation parameters for real-time rain detection
       final url = Uri.parse(
         'https://api.open-meteo.com/v1/forecast'
         '?latitude=${location.latitude}'
         '&longitude=${location.longitude}'
-        '&current_weather=true',
+        '&current=temperature_2m,weather_code,rain,precipitation,showers'
+        '&timezone=auto',
       );
 
       final response = await http.get(url).timeout(
@@ -140,11 +198,28 @@ class WeatherNotifier extends Notifier<WeatherState> {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final current = data['current_weather'];
-        
+        final current = data['current'];
+
+        final weatherCode = current['weather_code'] as int;
+        final rain = (current['rain'] as num?)?.toDouble() ?? 0.0;
+        final precipitation =
+            (current['precipitation'] as num?)?.toDouble() ?? 0.0;
+        final showers = (current['showers'] as num?)?.toDouble() ?? 0.0;
+
+        final effectiveWeather = _computeEffectiveWeather(
+          weatherCode: weatherCode,
+          rain: rain,
+          precipitation: precipitation,
+          showers: showers,
+        );
+
         state = WeatherState(
-          temperature: (current['temperature'] as num).toDouble(),
-          weatherCode: current['weathercode'] as int,
+          temperature: (current['temperature_2m'] as num).toDouble(),
+          weatherCode: weatherCode,
+          rain: rain,
+          precipitation: precipitation,
+          showers: showers,
+          effectiveWeather: effectiveWeather,
           isLoading: false,
           lastUpdated: DateTime.now(),
         );

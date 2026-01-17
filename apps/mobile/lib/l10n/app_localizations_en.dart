@@ -182,6 +182,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get weatherRainShowers => 'Rain showers';
 
   @override
+  String get weatherHeavyRain => 'Heavy rain';
+
+  @override
   String get weatherThunderstorm => 'Thunderstorm';
 
   @override

@@ -79,7 +79,7 @@ tb_logs/
 # NOTEBOOKS
 .ipynb_checkpoints/
 
-# Ignore all notebooks EXCEPT the training notebook
+# # Ignore all notebooks EXCEPT the training notebook
 **/*.ipynb
 !colab_training.ipynb
 

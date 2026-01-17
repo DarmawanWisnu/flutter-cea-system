@@ -440,6 +440,12 @@ abstract class AppLocalizations {
   /// **'Rain showers'**
   String get weatherRainShowers;
 
+  /// No description provided for @weatherHeavyRain.
+  ///
+  /// In en, this message translates to:
+  /// **'Heavy rain'**
+  String get weatherHeavyRain;
+
   /// No description provided for @weatherThunderstorm.
   ///
   /// In en, this message translates to:
