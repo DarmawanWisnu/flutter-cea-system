@@ -46,15 +46,7 @@ partition "Pengujian" {
   end split
 }
 
-partition "Pemeliharaan" {
-  split
-    :Maintenance Aplikasi;
-  split again
-    :Deploy ke dalam bentuk APK;
-  end split
-}
 
-:System Usability Scale (SUS);
 
 stop
 @enduml
