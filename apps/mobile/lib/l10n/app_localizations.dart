@@ -968,6 +968,24 @@ abstract class AppLocalizations {
   /// **'No adjustment needed'**
   String get monitorNoAdjustmentNeeded;
 
+  /// No description provided for @monitorStatusOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'Online'**
+  String get monitorStatusOnline;
+
+  /// No description provided for @monitorStatusOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get monitorStatusOffline;
+
+  /// No description provided for @monitorLiveTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Live Time'**
+  String get monitorLiveTime;
+
   /// No description provided for @sensorPh.
   ///
   /// In en, this message translates to:

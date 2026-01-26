@@ -53,8 +53,13 @@ class MonitorNotifier extends StateNotifier<MonitorState> {
   void _setupListener() {
     _mqttSub = ref.listen(mqttProvider, (_, next) {
       final map = next.telemetryMap;
+      print("[MonitorNotifier] MQTT update received, telemetryMap keys: ${map.keys.toList()}, current kitId: $kitId");
       if (map.containsKey(kitId)) {
-        state = state.copyWith(data: map[kitId], lastUpdated: DateTime.now());
+        final newData = map[kitId];
+        print("[MonitorNotifier] Updating state with new telemetry for $kitId");
+        state = state.copyWith(data: newData, lastUpdated: DateTime.now());
+      } else {
+        print("[MonitorNotifier] No telemetry data for $kitId yet");
       }
     }, fireImmediately: true);
   }
@@ -64,7 +69,9 @@ class MonitorNotifier extends StateNotifier<MonitorState> {
     state = state.copyWith(loading: true);
 
     final api = ref.read(apiServiceProvider);
+    print("[MonitorNotifier] Fetching latest telemetry for kitId: $kitId");
     final latest = await api.getLatestTelemetry(kitId);
+    print("[MonitorNotifier] Got telemetry: ${latest != null ? 'data received' : 'null'}");
 
     state = state.copyWith(
       data: latest,

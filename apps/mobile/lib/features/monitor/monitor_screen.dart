@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fountaine/providers/provider/monitor_provider.dart';
@@ -102,10 +104,23 @@ class MonitorScreen extends ConsumerStatefulWidget {
 class _MonitorScreenState extends ConsumerState<MonitorScreen> {
   String? kitId;
   bool isAuto = false;
+  
+  // Live clock state
+  DateTime _currentTime = DateTime.now();
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
+    
+    // Start timer for live clock
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) {
+        setState(() {
+          _currentTime = DateTime.now();
+        });
+      }
+    });
 
     Future.microtask(() async {
       try {
@@ -178,6 +193,12 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
   }
 
   @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final _kitId = kitId;
     final colorScheme = Theme.of(context).colorScheme;
@@ -236,6 +257,10 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // LIVE TIME DISPLAY
+              _buildLiveTimeRow(context, s, l10n),
+              SizedBox(height: 12 * s),
+              
               // GRID GAUGES - 3x2 for 6 sensors
               GridView(
                 padding: EdgeInsets.zero,
@@ -289,22 +314,23 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
                       width: 10 * s,
                       height: 10 * s,
                       decoration: BoxDecoration(
-                        color: t == null ? Colors.grey : _kGreen,
+                        color: t == null ? _kRed.withValues(alpha: 0.7) : _kGreen,
                         shape: BoxShape.circle,
                       ),
                     ),
                     SizedBox(width: 12 * s),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      child: Row(
                         children: [
-                          _kitSelector(context, s, l10n),
-                          SizedBox(height: 4 * s),
+                          Expanded(child: _kitSelector(context, s, l10n)),
                           Text(
-                            '${l10n.commonLast}: ${format(last)}',
+                            t == null ? l10n.monitorStatusOffline : l10n.monitorStatusOnline,
                             style: TextStyle(
                               fontSize: 11 * s,
-                              color: colorScheme.primary.withValues(alpha: 0.5),
+                              fontWeight: FontWeight.w500,
+                              color: t == null 
+                                  ? _kRed.withValues(alpha: 0.7) 
+                                  : _kGreen,
                             ),
                           ),
                         ],
@@ -321,6 +347,36 @@ class _MonitorScreenState extends ConsumerState<MonitorScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  /// Builds the live time display row showing real-time clock
+  Widget _buildLiveTimeRow(BuildContext context, double s, AppLocalizations l10n) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final time = _currentTime;
+    
+    String two(int v) => v.toString().padLeft(2, '0');
+    final timeStr = '${two(time.hour)}:${two(time.minute)}:${two(time.second)}';
+    
+    return Row(
+      children: [
+        Text(
+          '${l10n.monitorLiveTime} • ',
+          style: TextStyle(
+            fontSize: 12 * s,
+            fontWeight: FontWeight.w400,
+            color: colorScheme.primary.withValues(alpha: 0.7),
+          ),
+        ),
+        Text(
+          timeStr,
+          style: TextStyle(
+            fontSize: 12 * s,
+            fontWeight: FontWeight.w500,
+            color: colorScheme.primary.withValues(alpha: 0.7),
+          ),
+        ),
+      ],
     );
   }
 

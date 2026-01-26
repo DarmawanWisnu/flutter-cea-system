@@ -421,17 +421,22 @@ final filteredNotificationProvider =
     Provider.family<List<NotificationItem>, String?>((ref, level) {
       final list = ref.watch(notificationListProvider);
       final key = _norm(level);
+      
+      // Filter by active kit first
+      final activeKitId = ref.watch(currentKitIdProvider);
+      var filtered = list.where((n) => n.kitName == activeKitId).toList();
 
-      if (level == null || key.isEmpty || key == 'all') {
-        return [...list]..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      // Then filter by level
+      if (level != null && key.isNotEmpty && key != 'all') {
+        filtered = filtered.where((n) => _norm(n.level) == key).toList();
       }
-
-      final filtered = list.where((n) => _norm(n.level) == key).toList();
+      
       filtered.sort((a, b) => b.timestamp.compareTo(a.timestamp));
       return filtered;
     });
 
 final unreadNotificationCountProvider = Provider<int>((ref) {
   final list = ref.watch(notificationListProvider);
-  return list.where((n) => !n.isRead).length;
+  final activeKitId = ref.watch(currentKitIdProvider);
+  return list.where((n) => !n.isRead && n.kitName == activeKitId).length;
 });

@@ -461,6 +461,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get monitorNoAdjustmentNeeded => 'No adjustment needed';
 
   @override
+  String get monitorStatusOnline => 'Online';
+
+  @override
+  String get monitorStatusOffline => 'Offline';
+
+  @override
+  String get monitorLiveTime => 'Live Time';
+
+  @override
   String get sensorPh => 'pH';
 
   @override

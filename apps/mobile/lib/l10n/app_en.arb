@@ -209,6 +209,9 @@
   "monitorAllParametersSafe": "All Parameters Safe",
   "monitorLatestAdjustment": "Latest adjustment",
   "monitorNoAdjustmentNeeded": "No adjustment needed",
+  "monitorStatusOnline": "Online",
+  "monitorStatusOffline": "Offline",
+  "monitorLiveTime": "Live Time",
   
   "@@_sectionSensors": "=== SENSOR LABELS ===",
   "sensorPh": "pH",

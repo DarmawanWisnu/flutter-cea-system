@@ -173,5 +173,17 @@ void main() {
       await pumpMonitorScreen(tester);
       expect(find.byType(LinearProgressIndicator), findsWidgets);
     });
+
+    /// Verifies live time display is rendered.
+    testWidgets('should display live time label', (WidgetTester tester) async {
+      await pumpMonitorScreen(tester);
+      expect(find.text('Live Time • '), findsOneWidget);
+    });
+
+    /// Verifies status indicator shows Online when data is available.
+    testWidgets('should display Online status when connected', (WidgetTester tester) async {
+      await pumpMonitorScreen(tester);
+      expect(find.text('Online'), findsOneWidget);
+    });
   });
 }

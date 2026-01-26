@@ -461,6 +461,15 @@ class AppLocalizationsId extends AppLocalizations {
   String get monitorNoAdjustmentNeeded => 'Tidak perlu penyesuaian';
 
   @override
+  String get monitorStatusOnline => 'Online';
+
+  @override
+  String get monitorStatusOffline => 'Offline';
+
+  @override
+  String get monitorLiveTime => 'Waktu Aktual';
+
+  @override
   String get sensorPh => 'pH';
 
   @override

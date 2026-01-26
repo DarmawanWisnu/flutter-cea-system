@@ -7,6 +7,7 @@
 /// - URL settings (apiBaseUrlProvider)
 import 'package:mockito/mockito.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:fountaine/services/api_service.dart';
 import 'package:fountaine/providers/provider/api_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
