@@ -17,8 +17,9 @@ class MqttConst {
   static String get clientPrefix =>
       dotenv.env['MQTT_CLIENT_PREFIX'] ?? 'hydro-app-';
 
-  // MQTT non-TLS
-  static const bool tls = false;
+  // TLS enabled flag (for HiveMQ Cloud)
+  static bool get tls =>
+      (dotenv.env['MQTT_USE_TLS'] ?? 'false').toLowerCase() == 'true';
 
   // Topic helper
   static String tControl(String kitId) => "kit/$kitId/control";

@@ -1,6 +1,11 @@
 import csv, json, time, os, signal, sys, random
+import ssl
 import requests
+from dotenv import load_dotenv
 from paho.mqtt import client as mqtt
+
+# Load .env file from same directory
+load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
 RUNNING = True
 def handle_signal(signum, frame):
@@ -10,9 +15,13 @@ def handle_signal(signum, frame):
 signal.signal(signal.SIGINT, handle_signal)
 signal.signal(signal.SIGTERM, handle_signal)
 
-# Environment configuration
-BROKER = os.getenv("MQTT_BROKER", "localhost")
-PORT = int(os.getenv("MQTT_PORT", "1883"))
+# Environment configuration - HiveMQ Cloud
+BROKER = os.getenv("MQTT_BROKER", "")
+PORT = int(os.getenv("MQTT_PORT", ""))
+MQTT_USERNAME = os.getenv("MQTT_USERNAME", "")
+MQTT_PASSWORD = os.getenv("MQTT_PASSWORD", "")
+USE_TLS = os.getenv("MQTT_USE_TLS", "true").lower() == "true"
+
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000/kits/all")
 CSV_PATH = os.path.join(os.path.dirname(__file__), "data.csv")
 QOS = 1
@@ -56,6 +65,14 @@ def create_client(client_id):
         client_id=client_id,
         protocol=mqtt.MQTTv311
     )
+    
+    # HiveMQ Cloud requires TLS and authentication
+    if USE_TLS:
+        c.tls_set(tls_version=ssl.PROTOCOL_TLS)
+    
+    if MQTT_USERNAME and MQTT_PASSWORD:
+        c.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
+    
     c.connect(BROKER, PORT)
     c.loop_start()
     return c

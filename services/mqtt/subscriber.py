@@ -2,10 +2,15 @@ import json
 import time
 import signal
 import os
+import ssl
 import requests
+from dotenv import load_dotenv
 from paho.mqtt import client as mqtt
 from threading import Lock, Thread
 from datetime import datetime
+
+# Load .env file from same directory
+load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
 # ANSI Color Codes for professional terminal output
 class Colors:
@@ -29,9 +34,13 @@ def handle_signal(signum, frame):
 signal.signal(signal.SIGINT, handle_signal)
 signal.signal(signal.SIGTERM, handle_signal)
 
-# Environment configuration
-BROKER = os.getenv("MQTT_BROKER", "localhost")
-PORT = int(os.getenv("MQTT_PORT", "1883"))
+# Environment configuration - HiveMQ Cloud
+BROKER = os.getenv("MQTT_BROKER", "")
+PORT = int(os.getenv("MQTT_PORT", ""))
+MQTT_USERNAME = os.getenv("MQTT_USERNAME", "")
+MQTT_PASSWORD = os.getenv("MQTT_PASSWORD", "")
+USE_TLS = os.getenv("MQTT_USE_TLS", "true").lower() == "true"
+
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000/telemetry")
 
 KIT_ID = os.getenv("KIT_ID")
@@ -164,6 +173,13 @@ def main():
         client_id=CLIENT_ID,
         protocol=mqtt.MQTTv311
     )
+
+    # HiveMQ Cloud requires TLS and authentication
+    if USE_TLS:
+        client.tls_set(tls_version=ssl.PROTOCOL_TLS)
+    
+    if MQTT_USERNAME and MQTT_PASSWORD:
+        client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
 
     client.on_connect = on_connect
     client.on_message = on_message
